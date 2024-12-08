@@ -176,6 +176,79 @@ export default function userManagement(){
                     
                     </div>
                 </div>
+<<<<<<< HEAD
+=======
+                <table className="table table-zebra">
+                  {/* head */}
+                  <thead>
+                    <tr>
+                      <th>UID</th>
+                      <th className="">ชื่อ</th>
+                      <th>นามสกุล</th>
+                      <th>E-mail</th>
+                      <th>เบอร์โทรศัพท์</th>
+                      {/* <th>สถานะ</th> */}
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* {test.map(e => 
+                      <AdminUserTable user={e}/>  
+                    )} */}
+                    {/* <AdminUserTable user={user} /> */}
+                    {/* <AdminUserTable user={user} /> */}
+                    {/* <AdminUserTable user={user} /> */}
+                    {/* <AdminUserTable user={user} /> */}
+                    {/* <AdminUserTable user={user} /> */}
+                    {/* {test.slice(page[0],page[1]).map((e)=>{
+                        console.log(page[0],page[1])
+                        console.log(test.slice(page[0],page[1]))
+                        return<AdminUserTable user={e} />})} */}
+                        {test.slice(page[0],page[1]).map((e) => <AdminUserTable user={e} />)}
+                  </tbody>
+                </table>
+                <div className="join">
+                    {test.length > 7 ?
+                    Array.from({length: Math.ceil(test.length/7)},(_,index) =>
+                    <button className={`join-item btn ${index==0? 'bg-yellow-600':''}`}
+                    onClick={(e)=>{
+                        setPage([index*7,((index+1)*7-1)])
+                        const k = document.querySelectorAll('.join-item')
+                        k.forEach(d => d.classList.remove('bg-yellow-600'))
+                        e.target.classList.add('bg-yellow-600')
+                    }}>{index+1}
+                    
+                    </button>)
+                    : ''}
+
+                <div className="join">
+                    <button className="join-item btn" onClick={()=>{
+                        if (curPage-1 < 0){
+                            return
+                        }
+                        setCurPage(curPage-1)
+                        setShow(paginate(test, 6, curPage-1))
+
+                    }}>«</button>
+                    <button className="join-item btn">Page {curPage}</button>
+                    <button className="join-item btn" onClick={()=>{
+                        console.log('last',(curPage-1)*7,test.length)
+                        if (curPage > test.length/7){
+                            return
+                        }
+                        setCurPage(curPage+1)
+                        setShow(paginate(test, 6, curPage-1))
+                    }}>»</button>
+                </div>
+                <button className="join-item btn" onClick={()=>{
+                    console.log(page, curPage)
+                    
+                    }}>1</button>
+                <button className="join-item btn">2</button>
+                <button className="join-item btn btn-disabled">...</button>
+                <button className="join-item btn">99</button>
+                <button className="join-item btn">100</button>
+>>>>>>> parent of cb08d3e (test)
             </div>
         </div>
     )
