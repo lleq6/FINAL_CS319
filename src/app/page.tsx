@@ -1,7 +1,6 @@
 'use client'
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import Product from "../components/Product";
 
 {/* <div className="flex"> */}
 export default function Homepage(){
@@ -25,13 +24,6 @@ export default function Homepage(){
   },[])
     return(
         <div>
-            <div className="flex">
-            {data.map((product : ProductInfo) => {
-            // console.log(product)
-            return <Product key={product.Product_ID} product={product}>
-            </Product>
-            })}
-        </div>
 
         </div>
     )

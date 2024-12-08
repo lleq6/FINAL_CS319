@@ -21,6 +21,9 @@ const client = new Pool(config);
 
 
 module.exports = {
+    feathUsers: async() => {
+        client.query(`SELECT * FROM User ORDER BY User_ID ASC`)
+    },
     query: (text, params) => client.query(text, params),
     test: () => client.query('SELECT * from User'),
     fetchOneUser: (email) => client.query(`SELECT * FROM public."User" WHERE "Email" = $1`,[email]),
