@@ -2,6 +2,7 @@ const fs = require('fs');
 const pg = require('pg');
 const url = require('url');
 import { UserAddress } from '@/app/model/AddressModel'
+import { UserInfo } from '@/app/model/UserInfo'
 const { Pool } = require('pg');
 require("dotenv").config();
 const config = {
@@ -21,8 +22,9 @@ const client = new Pool(config);
 
 
 module.exports = {
-    feathUsers: async() => {
-        client.query(`SELECT * FROM User ORDER BY User_ID ASC`)
+    fetchUsers: async() => {
+        const data = await client.query(`SELECT * FROM public."User" ORDER BY "User_ID" ASC`)
+        return data.rows;
     },
     query: (text, params) => client.query(text, params),
     test: () => client.query('SELECT * from User'),
@@ -126,7 +128,7 @@ WHERE sc."Sub_Category_ID" = 2
             s."Sub_Category_ID"=$1
         `,[Sub_ID]),
     
-    fetchChildCategoryDetail : async (Child_ID) => await client.query(`
+    fetchChildCategoryDetail : async (Child_ID ) => await client.query(`
         SELECT 
             cc.*,
             cc."Name" as cc_name,
@@ -156,10 +158,10 @@ WHERE sc."Sub_Category_ID" = 2
         WHERE
             cd."User_ID" = $1
         `,[user_id]),
-    removeItemFromCart : async (user_id, product_id) => await client.query(`DELETE FROM public."Cart_Detail" WHERE "User_ID"=$1 AND "Product_ID"=$2`,[user_id, product_id]),
+    removeItemFromCart : async (user_id , product_id) => await client.query(`DELETE FROM public."Cart_Detail" WHERE "User_ID"=$1 AND "Product_ID"=$2`,[user_id, product_id]),
     
     clearCart : async (User_ID) => client.query(`DELETE FROM public."Cart_Detail" WHERE "User_ID"=$1`,[User_ID]),
-    addAddress : async ( Address ) => await client.query(`
+    addAddress : async ( Address) => await client.query(`
         INSERT INTO public."Address" 
         ("User_ID", "Address_1", "Address_2", "District", "Province", "Zip_Code", "Is_Default", "Sub_District", "Phone") 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "Address_ID";`,[
@@ -168,7 +170,7 @@ WHERE sc."Sub_Category_ID" = 2
     deleteAddress : async (Address_ID) => await client.query(`DELETE FROM public."Address" WHERE "Address_ID"=$1`,[Address_ID]),
 
     getUserAddress : async (User_ID) => await client.query(`SELECT * FROM public."Address" WHERE "User_ID"=$1`,[User_ID]),
-    editUserAddress : async ( address ) => {
+    editUserAddress : async ( address) => {
         const updates = [];
         const values = [];
         let index = 1;
@@ -222,25 +224,7 @@ const a = async ()=>{
 // }]},]
 //     }
 // a()
-const b =async () =>{
-    const user_id = 1 
-    const data = await client.query(`
-        SELECT 
-            cd."Quantity" as "cd_Quantity",
-            p.*
-        FROM
-            public."Cart_Detail" cd
-        JOIN
-            public."Product" p ON p."Product_ID" IN (SELECT cd."Product_ID" WHERE cd."User_ID" = $1)
-        WHERE
-            cd."User_ID" = $1
-        `,[user_id])
 
-    console.log(data.rows)
-
-}
-
-// b()
 // fetchLogin({email: 'admin@gmail.com'})
 
 import { Pool } from 'pg';
