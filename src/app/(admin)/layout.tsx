@@ -10,9 +10,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const session = useSession()
 
 
-  if (!session && session.status !== 'loading' || session?.data?.user.role !='a' && session.status !== 'loading'){
-    return redirect('/products')
-  }else if(session.status !== 'loading'){
+  // if (!session && session.status !== 'loading' || session?.data?.user.role !='a' && session.status !== 'loading'){
+    // return redirect('/admin')
+  // }else if(session.status !== 'loading'){
     return (
       <div>
         <CounterProvider>
@@ -31,4 +31,4 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // if (session?.data?.user.role)
 
   
-  }
+  // }
