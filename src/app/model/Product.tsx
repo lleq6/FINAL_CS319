@@ -12,9 +12,9 @@ export interface ProductInfo {
     Visibility: boolean;
     Review_Rating: number;
     Image_URL: string;
-    c_id : string;
+    c_id : number;
     c_name : string;
-    s_id: string;
+    s_id: number;
     s_name: string;
     cc_name: string;
 

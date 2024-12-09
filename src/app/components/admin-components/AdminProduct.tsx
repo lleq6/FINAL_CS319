@@ -3,8 +3,9 @@ import Image from "next/image";
 
 interface AdminProductProps {
   product: ProductInfo;
+  setProduct: (product : ProductInfo)=> void
 }
-export default function AdminProduct({ product }: AdminProductProps) {
+export default function AdminProduct({ product, setProduct }: AdminProductProps) {
 
   return (
     <div className="">
@@ -45,11 +46,11 @@ export default function AdminProduct({ product }: AdminProductProps) {
         <p className="my-auto text-lg mx-2">
           สถานะ : <span className="text-green-800">ปกติ</span>
         </p>
-        <button className="rounded-lg bg-red-500 text-lg m-2 p-1 px-2 w-28">
+        <button className="btn rounded-lg bg-red-500 text-lg m-2 p-1 px-2 w-28" onClick={()=>setProduct(product)}>
           {" "}
           แก้ไข
         </button>
-        <button className="rounded-lg bg-red-500 text-lg m-2 p-1 px-2 w-28">
+        <button className="btn bg-red-500 text-lg m-2 p-1 px-2 w-28">
           {" "}
           ลบ
         </button>

@@ -6,15 +6,52 @@ import { CategoryList } from "@/app/model/CategoryModel";
 import { ProductInfo } from "@/app/model/Product";
 import { useEffect, useState } from "react";
 
+// Create an empty data variable
+const emptyProduct: ProductInfo = {
+  Product_ID: "",
+  Child_ID: 0,
+  Name: "",
+  Brand: "",
+  Description: "",
+  Unit: "",
+  Quantity: 0,
+  Sale_Cost: 0,
+  Sale_Price: 0,
+  Reorder_Point: 0,
+  Visibility: false,
+  Review_Rating: 0,
+  Image_URL: "",
+  c_id: 0,
+  c_name: "",
+  s_id: 0,
+  s_name: "",
+  cc_name: "",
+};
+
 export default function productManagement() {
+  const [curProduct, setCurProduct] = useState<ProductInfo>({
+    Product_ID: "",
+    Child_ID: 0,
+    Name: "",
+    Brand: "",
+    Description: "",
+    Unit: "",
+    Quantity: 0,
+    Sale_Cost: 0,
+    Sale_Price: 0,
+    Reorder_Point: 0,
+    Visibility: false,
+    Review_Rating: 0,
+    Image_URL: "",
+    c_id: 0,
+    c_name: "",
+    s_id: 0,
+    s_name: "",
+    cc_name: "",
+  });
   const [Products, setProducts] = useState<ProductInfo[]>([]);
   const [Show, setShow] = useState<ProductInfo[]>([]);
   const [category, setCategory] = useState<CategoryList[]>([]);
-  const [categorySelect, setCategorySelect] = useState({
-    cat: 0,
-    sub: 0,
-    child: 0,
-  });
   const [curCategory, setCurCategory] = useState<CategoryList>();
   const [CurSubCategory, setCurSubCategory] = useState<CategoryList>();
   useEffect(() => {
@@ -34,12 +71,29 @@ export default function productManagement() {
     fetchData();
     console.log(category);
   }, []);
+  function setP(p: ProductInfo) {
+    setCurProduct(p);
+    console.log(p);
 
-  useEffect(() => {
-    console.log(categorySelect);
-    setCurCategory(category[categorySelect.cat]);
-  }, [categorySelect]);
-  useEffect(() => {}, [curCategory]);
+    const main = document.querySelector("#c1");
+    const sub = document.querySelector("#c2");
+    const child = document.querySelector("#c3");
+    main.value = p.c_id;
+    sub.value = p.s_id;
+    child.value = p.Child_ID;
+    setCurCategory(category.find((e) => e.Category_ID == p.c_id));
+    setCurSubCategory(
+        curCategory?.Sub_Category.find((sub) => sub.Sub_Category_ID == p.s_id)
+    );
+    // setTimeout(() => (child.value = p.Child_ID), 1000);
+  }
+  function handleChange(e: React.FormEvent<HTMLInputElement>) {
+    const { name, value } = e.currentTarget;
+    setCurProduct({
+      ...curProduct,
+      [name]: value,
+    });
+  }
 
   return (
     <div className="">
@@ -70,16 +124,36 @@ export default function productManagement() {
                     type="text"
                     placeholder="Type here"
                     className="input input-bordered w-full max-w-xs"
+                    value={curProduct?.Product_ID || ""}
+                    onChange={(e) => handleChange(e)}
+                    name="Product_ID"
+                    disabled
                   />
                 </label>
                 <label className="form-control w-full">
                   <div className="label">
-                    <span className="label-text">ชื่อสินค้า</span>
+                    <span className="label-text">ยี่ห้อ</span>
                   </div>
                   <input
                     type="text"
                     placeholder="Type here"
                     className="input input-bordered w-full max-w-md"
+                    value={curProduct?.Brand || ""}
+                    onChange={handleChange}
+                    name="Brand"
+                  />
+                </label>
+                <label className="form-control w-full">
+                  <div className="label">
+                    <span className="label-text">ชื่อ</span>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Type here"
+                    className="input input-bordered w-full max-w-md"
+                    value={curProduct?.Name || ""}
+                    onChange={handleChange}
+                    name="Name"
                   />
                 </label>
 
@@ -93,10 +167,10 @@ export default function productManagement() {
                       className="select select-bordered w-full max-w-48"
                       defaultValue={0}
                       onChange={(e) => {
-                        const k = document.querySelectorAll('.ctgy')
-                        k.forEach(e => {
-                            e.value = 0
-                        })
+                        const k = document.querySelectorAll(".ctgy");
+                        k.forEach((e) => {
+                          e.value = 0;
+                        });
                         setCurCategory(
                           category.find(
                             (cat) => cat.Category_ID == e.target.value
@@ -122,11 +196,6 @@ export default function productManagement() {
                       defaultValue={0}
                       onChange={(e) => {
                         console.log(e.target.value);
-                        console.log(
-                          curCategory?.Sub_Category.find(
-                            (sub) => sub.Sub_Category_ID == e.target.value
-                          )
-                        );
                         setCurSubCategory(
                           curCategory?.Sub_Category.find(
                             (sub) => sub.Sub_Category_ID == e.target.value
@@ -152,14 +221,26 @@ export default function productManagement() {
                       <span className="label-text">หมวดหมู่รอง 2</span>
                     </div>
                     <select
+                      id="c3"
                       className="ctgy select select-bordered w-full max-w-48"
                       defaultValue={0}
+                      onChange={(e) => {
+                        setCurProduct((old) => {
+                          const p = {
+                            ...old,
+                            Child_ID: e.target.value,
+                          };
+                          return p;
+                        });
+                      }}
                     >
                       <option disabled value={0}>
                         - เลือก -
                       </option>
                       {CurSubCategory?.ChildCategory?.map((e) => (
-                        <option key={e.Child_ID}>{e.Name}</option>
+                        <option key={e.Child_ID} value={e.Child_ID}>
+                          {e.Name}
+                        </option>
                       ))}
                     </select>
                   </label>
@@ -202,13 +283,43 @@ export default function productManagement() {
             <h1>คำอธิบายสินค้า</h1>
             <textarea className="mx-2 textarea textarea-bordered w-8/12 h-32"></textarea>
             <div>
-              <button className="btn">asd</button>
+              <button
+                className="btn"
+                onClick={() => {
+                  setCurProduct({
+                    Product_ID: "",
+                    Child_ID: 0,
+                    Name: "",
+                    Brand: "",
+                    Description: "",
+                    Unit: "",
+                    Quantity: 0,
+                    Sale_Cost: 0,
+                    Sale_Price: 0,
+                    Reorder_Point: 0,
+                    Visibility: false,
+                    Review_Rating: 0,
+                    Image_URL: "",
+                    c_id: 0,
+                    c_name: "",
+                    s_id: 0,
+                    s_name: "",
+                    cc_name: "",
+                  });
+                }}
+              >
+                asd
+              </button>
               <button className="btn">asd</button>
               <button className="btn">asd</button>
             </div>
             <div className="grid grid-rows-4 mx-a">
               {Products.map((e) => (
-                <AdminProduct key={e.Product_ID} product={e} />
+                <AdminProduct
+                  key={e.Product_ID}
+                  product={e}
+                  setProduct={setP}
+                />
               ))}
             </div>
           </div>

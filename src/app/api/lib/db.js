@@ -50,7 +50,22 @@ module.exports = {
     },
 
     fetchAllProduct: async() => {
-        const data = await client.query(`SELECT * FROM public."Product" ORDER BY "Product_ID" ASC`)
+        const data = await client.query(`            SELECT 
+                p.*, 
+                c."Name" as C_NAME,
+                c."Category_ID" as C_ID,
+                s."Name" as S_NAME,
+                s."Sub_Category_ID" as S_ID,
+                cc."Name" as CC_Name
+            FROM 
+                public."Product" p
+            JOIN 
+                public."Child_Sub_Category" cc ON p."Child_ID" = cc."Child_ID"
+            JOIN 
+                public."Sub_Category" s ON cc."Sub_Category_ID" = s."Sub_Category_ID"
+            JOIN 
+                public."Category" c ON s."Category_ID" = c."Category_ID"
+                 ORDER BY "Product_ID" ASC`)
         const dat = await client.query(`SELECT * FROM public."Child_Sub_Category"`)
         return data.rows
     },
