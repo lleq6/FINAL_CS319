@@ -10,9 +10,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const session = useSession()
 
 
+<<<<<<< HEAD
   // if (!session && session.status !== 'loading' || session?.data?.user.role !='a' && session.status !== 'loading'){
     // return redirect('/admin')
   // }else if(session.status !== 'loading'){
+=======
+  if (!session && session.status !== 'loading' || session?.data?.user.role !='a' && session.status !== 'loading'){
+    return redirect('/products')
+  }else if(session.status !== 'loading'){
+>>>>>>> 8c1ebf8b73ad8290fee41aac5e0141c4c28ffe1f
     return (
       <div>
         <CounterProvider>
@@ -31,4 +37,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // if (session?.data?.user.role)
 
   
+<<<<<<< HEAD
   // }
+=======
+  }
+>>>>>>> 8c1ebf8b73ad8290fee41aac5e0141c4c28ffe1f
