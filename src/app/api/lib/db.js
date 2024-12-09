@@ -241,7 +241,7 @@ WHERE sc."Sub_Category_ID" = 2
     await client.query(`SELECT * FROM public."Address" WHERE "User_ID"=$1`, [
       User_ID,
     ]),
-  editUserAddress: async (address) => {
+w  editUserAddress: async (address) => {
     const updates = [];
     const values = [];
     let index = 1;

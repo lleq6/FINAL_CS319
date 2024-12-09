@@ -4,6 +4,13 @@ import AdminProductSidebar from "@/app/components/admin-components/AdminProductS
 import Product from "@/app/components/Product";
 
 export default function productManagement(){
+    useEffect(async()=>{
+        try {
+            const data = await fetch('api/products/allProduct')
+        } catch (error) {
+            
+        }
+    })
     return(
         <div className="">
         <div className="pl-5">

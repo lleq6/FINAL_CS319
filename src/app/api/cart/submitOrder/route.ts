@@ -30,7 +30,10 @@ const generateOrderId = () => {
   const randomNum = Math.random().toString(36).substr(2, 5);
   return `${timestamp}-${randomNum}`;
 };
-
+fetch('url',{method: 'POST', body : JSON.stringify({
+  test:'asdsad',
+  test1:'tesda1'
+})})
 export async function POST(req: NextRequest, res: NextApiResponse) {
   const { User_ID, items, Address_ID, COD }: RequestBody = await req.json();
   if (!items) {

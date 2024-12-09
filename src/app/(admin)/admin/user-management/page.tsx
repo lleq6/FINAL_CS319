@@ -2,12 +2,11 @@
 import AdminProduct from "@/app/components/admin-components/AdminProduct";
 import AdminUserSidebar from "@/app/components/admin-components/AdminUserSidebar";
 import UserInfo from "@/app/model/UserInfo";
-import React, { useEffect, useState } from "react";
+import React, { ButtonHTMLAttributes, MouseEvent, useEffect, useState } from "react";
 
 interface UserTable {
   user: UserInfo;
 }
-
 const user: UserInfo = {
   UID: "U00001",
   Email: "test@gmail.com",
@@ -17,33 +16,70 @@ const user: UserInfo = {
   Role: "",
 };
 function paginate(items, itemsPerPage, pageNumber) {
-    const startIndex = pageNumber * itemsPerPage;
-    let endIndex = startIndex + itemsPerPage;
-    console.log(startIndex,endIndex,pageNumber,'d')
-    if (endIndex > items.length-1){
-        console.log('over length')
-        return items.slice(startIndex, items.length-1)
-    }
-    return items.slice(startIndex, endIndex);
+  const startIndex = pageNumber * itemsPerPage;
+  let endIndex = startIndex + itemsPerPage;
+  console.log(startIndex, endIndex, pageNumber, "d");
+  if (endIndex > items.length - 1) {
+    console.log("over length");
+    return items.slice(startIndex, items.length - 1);
   }
-export default function userManagement() {
-    const [page,setPage] = useState([0,6])
-    const [curPage, setCurPage] = useState(1)
-    const [test,setTest] = useState<UserInfo[]>([user, user, user ,user ,user,user,user, user, 
-        user ,user ,user,user,user, user, user ,user ,user,user,user, user, user ,user ,user,user])
-    const [show, setShow] = useState([])
-    console.log(test.length/10)
+  return items.slice(startIndex, endIndex);
+}
 
-    useEffect(()=>{
-        setShow(paginate(test,6,1))
-        let i = 0
-            setTest(old => old.map((e)=>{
-        e.Name = `ชื่อ${i}`
-        i
-        return e
-    }))
-        
-    },[])
+export default function userManagement() {
+  const [page, setPage] = useState([0, 6]);
+  const [curPage, setCurPage] = useState(1);
+  const [test, setTest] = useState<UserInfo[]>([
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    user,
+    // test.map()
+  ].map((e,index) => {
+    const obj = {...user, UID:"U00001"+index}
+    return obj
+  }));
+  const [show, setShow] = useState([]);
+  // const
+  // console.log(test.length / 10);
+
+  useEffect(() => {
+    let i = 2;
+    setTest(
+      test.map((e) => {
+        const obj = { ...e,UID: e.UID + i };
+        i++;
+        return obj;
+      })
+    );
+    // setShow(paginate(test, 6, 1));
+    // return e;
+  }, []);
+  useEffect(() => {
+    console.log(test);
+    setShow(test);
+  }, [test]);
+
   function AdminUserTable(props: UserTable) {
     return (
       <tr>
@@ -109,9 +145,10 @@ export default function userManagement() {
                     type="text"
                     placeholder="Type here"
                     className="input input-bordered w-11/12"
-                    name="Name"
+                    name="UID"
                     value={curUser.UID}
                     onChange={handleChange}
+                    disabled
                   />
                 </label>
                 <div className="flex">
@@ -124,6 +161,7 @@ export default function userManagement() {
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
                       value={curUser.Name}
+                      onChange={handleChange}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -135,6 +173,7 @@ export default function userManagement() {
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
                       value={curUser.LastName}
+                      onChange={handleChange}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -146,6 +185,7 @@ export default function userManagement() {
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
                       value={curUser.Email}
+                      onChange={handleChange}
                     />
                   </label>
                 </div>
@@ -200,23 +240,41 @@ export default function userManagement() {
                         console.log(page[0],page[1])
                         console.log(test.slice(page[0],page[1]))
                         return<AdminUserTable user={e} />})} */}
-                        {test.slice(page[0],page[1]).map((e) => <AdminUserTable key={e.UID} user={e} />)}
+                    {/* {test.slice(page[0], page[1]).map((e) => ( */}
+                    {/* // <AdminUserTable key={e.UID} user={e} /> */}
+                    {/* // ))} */}
+                    {test.slice(page[0],page[1]).map((e) => {
+                      console.log(e)
+                      return(
+                      <AdminUserTable key={e.UID} user={e} />
+                    )})}
                   </tbody>
                 </table>
                 <div className="join my-4">
-                    {test.length > 7 ?
-                    Array.from({length: Math.ceil(test.length/7)},(_,index) =>
-                    <button key={index} className={`join-item btn ${index==0? 'bg-yellow-600':''}`}
-                    onClick={(e)=>{
-                        setPage([index*7,((index+1)*7-1)])
-                        const k = document.querySelectorAll('.join-item')
-                        k.forEach(d => d.classList.remove('bg-yellow-600'))
-                        e.target.classList.add('bg-yellow-600')
-                    }}>{index+1}
-                    
-                    </button>)
-                    : ''}
-            </div>
+                  {test.length > 7
+                    ? Array.from(
+                        { length: Math.ceil(test.length / 7) },
+                        (_, index) => (
+                          <button
+                            key={index}
+                            className={`join-item btn ${
+                              index == 0 ? "bg-yellow-600" : ""
+                            }`}
+                            onClick={(e : MouseEvent<Element>) => {
+                              setPage([index * 7, (index + 1) * 7 - 1]);
+                              const k = document.querySelectorAll(".join-item");
+                              k.forEach((d) =>
+                                d.classList.remove("bg-yellow-600")
+                              );
+                              e.target.classList.add("bg-yellow-600");
+                            }}
+                          >
+                            {index + 1}
+                          </button>
+                        )
+                      )
+                    : ""}
+                </div>
               </div>
             </div>
           </div>
