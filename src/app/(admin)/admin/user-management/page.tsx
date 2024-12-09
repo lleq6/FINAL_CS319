@@ -1,7 +1,7 @@
 "use client";
-import AdminProduct from "@/app/components/admin-components/AdminProduct";
 import AdminUserSidebar from "@/app/components/admin-components/AdminUserSidebar";
 import UserInfo from "@/app/model/UserInfo";
+import AddressInfo from "@/app/model/AddressModel";
 import React, { useEffect, useState } from "react";
 
 interface UserTable {
@@ -10,17 +10,21 @@ interface UserTable {
 
 export default function userManagement() {
   function AdminUserTable(props: UserTable) {
+    const nameParts = props.user.Full_Name.split(" ");
     return (
       <tr>
-        <td>{props.user.UID}</td>
-        <td>{props.user.Name}</td>
-        <td>{props.user.LastName}</td>
+        <td>{props.user.User_ID}</td>
+        <td>{nameParts[0]}</td>
+        <td>{nameParts[1]}</td>
         <td>{props.user.Email}</td>
         <td>{props.user.Phone}</td>
+        <td>{props.user.Access_Level}</td>
         <td>
           <button
             className="btn bg-yellow-500"
-            onClick={(e) => selectUser(props.user)}
+            onClick={(e) => {
+              selectUser(props.user);
+            }}
           >
             แก้ไข
           </button>
@@ -36,32 +40,100 @@ export default function userManagement() {
       [name]: value,
     });
   }
+
+  function handleAddrChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const value = e.target.value;
+    const selected = dataAddr.find((x:AddressInfo) => x.Address_ID == value);
+    setCurUserAddress(
+      selected || {
+        Address_ID: "",
+        User_ID: "",
+        Address_1: "",
+        Address_2: "",
+        District: "",
+        Province: "",
+        Zip_Code: "",
+        Is_Default: false,
+        Sub_District: "",
+        Phone: "",
+      }
+    );
+  }
+
   const [curUser, setCurUser] = useState({
-    UID: "",
-    Name: "",
-    LastName: "",
+    User_ID: "",
+    Full_Name: "",
     Email: "",
     Phone: "",
-    Role: "",
+    Access_Level: "",
+  });
+
+  useEffect(() => {
+    if (dataAddr) setAddrData([]);
+  }, [curUser]);
+
+  const [curUserAddr, setCurUserAddress] = useState<AddressInfo>({
+    Address_ID: "",
+    User_ID: "",
+    Address_1: "",
+    Address_2: "",
+    District: "",
+    Province: "",
+    Zip_Code: "",
+    Is_Default: false,
+    Sub_District: "",
+    Phone: "",
   });
 
   function selectUser(user: UserInfo) {
     setCurUser(user);
-  }
-  const [data, setData]= useState([])
-  useEffect(()=>{
-    async function fetchData(){
-      try{
-        const response = await fetch(`/api/user/GetUsers`);
-        if(!response.ok)
-          throw new Error('ERROR')
-        setData(await response.json())
-      }catch (error){
-
+    setCurUserAddress({
+      Address_ID: "",
+      User_ID: "",
+      Address_1: "",
+      Address_2: "",
+      District: "",
+      Province: "",
+      Zip_Code: "",
+      Is_Default: false,
+      Sub_District: "",
+      Phone: "",
+    });
+    async function fetchData() {
+      try {
+        const response = await fetch(`/api/user/getAddressByUserID`, {
+          method: "POST",
+          body: JSON.stringify({
+            UserID: user.User_ID,
+          }),
+        });
+        if (!response.ok) throw new Error("ERROR");
+        const data = await response.json();
+        console.log(data);
+        setAddrData(data);
+      } catch (ex) {
+        console.error(ex);
       }
     }
-    fetchData()
-  },[])
+    fetchData();
+  }
+
+  const [data, setData] = useState([]);
+  const [dataAddr, setAddrData] = useState([]);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch(`/api/user/GetUsers`);
+        if (!response.ok) throw new Error("ERROR");
+        const data = await response.json();
+        setData(data);
+      } catch (ex) {
+        console.error(ex);
+      }
+    }
+    fetchData();
+  }, []);
+  let Index = 0;
   return (
     <div className="">
       <style jsx>
@@ -88,7 +160,7 @@ export default function userManagement() {
                     placeholder="Type here"
                     className="input input-bordered w-11/12"
                     name="Name"
-                    value={curUser.UID}
+                    value={curUser.User_ID}
                     onChange={handleChange}
                   />
                 </label>
@@ -101,7 +173,7 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.Name}
+                      value={curUser.Full_Name.split(" ")[0]}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -112,7 +184,7 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.LastName}
+                      value={curUser.Full_Name.split(" ")[1]}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -141,17 +213,20 @@ export default function userManagement() {
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
                     <div className="label">
-                      <span className="label-text">UID</span>
+                      <span className="label-text">สิทธิการเข้าถึง</span>
                     </div>
                     <input
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.Role}
+                      value={curUser.Access_Level}
                     />
                   </label>
                   <button className="btn self-end">เปลี่ยนรหัสผ่าน</button>
                 </div>
+                <button className="btn bg-green-500">เพิ่ม</button>
+                <button className="btn bg-yellow-500">บันทึก</button>
+                <button className="btn bg-red-500">ลบ</button>
               </div>
               <div className="">
                 <label className="form-control w-full max-w-xs mx-1">
@@ -159,52 +234,89 @@ export default function userManagement() {
                     <span className="label-text">ที่อยู่</span>
                   </div>
                   <select
-                    name="cars"
-                    id="cars"
+                    name="addrlist"
+                    id="addrlist"
                     className="select select-bordered"
+                    onChange={handleAddrChange}
                   >
-                    <option value="volvo">Volvo</option>
-                    <option value="saab">Saab</option>
-                    <option value="mercedes">Mercedes</option>
-                    <option value="audi">Audi</option>
+                    {dataAddr.map((x: AddressInfo) => {
+                      return (
+                        <option value={x.Address_ID}>
+                          ที่อยู่ - {++Index}
+                        </option>
+                      );
+                    })}
                   </select>
                 </label>
                 <div className="flex">
                   <label className="form-control w-full max-w-xs mx-1">
                     <div className="label">
-                      <span className="label-text">ชื่อ</span>
+                      <span className="label-text">ที่อยู่ : 1</span>
                     </div>
                     <input
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.Name}
+                      value={curUserAddr.Address_1}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
                     <div className="label">
-                      <span className="label-text">นามสกุล</span>
+                      <span className="label-text">ที่อยู่ : 2</span>
                     </div>
                     <input
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.LastName}
+                      value={curUserAddr.Address_2}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
                     <div className="label">
-                      <span className="label-text">E-mail</span>
+                      <span className="label-text">ตำบล/แขวง</span>
                     </div>
                     <input
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.Email}
+                      value={curUserAddr.Sub_District}
+                    />
+                  </label>
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">อำเภอ/เขต</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-11/12"
+                      value={curUserAddr.District}
                     />
                   </label>
                 </div>
                 <div className="flex">
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">จังหวัด</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-11/12"
+                      value={curUserAddr.Province}
+                    />
+                  </label>
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">รหัสไปรษณีย์</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-11/12"
+                      value={curUserAddr.Zip_Code}
+                    />
+                  </label>
                   <label className="form-control w-full max-w-xs mx-1">
                     <div className="label">
                       <span className="label-text">เบอร์โทรศัพท์</span>
@@ -213,26 +325,16 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.Phone}
+                      value={curUserAddr.Phone}
                     />
                   </label>
-                  <label className="form-control w-full max-w-xs mx-1">
-                    <div className="label">
-                      <span className="label-text">UID</span>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Type here"
-                      className="input input-bordered w-11/12"
-                      value={curUser.Role}
-                    />
-                  </label>
-                  <button className="btn self-end">เปลี่ยนรหัสผ่าน</button>
                 </div>
+                <button className="btn bg-green-500">เพิ่ม</button>
+                <button className="btn bg-yellow-500">บันทึก</button>
+                <button className="btn bg-red-500">ลบ</button>
               </div>
               <div className="overflow-x-auto">
                 <table className="table table-zebra">
-                  {/* head */}
                   <thead>
                     <tr>
                       <th>UID</th>
@@ -240,14 +342,13 @@ export default function userManagement() {
                       <th>นามสกุล</th>
                       <th>E-mail</th>
                       <th>เบอร์โทรศัพท์</th>
-                      {/* <th>สถานะ</th> */}
+                      <th>สิทธิการเข้าถึง</th>
                       <th></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((user : UserInfo) =>
-                    {
-                        return <AdminUserTable user={user} />
+                    {data.map((user: UserInfo) => {
+                      return <AdminUserTable user={user} />;
                     })}
                   </tbody>
                 </table>

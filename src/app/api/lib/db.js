@@ -23,7 +23,7 @@ const client = new Pool(config);
 
 module.exports = {
     fetchUsers: async() => {
-        const data = await client.query(`SELECT * FROM public."User" ORDER BY "User_ID" ASC`)
+        const data = await client.query(`SELECT "User_ID", "Full_Name", "Email", "Phone", "Access_Level" FROM public."User" ORDER BY "User_ID" ASC`)
         return data.rows;
     },
     query: (text, params) => client.query(text, params),
@@ -169,7 +169,10 @@ WHERE sc."Sub_Category_ID" = 2
             Address.District, Address.Province, Address.Zip_Code, Address.Is_Default, Address.Sub_District, Address.Phone]),
     deleteAddress : async (Address_ID) => await client.query(`DELETE FROM public."Address" WHERE "Address_ID"=$1`,[Address_ID]),
 
-    getUserAddress : async (User_ID) => await client.query(`SELECT * FROM public."Address" WHERE "User_ID"=$1`,[User_ID]),
+    getUserAddress : async (User_ID) => {
+        const data = await client.query(`SELECT * FROM public."Address" WHERE "User_ID"=$1 ORDER BY "Address_ID" ASC`,[User_ID])
+        return data.rows;
+    },
     editUserAddress : async ( address) => {
         const updates = [];
         const values = [];

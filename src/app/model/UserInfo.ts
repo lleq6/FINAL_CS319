@@ -1,8 +1,7 @@
-export default interface UserInfo{
-    UID: string ;
-    Name: string;
-    LastName: string;
-    Email: string;
-    Phone: string;
-    Role: string;
+export default class UserInfo {
+    User_ID: string = "";
+    Full_Name: string = "";
+    Email: string = "";
+    Phone: string = "";
+    Access_Level: string = "";
 }
