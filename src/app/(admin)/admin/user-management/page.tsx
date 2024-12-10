@@ -1,6 +1,7 @@
 "use client";
 import AdminProduct from "@/app/components/admin-components/AdminProduct";
 import AdminUserSidebar from "@/app/components/admin-components/AdminUserSidebar";
+import { ProductInfo } from "@/app/model/Product";
 import UserInfo from "@/app/model/UserInfo";
 import React, { ButtonHTMLAttributes, MouseEvent, useEffect, useState } from "react";
 
@@ -98,6 +99,11 @@ export default function userManagement() {
         </td>
       </tr>
     );
+  }
+
+  function Paginate(items : ProductInfo[], itemsPerPage : number, setShow: ()=> void){
+    
+    return(<></>)
   }
 
   function handleChange(e: React.FormEvent<HTMLInputElement>) {

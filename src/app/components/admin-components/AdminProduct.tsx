@@ -15,12 +15,16 @@ export default function AdminProduct({ product, setProduct }: AdminProductProps)
           style={{}}
         >
           <p className="my-auto">
+            {!(product.Image_URL == "") ?
             <Image
               alt={product.Name}
               src={product.Image_URL}
               width={500}
               height={500}
             ></Image>
+            :
+            <p className="w-[150px] h-[150px]">URL NOT FOUND</p>
+            }
           </p>
         </div>
         <div className="m-auto h-full w-full bg-red-300 flex text-center mx-2">
