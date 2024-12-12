@@ -41,7 +41,7 @@ function Paginate({ items, itemsPerPage, setShow }) {
             key={index}
             className={`join-item i2 btn ${index == 0 ? "bg-yellow-600" : ""}`}
             onClick={(e: MouseEvent<Element>) => {
-              console.log(index * itemsPerPage, (index + 1) * itemsPerPage);
+              // console.log(index * itemsPerPage, (index + 1) * itemsPerPage);
               setShow(
                 items.slice(index * itemsPerPage, (index + 1) * itemsPerPage)
               );
@@ -130,7 +130,7 @@ export default function productManagement() {
   }, [curCategory]);
 
   useEffect(() => {
-    setShow(productFilter.slice(0, 3));
+    setShow(productFilter.slice(0, 4));
   }, [productFilter]);
 
   useEffect(() => {
@@ -193,20 +193,64 @@ export default function productManagement() {
     alert(k.join("\n"));
   }, [errors]);
 
-  async function submitImage(e) {
-    const a = new FormData();
-    if (curFileImg) {
-      a.append("myfile", curFileImg);
-    }
-    a.append("Product", JSON.stringify(curProduct));
+  useEffect(() => {
+    setFilter(Products);
+  }, [Products]);
 
-    // Object.keys(curProduct).forEach((key) => {
-    //   a.append(key, curProduct[key]);
-    // });
-    await fetch("/api/admin/addProduct", {
-      method: "POST",
-      body: a,
-    });
+  async function addNewItem() {
+    const formData = new FormData();
+    if (curFileImg) {
+      formData.append("myfile", curFileImg);
+    }
+    formData.append("Product", JSON.stringify(curProduct));
+
+    try {
+      const response = await fetch("/api/admin/addProduct", {
+        method: "POST",
+        body: formData,
+      });
+      // console.log(await response.json())
+
+      if (!response.ok) {
+        alert("เกิดข้อผิดพลาด");
+        return;
+      }
+      const data = await response.json();
+      setProducts((e) => [
+        ...e,
+        { ...curProduct, Product_ID: data.Product_ID },
+      ]);
+      setFilter((e) => [
+        ...Products,
+        { ...curProduct, Product_ID: data.Product_ID },
+      ]);
+      // setCurProduct(emptyProduct);
+      alert("เพิ่มสินค้าเข้าสู่ระบบเรียบร้อย");
+    } catch (error) {
+      alert("เพิ่มไอเทมไม่สำเร็จ");
+      return;
+    }
+  }
+
+  async function saveEditItem() {
+    try {
+      const response = await fetch("/api/admin/edit-product", {
+        method: "POST",
+        body: JSON.stringify(curProduct),
+      });
+      const newObj = Products.map((e) => {
+        if (e.Product_ID == curProduct.Product_ID) {
+          return curProduct;
+        }
+        return e;
+      });
+      setProducts(newObj);
+      setFilter(newObj);
+      setCurProduct(emptyProduct)
+      alert("แก้ไขข้อมูลสำเร็จ");
+    } catch (error) {}
+    alert("เกิดข้อผิดพลาดในการแก้ไข");
+    return;
   }
 
   if (!Product) return <div>loading</div>;
@@ -527,15 +571,19 @@ export default function productManagement() {
                 disabled={!curProduct.Product_ID ? true : false}
                 onClick={(e) => {
                   console.log(curProduct);
-                  // if (validate()) {
-                  submitImage(e);
-                  // if (curFileImg) {
-                  // }
-                  // console.log(curProduct);
-                  // }
+                  if (validate()) {
+                    if (
+                      curProduct.Product_ID === Number(curProduct.Product_ID)
+                    ) {
+                      saveEditItem();
+                      return;
+                    }
+                    console.log("addnew");
+                    addNewItem();
+                  }
                 }}
               >
-                บันทึก
+                {curProduct.Product_ID == 'เพิ่มสินค้าใหม่'? 'เพิ่ม': 'บันทึก'}
               </button>
             </div>
 
@@ -549,7 +597,7 @@ export default function productManagement() {
               <p>จำนวนคงเหลือ</p>
               <p>จุดสั่งซื้อ</p>
             </div>
-            <div className="grid grid-rows-4 w-fit">
+            <div className="grid grid-rows-4 w-full">
               {productFilter.length == 0 ? <p>ไม่พบสินค้า</p> : ""}
               {Show.map((e, index) => (
                 <div key={e.Product_ID}>
