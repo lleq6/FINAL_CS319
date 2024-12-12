@@ -1,9 +1,14 @@
 "use client";
-import AdminProduct from "@/app/components/admin-components/AdminProduct";
 import AdminUserSidebar from "@/app/components/admin-components/AdminUserSidebar";
 import { ProductInfo } from "@/app/model/Product";
 import UserInfo from "@/app/model/UserInfo";
-import React, { ButtonHTMLAttributes, MouseEvent, useEffect, useState } from "react";
+import React, {
+  // ButtonHTMLAttributes,
+  MouseEvent,
+  useEffect,
+  useState,
+} from "react";
+import AddressInfo from "@/app/model/AddressModel";
 
 interface UserTable {
   user: UserInfo;
@@ -30,36 +35,38 @@ function paginate(items, itemsPerPage, pageNumber) {
 export default function userManagement() {
   const [page, setPage] = useState([0, 6]);
   const [curPage, setCurPage] = useState(1);
-  const [test, setTest] = useState<UserInfo[]>([
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    user,
-    // test.map()
-  ].map((e,index) => {
-    const obj = {...user, UID:"U00001"+index}
-    return obj
-  }));
+  const [test, setTest] = useState<UserInfo[]>(
+    [
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      user,
+      // test.map()
+    ].map((e, index) => {
+      const obj = { ...user, UID: "U00001" + index };
+      return obj;
+    })
+  );
   const [show, setShow] = useState([]);
   // const
   // console.log(test.length / 10);
@@ -68,7 +75,7 @@ export default function userManagement() {
     let i = 2;
     setTest(
       test.map((e) => {
-        const obj = { ...e,UID: e.UID + i };
+        const obj = { ...e, UID: e.UID + i };
         i++;
         return obj;
       })
@@ -82,17 +89,21 @@ export default function userManagement() {
   }, [test]);
 
   function AdminUserTable(props: UserTable) {
+    const nameParts = props.user.Full_Name.split(" ");
     return (
       <tr>
-        <td>{props.user.UID}</td>
-        <td>{props.user.Name}</td>
-        <td>{props.user.LastName}</td>
+        <td>{props.user.User_ID}</td>
+        <td>{nameParts[0]}</td>
+        <td>{nameParts[1]}</td>
         <td>{props.user.Email}</td>
         <td>{props.user.Phone}</td>
+        <td>{props.user.Access_Level}</td>
         <td>
           <button
             className="btn bg-yellow-500"
-            onClick={(e) => selectUser(props.user)}
+            onClick={(e) => {
+              selectUser(props.user);
+            }}
           >
             แก้ไข
           </button>
@@ -101,9 +112,12 @@ export default function userManagement() {
     );
   }
 
-  function Paginate(items : ProductInfo[], itemsPerPage : number, setShow: ()=> void){
-    
-    return(<></>)
+  function Paginate(
+    items: ProductInfo[],
+    itemsPerPage: number,
+    setShow: () => void
+  ) {
+    return <></>;
   }
 
   function handleChange(e: React.FormEvent<HTMLInputElement>) {
@@ -113,19 +127,100 @@ export default function userManagement() {
       [name]: value,
     });
   }
+
+  function handleAddrChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const value = e.target.value;
+    const selected = dataAddr.find((x: AddressInfo) => x.Address_ID == value);
+    setCurUserAddress(
+      selected || {
+        Address_ID: "",
+        User_ID: "",
+        Address_1: "",
+        Address_2: "",
+        District: "",
+        Province: "",
+        Zip_Code: "",
+        Is_Default: false,
+        Sub_District: "",
+        Phone: "",
+      }
+    );
+  }
+
   const [curUser, setCurUser] = useState({
-    UID: "",
-    Name: "",
-    LastName: "",
+    User_ID: "",
+    Full_Name: "",
     Email: "",
     Phone: "",
-    Role: "",
+    Access_Level: "",
+  });
+
+  useEffect(() => {
+    if (dataAddr) setAddrData([]);
+  }, [curUser]);
+
+  const [curUserAddr, setCurUserAddress] = useState<AddressInfo>({
+    Address_ID: "",
+    User_ID: "",
+    Address_1: "",
+    Address_2: "",
+    District: "",
+    Province: "",
+    Zip_Code: "",
+    Is_Default: false,
+    Sub_District: "",
+    Phone: "",
   });
 
   function selectUser(user: UserInfo) {
     setCurUser(user);
+    setCurUserAddress({
+      Address_ID: "",
+      User_ID: "",
+      Address_1: "",
+      Address_2: "",
+      District: "",
+      Province: "",
+      Zip_Code: "",
+      Is_Default: false,
+      Sub_District: "",
+      Phone: "",
+    });
+    async function fetchData() {
+      try {
+        const response = await fetch(`/api/user/getAddressByUserID`, {
+          method: "POST",
+          body: JSON.stringify({
+            UserID: user.User_ID,
+          }),
+        });
+        if (!response.ok) throw new Error("ERROR");
+        const data = await response.json();
+        console.log(data);
+        setAddrData(data);
+      } catch (ex) {
+        console.error(ex);
+      }
+    }
+    fetchData();
   }
 
+  const [data, setData] = useState([]);
+  const [dataAddr, setAddrData] = useState([]);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch(`/api/user/GetUsers`);
+        if (!response.ok) throw new Error("ERROR");
+        const data = await response.json();
+        setData(data);
+      } catch (ex) {
+        console.error(ex);
+      }
+    }
+    fetchData();
+  }, []);
+  let Index = 0;
   return (
     <div className="">
       <style jsx>
@@ -151,8 +246,8 @@ export default function userManagement() {
                     type="text"
                     placeholder="Type here"
                     className="input input-bordered w-11/12"
-                    name="UID"
-                    value={curUser.UID}
+                    name="Name"
+                    value={curUser.User_ID}
                     onChange={handleChange}
                     disabled
                   />
@@ -166,8 +261,7 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.Name}
-                      onChange={handleChange}
+                      value={curUser.Full_Name.split(" ")[0]}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -178,8 +272,7 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.LastName}
-                      onChange={handleChange}
+                      value={curUser.Full_Name.split(" ")[1]}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -209,19 +302,128 @@ export default function userManagement() {
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
                     <div className="label">
-                      <span className="label-text">UID</span>
+                      <span className="label-text">สิทธิการเข้าถึง</span>
                     </div>
                     <input
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.Role}
+                      value={curUser.Access_Level}
                     />
                   </label>
                   <button className="btn self-end">เปลี่ยนรหัสผ่าน</button>
                 </div>
+                <button className="btn bg-green-500">เพิ่ม</button>
+                <button className="btn bg-yellow-500">บันทึก</button>
+                <button className="btn bg-red-500">ลบ</button>
+              </div>
+              <div className="">
+                <label className="form-control w-full max-w-xs mx-1">
+                  <div className="label">
+                    <span className="label-text">ที่อยู่</span>
+                  </div>
+                  <select
+                    name="addrlist"
+                    id="addrlist"
+                    className="select select-bordered"
+                    onChange={handleAddrChange}
+                  >
+                    {dataAddr.map((x: AddressInfo) => {
+                      return (
+                        <option value={x.Address_ID}>
+                          ที่อยู่ - {++Index}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </label>
+                <div className="flex">
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">ที่อยู่ : 1</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-11/12"
+                      value={curUserAddr.Address_1}
+                    />
+                  </label>
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">ที่อยู่ : 2</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-11/12"
+                      value={curUserAddr.Address_2}
+                    />
+                  </label>
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">ตำบล/แขวง</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-11/12"
+                      value={curUserAddr.Sub_District}
+                    />
+                  </label>
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">อำเภอ/เขต</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-11/12"
+                      value={curUserAddr.District}
+                    />
+                  </label>
+                </div>
+                <div className="flex">
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">จังหวัด</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-11/12"
+                      value={curUserAddr.Province}
+                    />
+                  </label>
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">รหัสไปรษณีย์</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-11/12"
+                      value={curUserAddr.Zip_Code}
+                    />
+                  </label>
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">เบอร์โทรศัพท์</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-11/12"
+                      value={curUserAddr.Phone}
+                    />
+                  </label>
+                </div>
+                <button className="btn bg-green-500">เพิ่ม</button>
+                <button className="btn bg-yellow-500">บันทึก</button>
+                <button className="btn bg-red-500">ลบ</button>
+              </div>
+              <div className="overflow-x-auto">
                 <table className="table table-zebra">
-                  {/* head */}
                   <thead>
                     <tr>
                       <th>UID</th>
@@ -229,7 +431,7 @@ export default function userManagement() {
                       <th>นามสกุล</th>
                       <th>E-mail</th>
                       <th>เบอร์โทรศัพท์</th>
-                      {/* <th>สถานะ</th> */}
+                      <th>สิทธิการเข้าถึง</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -249,15 +451,13 @@ export default function userManagement() {
                     {/* {test.slice(page[0], page[1]).map((e) => ( */}
                     {/* // <AdminUserTable key={e.UID} user={e} /> */}
                     {/* // ))} */}
-                    {test.slice(page[0],page[1]).map((e) => {
-                      console.log(e)
-                      return(
-                      <AdminUserTable key={e.UID} user={e} />
-                    )})}
+                    {data.slice(page[0], page[1]).map((e) => {
+                      return <AdminUserTable user={user} />;
+                    })}
                   </tbody>
                 </table>
                 <div className="join my-4">
-                  {test.length > 7
+                  {data.length > 7
                     ? Array.from(
                         { length: Math.ceil(test.length / 7) },
                         (_, index) => (
@@ -266,7 +466,7 @@ export default function userManagement() {
                             className={`join-item btn ${
                               index == 0 ? "bg-yellow-600" : ""
                             }`}
-                            onClick={(e : MouseEvent<Element>) => {
+                            onClick={(e: MouseEvent<Element>) => {
                               setPage([index * 7, (index + 1) * 7 - 1]);
                               const k = document.querySelectorAll(".join-item");
                               k.forEach((d) =>

@@ -19,16 +19,15 @@ const config = {
 const client = new Pool(config);
 
 module.exports = {
-  feathUsers: async () => {
-    client.query(`SELECT * FROM User ORDER BY User_ID ASC`);
-  },
-  query: (text, params) => client.query(text, params),
-  test: () => client.query("SELECT * from User"),
-  fetchOneUser: (email) =>
-    client.query(`SELECT * FROM public."User" WHERE "Email" = $1`, [email]),
-  fetchOneProduct: async (id) => {
-    const data = await client.query(
-      `
+    fetchUsers: async() => {
+        const data = await client.query(`SELECT * FROM public."User" ORDER BY "User_ID" ASC`)
+        return data.rows;
+    },
+    query: (text, params) => client.query(text, params),
+    test: () => client.query('SELECT * from User'),
+    fetchOneUser: (email) => client.query(`SELECT * FROM public."User" WHERE "Email" = $1`,[email]),
+    fetchOneProduct:async (id) => {
+        const data = await client.query(`
             SELECT 
                 p.*, 
                 c."Name" as C_NAME,
@@ -255,36 +254,27 @@ WHERE sc."Sub_Category_ID" = 2
       Address_ID,
     ]),
 
-  getUserAddress: async (User_ID) =>
-    await client.query(`SELECT * FROM public."Address" WHERE "User_ID"=$1`, [
-      User_ID,
-    ]),
-  editUserAddress: async (address) => {
-    const updates = [];
-    const values = [];
-    let index = 1;
-    for (const key in address) {
-      if (key !== "Address_ID" && address[key] !== undefined) {
-        updates.push(`"${key}" = $${index}`);
-        values.push(address[key]);
-        index++;
-      }
+    getUserAddress : async (User_ID) => {
+        const data = await client.query(`SELECT * FROM public."Address" WHERE "User_ID"=$1 ORDER BY "Address_ID" ASC`,[User_ID])
+        return data.rows;
+    },
+    editUserAddress : async ( address) => {
+        const updates = [];
+        const values = [];
+        let index = 1;
+        for (const key in address) {
+            if (key !== 'Address_ID' && address[key] !== undefined) {
+                updates.push(`"${key}" = $${index}`);
+                values.push(address[key]);
+                index++;
+            }
+        }
+        values.push(address.Address_ID);
+        await client.query(`UPDATE public."Address"
+            SET ${updates.join(', ')}
+            WHERE "Address_ID" = $${index};`,values)
     }
-    values.push(address.Address_ID);
-    await client.query(
-      `UPDATE public."Address"
-            SET ${updates.join(", ")}
-            WHERE "Address_ID" = $${index};`,
-      values
-    );
-  },
-  addProduct: async (product) => {
-    // client.query(`
-    // INSERT INTO public."Product"
-    // `);
-    console.log(product)
 
-  },
 };
 
 const a = async () => {
