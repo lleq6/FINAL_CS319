@@ -34,67 +34,14 @@ function paginate(items, itemsPerPage, pageNumber) {
 
 export default function userManagement() {
   const [page, setPage] = useState([0, 6]);
-  const [curPage, setCurPage] = useState(1);
-  const [test, setTest] = useState<UserInfo[]>(
-    [
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      user,
-      // test.map()
-    ].map((e, index) => {
-      const obj = { ...user, UID: "U00001" + index };
-      return obj;
-    })
-  );
-  const [show, setShow] = useState([]);
-  // const
-  // console.log(test.length / 10);
-
-  useEffect(() => {
-    let i = 2;
-    setTest(
-      test.map((e) => {
-        const obj = { ...e, UID: e.UID + i };
-        i++;
-        return obj;
-      })
-    );
-    // setShow(paginate(test, 6, 1));
-    // return e;
-  }, []);
-  useEffect(() => {
-    console.log(test);
-    setShow(test);
-  }, [test]);
 
   function AdminUserTable(props: UserTable) {
-    const nameParts = props.user.Full_Name.split(" ");
+    // const nameParts = props.user.Full_Name.split(" ");
     return (
       <tr>
         <td>{props.user.User_ID}</td>
-        <td>{nameParts[0]}</td>
-        <td>{nameParts[1]}</td>
+        <td>{props.user.First_Name}</td>
+        <td>{props.user.Last_Name}</td>
         <td>{props.user.Email}</td>
         <td>{props.user.Phone}</td>
         <td>{props.user.Access_Level}</td>
@@ -111,15 +58,6 @@ export default function userManagement() {
       </tr>
     );
   }
-
-  function Paginate(
-    items: ProductInfo[],
-    itemsPerPage: number,
-    setShow: () => void
-  ) {
-    return <></>;
-  }
-
   function handleChange(e: React.FormEvent<HTMLInputElement>) {
     const { name, value } = e.currentTarget;
     setCurUser({
@@ -150,6 +88,8 @@ export default function userManagement() {
   const [curUser, setCurUser] = useState({
     User_ID: "",
     Full_Name: "",
+    First_Name: "",
+    Last_Name: "",
     Email: "",
     Phone: "",
     Access_Level: "",
@@ -213,6 +153,13 @@ export default function userManagement() {
         const response = await fetch(`/api/user/GetUsers`);
         if (!response.ok) throw new Error("ERROR");
         const data = await response.json();
+        const mapData = data.map((e : UserInfo) => {
+          return {
+            ...data,
+            First_Name : e.Full_Name.split(' ')[0],
+            Last_Name : e.Full_Name.split(' ')[1]
+          }
+        })
         setData(data);
       } catch (ex) {
         console.error(ex);
@@ -261,7 +208,8 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.Full_Name.split(" ")[0]}
+                      value={curUser.First_Name}
+                      onChange={handleChange}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -272,7 +220,7 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.Full_Name.split(" ")[1]}
+                      value={curUser.Last_Name}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -436,30 +384,15 @@ export default function userManagement() {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* {test.map(e => 
-                      <AdminUserTable user={e}/>  
-                    )} */}
-                    {/* <AdminUserTable user={user} /> */}
-                    {/* <AdminUserTable user={user} /> */}
-                    {/* <AdminUserTable user={user} /> */}
-                    {/* <AdminUserTable user={user} /> */}
-                    {/* <AdminUserTable user={user} /> */}
-                    {/* {test.slice(page[0],page[1]).map((e)=>{
-                        console.log(page[0],page[1])
-                        console.log(test.slice(page[0],page[1]))
-                        return<AdminUserTable user={e} />})} */}
-                    {/* {test.slice(page[0], page[1]).map((e) => ( */}
-                    {/* // <AdminUserTable key={e.UID} user={e} /> */}
-                    {/* // ))} */}
-                    {data.slice(page[0], page[1]).map((e) => {
-                      return <AdminUserTable user={user} />;
+                    {data.slice(page[0], page[1]).map((e: UserInfo) => {
+                      return <AdminUserTable key={e.User_ID} user={e} />;
                     })}
                   </tbody>
                 </table>
                 <div className="join my-4">
                   {data.length > 7
                     ? Array.from(
-                        { length: Math.ceil(test.length / 7) },
+                        { length: Math.ceil(data.length / 7) },
                         (_, index) => (
                           <button
                             key={index}
