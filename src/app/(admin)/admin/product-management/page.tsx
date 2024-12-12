@@ -4,6 +4,7 @@ import AdminProductSidebar from "@/app/components/admin-components/AdminProductS
 import Product from "@/app/components/Product";
 import { CategoryList } from "@/app/model/CategoryModel";
 import { ProductInfo } from "@/app/model/Product";
+import { error } from "console";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -19,7 +20,7 @@ const emptyProduct: ProductInfo = {
   Sale_Cost: 0,
   Sale_Price: 0,
   Reorder_Point: 0,
-  Visibility: false,
+  Visibility: true,
   Review_Rating: 0,
   Image_URL: "",
   c_id: 0,
@@ -30,9 +31,9 @@ const emptyProduct: ProductInfo = {
 };
 
 function Paginate({ items, itemsPerPage, setShow }) {
-  console.log("paginate", items);
+  // console.log(items.slice(index * itemsPerPage, (index + 1) * itemsPerPage))
   return (
-    <div className="join my-4">
+    <div className="join my-4 w-fit">
       {Array.from(
         { length: Math.ceil(items.length / itemsPerPage) },
         (_, index) => (
@@ -68,10 +69,10 @@ const ImageWithCheck = ({ src, alt, height, width }) => {
     img.onerror = () => setImageLoaded(false);
   }, [src]);
 
-  return imageLoaded ? (
+  return imageLoaded && src ? (
     <Image src={src} alt={alt} height={height} width={width} />
   ) : (
-    <div className="flex m-auto w-[300px] h-[300px] bg-red-300">
+    <div className={`flex m-auto w-[${width}px] h-[${height}px] bg-gray-300`}>
       <p className="m-auto text-center">ไม่สามารถแสดงภาพ...</p>
     </div>
   );
@@ -86,33 +87,17 @@ function test(p) {
 }
 
 export default function productManagement() {
-  const [curProduct, setCurProduct] = useState<ProductInfo>({
-    Product_ID: "",
-    Child_ID: 0,
-    Name: "",
-    Brand: "",
-    Description: "",
-    Unit: "",
-    Quantity: 0,
-    Sale_Cost: 0,
-    Sale_Price: 0,
-    Reorder_Point: 0,
-    Visibility: false,
-    Review_Rating: 0,
-    Image_URL: "",
-    c_id: 0,
-    c_name: "",
-    s_id: 0,
-    s_name: "",
-    cc_name: "",
-  });
-
+  const [curProduct, setCurProduct] = useState<ProductInfo>(emptyProduct);
+  const [productFilter, setFilter] = useState<ProductInfo[]>([]);
   const [Products, setProducts] = useState<ProductInfo[]>([]);
   const [Show, setShow] = useState<ProductInfo[]>([]);
   const [category, setCategory] = useState<CategoryList[]>([]);
   const [curCategory, setCurCategory] = useState<CategoryList>();
   const [CurSubCategory, setCurSubCategory] = useState<CategoryList>();
   const [curChild, setChild] = useState<CategoryList>();
+  const [curImage, setCurImage] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [curFileImg, setCurFile] = useState<File>();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -120,7 +105,8 @@ export default function productManagement() {
         const response = await fetch("/api/products/allProduct");
         const data = await response.json();
         setProducts(data);
-        setShow(data.slice(0, 2));
+        setFilter(data);
+        setShow(data.slice(0, 3));
       } catch (error) {}
       try {
         const response = await fetch("/api/getCategory/all");
@@ -133,33 +119,43 @@ export default function productManagement() {
     console.log(category);
   }, []);
 
-  // useEffect(()=>{
-  //   if(curCategory){
-  //     setCurSubCategory(
-  //       curCategory.Sub_Category.find((sub) => sub.Sub_Category_ID == curProduct.s_id)
-  //     );
-  //   }
-  // },[curCategory])
+  useEffect(() => {
+    if (curCategory) {
+      setCurSubCategory(
+        curCategory.Sub_Category.find(
+          (sub) => sub.Sub_Category_ID == curProduct.s_id
+        )
+      );
+    }
+  }, [curCategory]);
+
+  useEffect(() => {
+    setShow(productFilter.slice(0, 3));
+  }, [productFilter]);
+
   useEffect(() => {
     if (CurSubCategory) {
       setChild(CurSubCategory.ChildCategory);
     }
   }, [CurSubCategory]);
+
   function setP(p: ProductInfo) {
     setCurProduct(p);
     console.log(p);
     test(p);
+    setCurImage(p.Image_URL);
+    if (!p.Product_ID) return;
     setCurCategory(category.find((e) => e.Category_ID == p.c_id));
-    setCurSubCategory(
-      curCategory.Sub_Category.find(
-        (sub) => sub.Sub_Category_ID == curProduct.s_id
-      )
-    );
+    // setCurSubCategory(
+    //   curCategory.Sub_Category.find(
+    //     (sub) => sub.Sub_Category_ID == curProduct.s_id
+    //   )
+    // );
     setChild(
       curCategory?.Sub_Category.find((sub) => sub.Sub_Category_ID == p.s_id)
         .ChildCategory
     );
-    console.log(curChild);
+    // console.log(curChild);
     // setTimeout(() => (child.value = p.Child_ID), 1000);
   }
 
@@ -170,56 +166,165 @@ export default function productManagement() {
       [name]: value,
     });
   }
-  if (!Product) return <div>loading</div>;
 
+  const validate = (): boolean => {
+    const newErrors: { [key: string]: string } = {};
+    // if (!curProduct.Product_ID) newErrors.Product_ID = 'Product ID is required';
+    if (!curProduct.Name) newErrors.Name = "โปรดกรอกชื่อสินค้า";
+    if (!curProduct.Brand) newErrors.Brand = "โปรดกรอกยี่ห้อ";
+    if (!curProduct.Description) newErrors.Description = "โปรดกรอกคำอธิบาย";
+    if (curProduct.Quantity <= 0)
+      newErrors.Quantity = "โปรดกรอกจำนวนที่ถูกต้อง";
+    if (curProduct.Sale_Cost < 0) newErrors.Sale_Cost = "โปรดกรอกราคา";
+    if (!curProduct.Unit) newErrors.Unit = "โปรดกรอกหน่่วยสินค้า";
+    if (curProduct.Child_ID <= 0)
+      newErrors.Child_ID = "โปรดเลือกหมวดหมู่สินค้า";
+    // if (curProduct.Sale_Price < 0) newErrors.Sale_Price = 'Sale Price cannot be negative';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  useEffect(() => {
+    if (Object.keys(errors).length === 0) return;
+    const k = [];
+    for (const [key, value] of Object.entries(errors)) {
+      console.log(key, value);
+      k.push(`${key} : ${value}`);
+    }
+    alert(k.join("\n"));
+  }, [errors]);
+
+  async function submitImage(e) {
+    const a = new FormData();
+    if (curFileImg) {
+      a.append("myfile", curFileImg);
+    }
+    a.append("Product", JSON.stringify(curProduct));
+
+    // Object.keys(curProduct).forEach((key) => {
+    //   a.append(key, curProduct[key]);
+    // });
+    await fetch("/api/admin/addProduct", {
+      method: "POST",
+      body: a,
+    });
+  }
+
+  if (!Product) return <div>loading</div>;
   return (
     <div className="">
       <div className="pl-5">
         <h1>จัดการคลังสินค้า</h1>
       </div>
       <div className="grid grid-cols-7 pl-5 pr-5">
-        <AdminProductSidebar />
+        <AdminProductSidebar setProducts={setFilter} Products={Products} />
         <div className="col-span-5 m-2">
           <div>
             <h1>รายละเอียดสินค้า</h1>
             <div className="flex">
               <div className="m-4 text-center">
-                <ImageWithCheck
-                  src={curProduct.Image_URL}
-                  alt={curProduct.Name}
-                  height={300}
-                  width={300}
-                ></ImageWithCheck>
-                <button className="btn my-2">อัพโหลดรูปภาพ...</button>
+                <div className="min-h-[300px] flex content-center">
+                  <label htmlFor="files" className=" m-auto">
+                    <ImageWithCheck
+                      src={curProduct.Image_URL}
+                      alt={curProduct.Name}
+                      height={300}
+                      width={300}
+                    ></ImageWithCheck>
+                  </label>
+                </div>
+                <div className="">
+                  <label
+                    htmlFor="files"
+                    className="btn border-gray-300 hover:bg-amber-500 hover:text-gray-600 hover:border-amber-500 btn-outline rounded-none w-[300px]"
+                    disabled={!curProduct.Product_ID ? true : false}
+                  >
+                    ..อัพโหลดรูปภาพ
+                  </label>
+                  <input
+                    id="files"
+                    hidden
+                    name="Image_URL"
+                    type="file"
+                    className="file-input w-10/12 my-2 file:btn  file:bg-yellow-400"
+                    placeholder="...อัพโหลดรูปภาพ"
+                    // value={curProduct.Image_URL}
+                    // onChange={handleChange}
+                    // disabled={!curProduct.Product_ID? true : false}
+                    accept=".jpg, .jpeg, .png"
+                    // value={curProduct.Image_URL}
+
+                    onChange={(e) => {
+                      const objectUrl = URL.createObjectURL(e.target.files[0]);
+                      setCurProduct({ ...curProduct, Image_URL: objectUrl });
+                      setCurFile(e.target.files[0]);
+                      console.log(`${e.target.files[0]}`);
+                      console.log(curProduct.Image_URL);
+                      return () => URL.revokeObjectURL(objectUrl);
+                    }}
+                  ></input>
+                </div>
               </div>
               <div className="w-8/12">
-                <label className="form-control w-full max-w-xs">
-                  <div className="label">
-                    <span className="label-text">รหัสสินค้า</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Type here"
-                    className="input input-bordered w-full max-w-xs"
-                    value={curProduct?.Product_ID || ""}
-                    onChange={(e) => handleChange(e)}
-                    name="Product_ID"
-                    disabled
-                  />
-                </label>
-                <label className="form-control w-full">
-                  <div className="label">
-                    <span className="label-text">ยี่ห้อ</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Type here"
-                    className="input input-bordered w-full max-w-md"
-                    value={curProduct?.Brand || ""}
-                    onChange={handleChange}
-                    name="Brand"
-                  />
-                </label>
+                <div className="flex">
+                  <label className="form-control w-full max-w-xs">
+                    <div className="label">
+                      <span className="label-text">รหัสสินค้า</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-full max-w-xs"
+                      value={curProduct?.Product_ID || ""}
+                      onChange={(e) => handleChange(e)}
+                      name="Product_ID"
+                      disabled
+                    />
+                  </label>
+                  <button
+                    className="btn mt-auto mx-2"
+                    onClick={() => {
+                      setCurProduct({
+                        ...emptyProduct,
+                        Product_ID: "เพิ่มสินค้าใหม่",
+                      });
+                      test(emptyProduct);
+                    }}
+                    disabled={curProduct.Product_ID ? true : false}
+                  >
+                    เพิ่มสินค้า
+                  </button>
+                </div>
+                <div className="grid grid-cols-[3fr_2fr] max-w-lg space-x-4">
+                  <label className="form-control">
+                    <div className="label">
+                      <span className="label-text">ยี่ห้อ</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-full max-w-sm"
+                      value={curProduct?.Brand || ""}
+                      onChange={handleChange}
+                      name="Brand"
+                      disabled={!curProduct.Product_ID ? true : false}
+                    />
+                  </label>
+
+                  <label className="form-control">
+                    <div className="label">
+                      <span className="label-text">หน่วย</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="e.g (ชิ้น,แท่ง,แผ่น)"
+                      className="input input-bordered w-full max-w-xs"
+                      value={curProduct?.Unit || ""}
+                      onChange={handleChange}
+                      name="Unit"
+                      disabled={!curProduct.Product_ID ? true : false}
+                    />
+                  </label>
+                </div>
                 <label className="form-control w-full ">
                   <div className="label">
                     <span className="label-text">ชื่อ</span>
@@ -231,13 +336,13 @@ export default function productManagement() {
                     value={curProduct?.Name || ""}
                     onChange={handleChange}
                     name="Name"
+                    disabled={!curProduct.Product_ID ? true : false}
                   />
                 </label>
-
                 <div className="flex max-w-lg">
                   <label className="form-control w-full max-w-xs mx-1">
                     <div className="label">
-                      <span className="label-text">หมวดหมู่</span>
+                      <span className="label-text">ประเภท</span>
                     </div>
                     <select
                       id="c1"
@@ -255,6 +360,7 @@ export default function productManagement() {
                           )
                         );
                       }}
+                      disabled={!curProduct.Product_ID ? true : false}
                     >
                       <option value={0}>- เลือก -</option>
                       {category.map((e) => (
@@ -266,23 +372,23 @@ export default function productManagement() {
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
                     <div className="label">
-                      <span className="label-text">หมวดหมู่รอง</span>
+                      <span className="label-text">หมวดหมู่</span>
                     </div>
                     <select
                       id={"c2"}
                       className="ctgy select select-bordered w-full max-w-48"
                       defaultValue={0}
                       onChange={(e) => {
-                        console.log(e.target.value, "subchange");
                         setCurSubCategory(
                           curCategory?.Sub_Category.find(
                             (sub) => sub.Sub_Category_ID == e.target.value
                           )
                         );
-                        const child = document.querySelector("#c3")
-                        child.value = 0
+                        const child = document.querySelector("#c3");
+                        child.value = 0;
                         // setChild(CurSubCategory.ChildCategory)
                       }}
+                      disabled={!curProduct.Product_ID ? true : false}
                     >
                       <option disabled value={0}>
                         - เลือก -
@@ -299,7 +405,7 @@ export default function productManagement() {
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
                     <div className="label">
-                      <span className="label-text">หมวดหมู่รอง 2</span>
+                      <span className="label-text">หมวดหมู่ย่อย</span>
                     </div>
                     <select
                       id="c3"
@@ -314,6 +420,7 @@ export default function productManagement() {
                           return p;
                         });
                       }}
+                      disabled={!curProduct.Product_ID ? true : false}
                     >
                       <option disabled value={0}>
                         - เลือก -
@@ -326,7 +433,6 @@ export default function productManagement() {
                     </select>
                   </label>
                 </div>
-
                 <div className="flex">
                   <label className="form-control w-full max-w-32 mx-2">
                     <div className="label">
@@ -337,6 +443,8 @@ export default function productManagement() {
                       placeholder="Type here"
                       className="input input-bordered w-full max-w-320"
                       value={curProduct.Sale_Price}
+                      disabled={!curProduct.Product_ID ? true : false}
+                      onChange={handleChange}
                     />
                   </label>
                   <label className={`form-control w-full max-w-32 mx-2`}>
@@ -358,6 +466,7 @@ export default function productManagement() {
                       value={curProduct.Quantity}
                       onChange={handleChange}
                       name={"Quantity"}
+                      disabled={!curProduct.Product_ID ? true : false}
                     />
                     {!(curProduct.Product_ID == "") ? (
                       <>
@@ -388,6 +497,8 @@ export default function productManagement() {
                       placeholder="Type here"
                       className="input input-bordered w-full max-w-32"
                       value={curProduct.Reorder_Point}
+                      onChange={handleChange}
+                      disabled={!curProduct.Product_ID ? true : false}
                     />
                   </label>
                 </div>
@@ -395,64 +506,64 @@ export default function productManagement() {
             </div>
             <h1>คำอธิบายสินค้า</h1>
             <textarea
-              className="mx-2 textarea textarea-bordered w-8/12 h-32"
+              className="mx-2 textarea textarea-bordered w-10/12 h-32"
               value={curProduct.Description}
               name="Description"
               onChange={handleChange}
             ></textarea>
-            <div className="w-full">
-              <div className="ml-auto flex w-[30%]">
+            <div className="w-10/12 ml-2 mt-3 text-end space-x-5">
               <button
-                className="btn mr-auto"
+                className="btn"
+                disabled={!curProduct.Product_ID ? true : false}
                 onClick={() => {
-                  const p = {
-                    Product_ID: "",
-                    Child_ID: 0,
-                    Name: "",
-                    Brand: "",
-                    Description: "",
-                    Unit: "",
-                    Quantity: 0,
-                    Sale_Cost: 0,
-                    Sale_Price: 0,
-                    Reorder_Point: 0,
-                    Visibility: false,
-                    Review_Rating: 0,
-                    Image_URL: "",
-                    c_id: 0,
-                    c_name: "",
-                    s_id: 0,
-                    s_name: "",
-                    cc_name: "",
-                  };
-                  setCurProduct(p);
-                  test(p);
+                  setP(emptyProduct);
+                  // setCurProduct(emptyProduct);
                 }}
               >
-                asd
+                ยกเลิก
               </button>
-              <button className="btn">asd</button>
-              <button className="btn ml-auto">asd</button>
-              </div>
+              <button
+                className="btn ml-auto"
+                disabled={!curProduct.Product_ID ? true : false}
+                onClick={(e) => {
+                  console.log(curProduct);
+                  // if (validate()) {
+                  submitImage(e);
+                  // if (curFileImg) {
+                  // }
+                  // console.log(curProduct);
+                  // }
+                }}
+              >
+                บันทึก
+              </button>
             </div>
-            <div className="grid grid-rows-4 mx-a">
-              {Show.map((e) => (
+
+            <div>ค้นหา</div>
+            <div className="mx-2 my-3 grid grid-cols-[2fr_1fr_4fr_2fr_2fr_1fr_1fr] divide-x-2 text-center">
+              <p>รูปภาพ</p>
+              <p>รหัสสินค้า</p>
+              <p>ชื่อสินค้า</p>
+              <p>หมวดหมู่ย่อย</p>
+              <p>ราคา</p>
+              <p>จำนวนคงเหลือ</p>
+              <p>จุดสั่งซื้อ</p>
+            </div>
+            <div className="grid grid-rows-4 w-fit">
+              {productFilter.length == 0 ? <p>ไม่พบสินค้า</p> : ""}
+              {Show.map((e, index) => (
                 <div key={e.Product_ID}>
                   <AdminProduct
                     key={e.Product_ID + 1}
                     product={e}
                     setProduct={setP}
-                  />
-                  <AdminProduct
-                    key={e.Product_ID}
-                    product={e}
-                    setProduct={setP}
+                    isGray={index % 2 == 0}
                   />
                 </div>
               ))}
               <Paginate
-                items={Products}
-                itemsPerPage={2}
+                items={productFilter}
+                itemsPerPage={4}
                 setShow={setShow}
               ></Paginate>
             </div>

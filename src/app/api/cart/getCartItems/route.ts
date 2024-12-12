@@ -10,7 +10,7 @@ export async function GET(req : NextRequest, res : NextApiResponse){
         
         return NextResponse.json(data.rows)
     } catch (error) {
-        return NextResponse.error()
+        return NextResponse.json({message:'error'}, {status:401})
     }
     // console.log(data.rows)
 

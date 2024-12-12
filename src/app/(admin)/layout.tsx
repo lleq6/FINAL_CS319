@@ -19,7 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <h1>admin</h1>
         <Navbar>
         </Navbar>
-        <div className="mx-14">
+        <div className="mx-14 h-fit">
           {session.data?.user.role}
         {children}
         </div>
