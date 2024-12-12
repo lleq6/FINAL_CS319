@@ -1,16 +1,7 @@
-<<<<<<< HEAD
 const fs = require("fs");
 const pg = require("pg");
 const url = require("url");
 const { Pool } = require("pg");
-=======
-const fs = require('fs');
-const pg = require('pg');
-const url = require('url');
-import { UserAddress } from '@/app/model/AddressModel'
-import { UserInfo } from '@/app/model/UserInfo'
-const { Pool } = require('pg');
->>>>>>> 9e70c92086ccebe913b846ef454161a572cd2408
 require("dotenv").config();
 const config = {
   user: process.env.DB_USER,
@@ -28,7 +19,6 @@ const config = {
 const client = new Pool(config);
 
 module.exports = {
-<<<<<<< HEAD
   feathUsers: async () => {
     client.query(`SELECT * FROM User ORDER BY User_ID ASC`);
   },
@@ -39,17 +29,6 @@ module.exports = {
   fetchOneProduct: async (id) => {
     const data = await client.query(
       `
-=======
-    fetchUsers: async() => {
-        const data = await client.query(`SELECT * FROM public."User" ORDER BY "User_ID" ASC`)
-        return data.rows;
-    },
-    query: (text, params) => client.query(text, params),
-    test: () => client.query('SELECT * from User'),
-    fetchOneUser: (email) => client.query(`SELECT * FROM public."User" WHERE "Email" = $1`,[email]),
-    fetchOneProduct:async (id) => {
-        const data = await client.query(`
->>>>>>> 9e70c92086ccebe913b846ef454161a572cd2408
             SELECT 
                 p.*, 
                 c."Name" as C_NAME,
@@ -197,7 +176,6 @@ WHERE sc."Sub_Category_ID" = 2
             public."Category" p ON p."Category_ID" = s."Category_ID"
         WHERE
             s."Sub_Category_ID"=$1
-<<<<<<< HEAD
         `,
       [Sub_ID]
     ),
@@ -205,11 +183,6 @@ WHERE sc."Sub_Category_ID" = 2
   fetchChildCategoryDetail: async (Child_ID) =>
     await client.query(
       `
-=======
-        `,[Sub_ID]),
-    
-    fetchChildCategoryDetail : async (Child_ID ) => await client.query(`
->>>>>>> 9e70c92086ccebe913b846ef454161a572cd2408
         SELECT 
             cc.*,
             cc."Name" as cc_name,
@@ -246,7 +219,6 @@ WHERE sc."Sub_Category_ID" = 2
             public."Product" p ON p."Product_ID" IN (SELECT cd."Product_ID" WHERE cd."User_ID" = $1)
         WHERE
             cd."User_ID" = $1
-<<<<<<< HEAD
         `,
       [user_id]
     ),
@@ -263,13 +235,6 @@ WHERE sc."Sub_Category_ID" = 2
   addAddress: async (Address) =>
     await client.query(
       `
-=======
-        `,[user_id]),
-    removeItemFromCart : async (user_id , product_id) => await client.query(`DELETE FROM public."Cart_Detail" WHERE "User_ID"=$1 AND "Product_ID"=$2`,[user_id, product_id]),
-    
-    clearCart : async (User_ID) => client.query(`DELETE FROM public."Cart_Detail" WHERE "User_ID"=$1`,[User_ID]),
-    addAddress : async ( Address) => await client.query(`
->>>>>>> 9e70c92086ccebe913b846ef454161a572cd2408
         INSERT INTO public."Address" 
         ("User_ID", "Address_1", "Address_2", "District", "Province", "Zip_Code", "Is_Default", "Sub_District", "Phone") 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "Address_ID";`,
@@ -290,7 +255,6 @@ WHERE sc."Sub_Category_ID" = 2
       Address_ID,
     ]),
 
-<<<<<<< HEAD
   getUserAddress: async (User_ID) =>
     await client.query(`SELECT * FROM public."Address" WHERE "User_ID"=$1`, [
       User_ID,
@@ -305,24 +269,6 @@ WHERE sc."Sub_Category_ID" = 2
         values.push(address[key]);
         index++;
       }
-=======
-    getUserAddress : async (User_ID) => await client.query(`SELECT * FROM public."Address" WHERE "User_ID"=$1`,[User_ID]),
-    editUserAddress : async ( address) => {
-        const updates = [];
-        const values = [];
-        let index = 1;
-        for (const key in address) {
-            if (key !== 'Address_ID' && address[key] !== undefined) {
-                updates.push(`"${key}" = $${index}`);
-                values.push(address[key]);
-                index++;
-            }
-        }
-        values.push(address.Address_ID);
-        await client.query(`UPDATE public."Address"
-            SET ${updates.join(', ')}
-            WHERE "Address_ID" = $${index};`,values)
->>>>>>> 9e70c92086ccebe913b846ef454161a572cd2408
     }
     values.push(address.Address_ID);
     await client.query(
@@ -383,7 +329,6 @@ const a = async () => {
 // }]},]
 //     }
 // a()
-<<<<<<< HEAD
 const b = async () => {
   const categoryL = await client.query(`SELECT * FROM public."Category"`);
   const subList = await client.query(`SELECT * FROM public."Sub_Category"`);
@@ -412,18 +357,3 @@ const b = async () => {
 
 b();
 // fetchLogin({email: 'admin@gmail.com'})
-=======
-
-// fetchLogin({email: 'admin@gmail.com'})
-
-import { Pool } from 'pg';
-
-// Configure your database connection
-const pool = new Pool({
-    user: 'yourUsername',
-    host: 'localhost',
-    database: 'yourDatabase',
-    password: 'yourPassword',
-    port: 5432,
-});
->>>>>>> 9e70c92086ccebe913b846ef454161a572cd2408

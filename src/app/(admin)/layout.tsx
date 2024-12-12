@@ -23,7 +23,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Navbar>
         </Navbar>
         <div className="mx-14 h-fit">
-          {session.data?.user.role}
         {children}
         </div>
         <Footer/>
@@ -34,4 +33,4 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // if (session?.data?.user.role)
 
   
-  // }
+  }
