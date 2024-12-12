@@ -6,6 +6,7 @@ import { FaTrash, FaEdit } from "react-icons/fa";
 interface AdminProductProps {
   product: ProductInfo;
   setProduct: (product: ProductInfo) => void;
+  setProducts: (product: ProductInfo[]) => void;
   isGray: boolean;
 }
 const ImageWithCheck = ({ src, alt, height, width }) => {
@@ -31,6 +32,7 @@ export default function AdminProduct({
   product,
   setProduct,
   isGray,
+  setProducts,
 }: AdminProductProps) {
   return (
     <div className={`${isGray ? "bg-yellow-100" : ""} w-full`}>
@@ -93,7 +95,33 @@ export default function AdminProduct({
           <FaEdit />
           แก้ไข
         </button>
-        <button className="btn btn-sm text-md p-1 mx-2 px-2 w-20 hover:bg-red-300 hover:text-red-600">
+        <button
+          className="btn btn-sm text-md p-1 mx-2 px-2 w-20 hover:bg-red-300 hover:text-red-600"
+          onClick={async () => {
+            const status = confirm(`คุณต้องการจะลบสินค้า
+              \nรหัสสินค้า : ${product.Product_ID}
+              \nชื่อ : ${product.Name}`);
+            if (status) {
+              try {
+                const response = await fetch("/api/admin/deleteProduct",{
+                  method:'POST',
+                  body: JSON.stringify({
+                    Product_ID : product.Product_ID,
+                  })
+                });
+                if (!response.ok) {
+                  alert("การลบสินค้าผิดพลาด");
+                  throw new Error("error");
+                }
+
+                setProducts((products : ProductInfo[]) => products.filter(e => e.Product_ID != product.Product_ID))
+                alert("ลบสินค้าเรียบร้อย");
+              } catch (error) {
+                alert("การลบสินค้าผิดพลาด");
+              }
+            }
+          }}
+        >
           {" "}
           <FaTrash />
           ลบ

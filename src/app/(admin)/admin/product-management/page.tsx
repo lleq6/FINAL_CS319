@@ -39,7 +39,7 @@ function Paginate({ items, itemsPerPage, setShow }) {
         (_, index) => (
           <button
             key={index}
-            className={`join-item i2 btn ${index == 0 ? "bg-yellow-600" : ""}`}
+            className={`join-item i2 btn ${index == 0 ? "bg-yellow-600 i1" : ""}`}
             onClick={(e: MouseEvent<Element>) => {
               // console.log(index * itemsPerPage, (index + 1) * itemsPerPage);
               setShow(
@@ -131,6 +131,12 @@ export default function productManagement() {
 
   useEffect(() => {
     setShow(productFilter.slice(0, 4));
+    const k = document.querySelectorAll(".i2");
+    k.forEach((d) => d.classList.remove("bg-yellow-600"));
+    const k22 : HTMLElement = document.querySelector('.i1')
+    if (k22){
+      k22.classList.add("bg-yellow-600");
+    }
   }, [productFilter]);
 
   useEffect(() => {
@@ -195,6 +201,7 @@ export default function productManagement() {
 
   useEffect(() => {
     setFilter(Products);
+    
   }, [Products]);
 
   async function addNewItem() {
@@ -583,7 +590,13 @@ export default function productManagement() {
                   }
                 }}
               >
-                {curProduct.Product_ID == 'เพิ่มสินค้าใหม่'? 'เพิ่ม': 'บันทึก'}
+                {curProduct.Product_ID == 'เพิ่มสินค้าใหม่'? 
+                <>
+                
+                เพิ่ม
+                </>
+                :
+                'บันทึก'}
               </button>
             </div>
 
@@ -606,6 +619,7 @@ export default function productManagement() {
                     product={e}
                     setProduct={setP}
                     isGray={index % 2 == 0}
+                    setProducts={setProducts}
                   />
                 </div>
               ))}
