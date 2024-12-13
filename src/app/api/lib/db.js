@@ -1,7 +1,7 @@
-const fs = require("fs");
-const pg = require("pg");
-const url = require("url");
-const { Pool } = require("pg");
+const fs = require('fs');
+const pg = require('pg');
+const url = require('url');
+const { Pool } = require('pg');
 require("dotenv").config();
 const config = {
   user: process.env.DB_USER,
@@ -20,7 +20,7 @@ const client = new Pool(config);
 
 module.exports = {
     fetchUsers: async() => {
-        const data = await client.query(`SELECT * FROM public."User" ORDER BY "User_ID" ASC`)
+        const data = await client.query(`SELECT "User_ID", "Full_Name", "Email", "Phone", "Access_Level" FROM public."User" ORDER BY "User_ID" ASC`)
         return data.rows;
     },
     query: (text, params) => client.query(text, params),
@@ -273,6 +273,8 @@ WHERE sc."Sub_Category_ID" = 2
         await client.query(`UPDATE public."Address"
             SET ${updates.join(', ')}
             WHERE "Address_ID" = $${index};`,values)
+    },
+    deleteUser : async (User_ID) => {
+        await client.query(`DELETE FROM public."User" WHERE "User_ID" = ${User_ID};`)
     }
-
 };
