@@ -458,6 +458,31 @@ export default function userManagement() {
                 <button className="btn bg-yellow-500">บันทึก</button>
                 <button className="btn bg-red-500">ลบ</button>
               </div>
+              <div className="join my-4">
+                  {data.length > 7
+                    ? Array.from(
+                        { length: Math.ceil(data.length / 7) },
+                        (_, index) => (
+                          <button
+                            key={index}
+                            className={`join-item btn ${
+                              index == 0 ? "bg-yellow-600" : ""
+                            }`}
+                            onClick={(e: MouseEvent<Element>) => {
+                              setPage([index * 7, (index + 1) * 7 - 1]);
+                              const k = document.querySelectorAll(".join-item");
+                              k.forEach((d) =>
+                                d.classList.remove("bg-yellow-600")
+                              );
+                              e.target.classList.add("bg-yellow-600");
+                            }}
+                          >
+                            {index + 1}
+                          </button>
+                        )
+                      )
+                    : ""}
+                </div>
               <div className="overflow-x-auto">
                 <table className="table table-zebra">
                   <thead>

@@ -30,10 +30,10 @@ export default function AdminProductSidebar({ Products, setProducts , isGray}: P
   }
   return (
     <div className="bg-gray-300 w-full">
-      <div className="sticky top-0">
+      <div className="sticky top-0 z-0">
         <label className="form-control w-full max-w-xs mx-1">
           <div className="label">
-            <span className="label-text">ค้นหาโดย</span>
+            <span className="label-text -z-10">ค้นหาโดย</span>
           </div>
           <select
             value={selectSearch}
