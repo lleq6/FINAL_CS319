@@ -312,7 +312,6 @@ export default function productManagement() {
       setProducts(newObj);
       setFilter(newObj);
       setCurProduct(emptyProduct);
-      // alert("แก้ไขข้อมูลสำเร็จ");
       showAlert({
         header:'แจ้งเตือน',
         message:'แก้ไขข้อมูลสินค้า',

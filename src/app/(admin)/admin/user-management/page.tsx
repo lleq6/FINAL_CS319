@@ -13,10 +13,13 @@ import {
   AdminDeleteUser,
   AdminDeleteSuccess,
 } from "../../../components/admin-components/AdminDeleteUser";
-import React, { useEffect, useState } from "react";
+import { FaTrashAlt } from "react-icons/fa";
+// import React, { useEffect, useState } from "react";
 
 interface UserTable {
   user: UserInfo;
+  selectUser: (user: string) => void;
+  setDeleteUser: (user: string) => void;
 }
 const user: UserInfo = {
   UID: "U00001",
@@ -37,11 +40,9 @@ function paginate(items, itemsPerPage, pageNumber) {
   return items.slice(startIndex, endIndex);
 }
 
-export default function userManagement() {
-  const [page, setPage] = useState([0, 6]);
-
-  function AdminUserTable(props: UserTable) {
-    return (
+function AdminUserTable(props: UserTable) {
+  return (
+    <>
       <tr>
         <td>{props.user.User_ID}</td>
         <td>{props.user.First_Name}</td>
@@ -49,19 +50,37 @@ export default function userManagement() {
         <td>{props.user.Email}</td>
         <td>{props.user.Phone}</td>
         <td>{props.user.Access_Level}</td>
-        <td>
+        <td width={100}>
           <button
             className="btn bg-yellow-500"
             onClick={() => {
-              selectUser(props.user);
+              props.selectUser(props.user);
             }}
           >
             แก้ไข
           </button>
         </td>
+        <td width={100}>
+          <button
+            className="btn bg-red-500 px-3"
+            onClick={() => {
+              props.setDeleteUser(props.user.User_ID);
+              document
+                .querySelector(`#deleteUser`)
+                .show();
+            }}
+          ><FaTrashAlt/>
+            ลบ
+          </button>
+        </td>
       </tr>
-    );
-  }
+    </>
+  );
+}
+
+export default function userManagement() {
+  const [page, setPage] = useState([0, 6]);
+
   function handleChange(e: React.FormEvent<HTMLInputElement>) {
     const { name, value } = e.currentTarget;
     setCurUser({
@@ -89,7 +108,7 @@ export default function userManagement() {
     );
   }
 
-  const [btnDelete, setBtnDelete] = useState(false);
+  const [btnDelete, setBtnDelete] = useState(0);
 
   useEffect(() => {
     fetchUsersData();
@@ -182,6 +201,7 @@ export default function userManagement() {
 
   const [data, setData] = useState([]);
   const [dataAddr, setAddrData] = useState([]);
+
   useEffect(() => {
     fetchUsersData();
   }, []);
@@ -197,16 +217,8 @@ export default function userManagement() {
         <h1>จัดการคลังสินค้า</h1>
       </div>
       <div className="grid grid-cols-7 pl-5 pr-5">
-        <dialog id="deleteUser" className="modal">
-          <AdminDeleteUser
-            User_ID={curUser.User_ID}
-            btnDelete={btnDelete}
-            setState={setBtnDelete}
-          />
-        </dialog>
-        <dialog id="deleteSuccess" className="modal">
-          <AdminDeleteSuccess />
-        </dialog>
+        <AdminDeleteUser User_ID={btnDelete} setDeleteUser={setBtnDelete}/>
+        <AdminDeleteSuccess />
         <AdminUserSidebar />
         <div className="col-span-5 m-2">
           <div>
@@ -239,6 +251,7 @@ export default function userManagement() {
                       className="input input-bordered w-11/12"
                       value={curUser.First_Name}
                       onChange={handleChange}
+                      name="First_Name"
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -295,15 +308,6 @@ export default function userManagement() {
                 </div>
                 <button className="btn bg-green-500">เพิ่ม</button>
                 <button className="btn bg-yellow-500">บันทึก</button>
-                <button
-                  className="btn bg-red-500"
-                  disabled={!btnDelete}
-                  onClick={() => {
-                    document?.getElementById("deleteUser").showModal();
-                  }}
-                >
-                  ลบ
-                </button>
               </div>
               <div className="">
                 <label className="form-control w-full max-w-xs mx-1">
@@ -316,9 +320,9 @@ export default function userManagement() {
                     className="select select-bordered"
                     onChange={handleAddrChange}
                   >
-                    {dataAddr.map((x: AddressInfo) => {
+                    {dataAddr.map((x: AddressInfo, Index) => {
                       return (
-                        <option value={x.Address_ID}>
+                        <option value={x.Address_ID} key={Index}>
                           ที่อยู่ - {++Index}
                         </option>
                       );
@@ -425,7 +429,14 @@ export default function userManagement() {
                   </thead>
                   <tbody>
                     {data.slice(page[0], page[1]).map((e: UserInfo) => {
-                      return <AdminUserTable key={e.User_ID} user={e} />;
+                      return (
+                        <AdminUserTable
+                          key={e.User_ID}
+                          user={e}
+                          selectUser={selectUser}
+                          setDeleteUser={setBtnDelete}
+                        />
+                      );
                     })}
                   </tbody>
                 </table>

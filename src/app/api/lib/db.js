@@ -20,7 +20,7 @@ const client = new Pool(config);
 
 module.exports = {
     fetchUsers: async() => {
-        const data = await client.query(`SELECT "User_ID", "Full_Name", "Email", "Phone", "Access_Level" FROM public."User" ORDER BY "User_ID" ASC`)
+        const data = await client.query(`SELECT "User_ID", "First_Name","Last_Name", "Email", "Phone", "Access_Level" FROM public."User" ORDER BY "User_ID" ASC`)
         return data.rows;
     },
     query: (text, params) => client.query(text, params),

@@ -1,4 +1,4 @@
-export function AdminDeleteUser({ User_ID, btnDelete, setState }: any) {
+export function AdminDeleteUser({ User_ID, setDeleteUser }: any) {
   async function OnDeleteUser(User_ID: string) {
     try {
       const response = await fetch(`/api/admin/deleteUser`, {
@@ -12,13 +12,14 @@ export function AdminDeleteUser({ User_ID, btnDelete, setState }: any) {
       if (data == 200) {
         document?.getElementById("deleteUser").close();
         document?.getElementById("deleteSuccess").showModal();
-        setState((btnDelete = false));
+        setDeleteUser(0)
       }
     } catch (ex) {
       console.error(ex);
     }
-  }
+  }  
   return (
+    <dialog id='deleteUser' className="modal bg-[#0006]">
     <div className="modal-box">
       <h3 className="font-bold text-lg">ลบบัญชีผู้ใช้งาน</h3>
       <form method="dialog">
@@ -41,16 +42,19 @@ export function AdminDeleteUser({ User_ID, btnDelete, setState }: any) {
         className="btn bg-red-500"
         onClick={() => {
           document?.getElementById("deleteUser").close();
+
         }}
       >
         ยกเลิก
       </button>
     </div>
+    </dialog>
   );
 }
 
 export function AdminDeleteSuccess() {
   return (
+    <dialog id="deleteSuccess" className="modal">
     <div className="modal-box">
       <h3 className="font-bold text-lg">ลบบัญชีผู้ใช้งาน</h3>
       <form method="dialog">
@@ -70,5 +74,6 @@ export function AdminDeleteSuccess() {
         ปิด
       </button>
     </div>
+    </dialog>
   );
 }
