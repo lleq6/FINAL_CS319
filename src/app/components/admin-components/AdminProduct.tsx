@@ -3,6 +3,7 @@ import { ProductInfo } from "@/app/model/Product";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
+import { MdErrorOutline } from "react-icons/md";
 interface AdminProductProps {
   product: ProductInfo;
   setProduct: (product: ProductInfo) => void;
@@ -27,6 +28,7 @@ const ImageWithCheck = ({ src, alt, height, width }) => {
     </div>
   );
 };
+
 function checkProduct(product: ProductInfo) {}
 export default function AdminProduct({
   product,
@@ -36,6 +38,61 @@ export default function AdminProduct({
 }: AdminProductProps) {
   return (
     <div className={`${isGray ? "bg-yellow-100" : ""} w-full`}>
+      {/* dialog */}
+      <dialog id={`deleteModal${product.Product_ID}`} className="modal">
+        <div className="modal-box">
+          <div className="flex">
+            <MdErrorOutline className="text-red-800 my-auto mr-3 text-[2rem] -p-2" />
+            <h3 className="font-bold text-lg">แจ้งเตือนสำคัญ!</h3>
+          </div>
+          <p className="py-4">
+            คุณต้องการที่จะลบสินค้ารหัส : {product.Product_ID} ใช่หรือไม่?
+          </p>
+          <div className="modal-action">
+            <form method="dialog">
+              {/* if there is a button in form, it will close the modal */}
+              <button
+                className="btn"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  try {
+                    const response = await fetch("/api/admin/deleteProduct", {
+                      method: "POST",
+                      body: JSON.stringify({
+                        Product_ID: product.Product_ID,
+                      }),
+                    });
+                    if (!response.ok) {
+                      alert("การลบสินค้าผิดพลาด");
+                      throw new Error("error");
+                    }
+
+                    setProducts((products: ProductInfo[]) =>
+                      products.filter((e) => e.Product_ID != product.Product_ID)
+                    );
+                    alert("ลบสินค้าเรียบร้อย");
+                  } catch (error) {
+                    alert("การลบสินค้าผิดพลาด");
+                  }
+                }}
+              >
+                ลบ
+              </button>
+              <button
+                className="btn"
+                onClick={() =>
+                  document
+                    .getElementById(`deleteModal${product.Product_ID}`)
+                    .close()
+                }
+              >
+                ยกเลิก
+              </button>
+            </form>
+          </div>
+        </div>
+      </dialog>
+
       <div className="mx-2 pt-2 grid grid-cols-[2fr_1fr_4fr_2fr_2fr_1fr_1fr] divide-x-2 text-center">
         <div
           className=" text-center content-center w-[150px] h-[150px]"
@@ -98,28 +155,9 @@ export default function AdminProduct({
         <button
           className="btn btn-sm text-md p-1 mx-2 px-2 w-20 hover:bg-red-300 hover:text-red-600"
           onClick={async () => {
-            const status = confirm(`คุณต้องการจะลบสินค้า
-              \nรหัสสินค้า : ${product.Product_ID}
-              \nชื่อ : ${product.Name}`);
-            if (status) {
-              try {
-                const response = await fetch("/api/admin/deleteProduct",{
-                  method:'POST',
-                  body: JSON.stringify({
-                    Product_ID : product.Product_ID,
-                  })
-                });
-                if (!response.ok) {
-                  alert("การลบสินค้าผิดพลาด");
-                  throw new Error("error");
-                }
-
-                setProducts((products : ProductInfo[]) => products.filter(e => e.Product_ID != product.Product_ID))
-                alert("ลบสินค้าเรียบร้อย");
-              } catch (error) {
-                alert("การลบสินค้าผิดพลาด");
-              }
-            }
+            document
+              .getElementById(`deleteModal${product.Product_ID}`)
+              .showModal();
           }}
         >
           {" "}
