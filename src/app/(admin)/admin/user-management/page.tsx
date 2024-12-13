@@ -2,6 +2,10 @@
 import AdminUserSidebar from "@/app/components/admin-components/AdminUserSidebar";
 import UserInfo from "@/app/model/UserInfo";
 import AddressInfo from "@/app/model/AddressModel";
+import {
+  AdminDeleteUser,
+  AdminDeleteSuccess,
+} from "../../../components/admin-components/AdminDeleteUser";
 import React, { useEffect, useState } from "react";
 
 interface UserTable {
@@ -10,19 +14,18 @@ interface UserTable {
 
 export default function userManagement() {
   function AdminUserTable(props: UserTable) {
-    const nameParts = props.user.Full_Name.split(" ");
     return (
       <tr>
         <td>{props.user.User_ID}</td>
-        <td>{nameParts[0]}</td>
-        <td>{nameParts[1]}</td>
+        <td>{props.user.First_Name}</td>
+        <td>{props.user.Last_Name}</td>
         <td>{props.user.Email}</td>
         <td>{props.user.Phone}</td>
         <td>{props.user.Access_Level}</td>
         <td>
           <button
             className="btn bg-yellow-500"
-            onClick={(e) => {
+            onClick={() => {
               selectUser(props.user);
             }}
           >
@@ -43,7 +46,7 @@ export default function userManagement() {
 
   function handleAddrChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const value = e.target.value;
-    const selected = dataAddr.find((x:AddressInfo) => x.Address_ID == value);
+    const selected = dataAddr.find((x: AddressInfo) => x.Address_ID == value);
     setCurUserAddress(
       selected || {
         Address_ID: "",
@@ -60,9 +63,26 @@ export default function userManagement() {
     );
   }
 
+  const [btnDelete, setBtnDelete] = useState(false);
+
+  useEffect(() => {
+    fetchUsersData();
+    if (!btnDelete) {
+      setCurUser({
+        User_ID: "",
+        First_Name: "",
+        Last_Name: "",
+        Email: "",
+        Phone: "",
+        Access_Level: "",
+      });
+    }
+  }, [btnDelete]);
+
   const [curUser, setCurUser] = useState({
     User_ID: "",
-    Full_Name: "",
+    First_Name: "",
+    Last_Name: "",
     Email: "",
     Phone: "",
     Access_Level: "",
@@ -85,53 +105,59 @@ export default function userManagement() {
     Phone: "",
   });
 
-  function selectUser(user: UserInfo) {
-    setCurUser(user);
-    setCurUserAddress({
-      Address_ID: "",
-      User_ID: "",
-      Address_1: "",
-      Address_2: "",
-      District: "",
-      Province: "",
-      Zip_Code: "",
-      Is_Default: false,
-      Sub_District: "",
-      Phone: "",
-    });
-    async function fetchData() {
-      try {
-        const response = await fetch(`/api/user/getAddressByUserID`, {
-          method: "POST",
-          body: JSON.stringify({
-            UserID: user.User_ID,
-          }),
-        });
-        if (!response.ok) throw new Error("ERROR");
-        const data = await response.json();
-        console.log(data);
-        setAddrData(data);
-      } catch (ex) {
-        console.error(ex);
-      }
+  async function fetchUserAddressData(User_ID: string) {
+    try {
+      const response = await fetch(`/api/user/getAddressByUserID`, {
+        method: "POST",
+        body: JSON.stringify({
+          UserID: User_ID,
+        }),
+      });
+      if (!response.ok) throw new Error("ERROR");
+      const data = await response.json();
+      setAddrData(data);
+    } catch (ex) {
+      console.error(ex);
     }
-    fetchData();
+  }
+
+  function selectUser(user: UserInfo) {
+    setBtnDelete(true);
+    setCurUser(user);
+    fetchUserAddressData(user.User_ID);
+    if (dataAddr.length == 0) {
+      setCurUserAddress({
+        Address_ID: "",
+        User_ID: "",
+        Address_1: "",
+        Address_2: "",
+        District: "",
+        Province: "",
+        Zip_Code: "",
+        Is_Default: false,
+        Sub_District: "",
+        Phone: "",
+      });
+    } else {
+      setCurUserAddress(dataAddr[0]);
+    }
+  }
+
+  async function fetchUsersData() {
+    try {
+      const response = await fetch(`/api/user/GetUsers`);
+      if (!response.ok) throw new Error("ERROR");
+      const data = await response.json();
+      setData(data);
+    } catch (ex) {
+      console.error(ex);
+    }
   }
 
   const [data, setData] = useState([]);
   const [dataAddr, setAddrData] = useState([]);
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await fetch(`/api/user/GetUsers`);
-        if (!response.ok) throw new Error("ERROR");
-        const data = await response.json();
-        setData(data);
-      } catch (ex) {
-        console.error(ex);
-      }
-    }
-    fetchData();
+    fetchUsersData();
   }, []);
   let Index = 0;
   return (
@@ -145,10 +171,20 @@ export default function userManagement() {
         <h1>จัดการคลังสินค้า</h1>
       </div>
       <div className="grid grid-cols-7 pl-5 pr-5">
+        <dialog id="deleteUser" className="modal">
+          <AdminDeleteUser
+            User_ID={curUser.User_ID}
+            btnDelete={btnDelete}
+            setState={setBtnDelete}
+          />
+        </dialog>
+        <dialog id="deleteSuccess" className="modal">
+          <AdminDeleteSuccess />
+        </dialog>
         <AdminUserSidebar />
         <div className="col-span-5 m-2">
           <div>
-            <h1>รายละเอียดสินค้า</h1>
+            <h1>รายละเอียดบัญชีผู้ใช้งาน</h1>
             <div>
               <div className="">
                 <label className="form-control w-full max-w-xs mx-1">
@@ -157,9 +193,10 @@ export default function userManagement() {
                   </div>
                   <input
                     type="text"
-                    placeholder="Type here"
+                    placeholder="Please choose first"
                     className="input input-bordered w-11/12"
                     name="Name"
+                    readOnly={true}
                     value={curUser.User_ID}
                     onChange={handleChange}
                   />
@@ -173,7 +210,8 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.Full_Name.split(" ")[0]}
+                      value={curUser.First_Name}
+                      onChange={handleChange}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -184,7 +222,8 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
-                      value={curUser.Full_Name.split(" ")[1]}
+                      value={curUser.Last_Name}
+                      onChange={handleChange}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -196,6 +235,7 @@ export default function userManagement() {
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
                       value={curUser.Email}
+                      onChange={handleChange}
                     />
                   </label>
                 </div>
@@ -209,6 +249,7 @@ export default function userManagement() {
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
                       value={curUser.Phone}
+                      onChange={handleChange}
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -220,13 +261,22 @@ export default function userManagement() {
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
                       value={curUser.Access_Level}
+                      onChange={handleChange}
                     />
                   </label>
                   <button className="btn self-end">เปลี่ยนรหัสผ่าน</button>
                 </div>
                 <button className="btn bg-green-500">เพิ่ม</button>
                 <button className="btn bg-yellow-500">บันทึก</button>
-                <button className="btn bg-red-500">ลบ</button>
+                <button
+                  className="btn bg-red-500"
+                  disabled={!btnDelete}
+                  onClick={() => {
+                    document?.getElementById("deleteUser").showModal();
+                  }}
+                >
+                  ลบ
+                </button>
               </div>
               <div className="">
                 <label className="form-control w-full max-w-xs mx-1">
