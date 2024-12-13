@@ -3,6 +3,10 @@ import AdminUserSidebar from "@/app/components/admin-components/AdminUserSidebar
 import UserInfo from "@/app/model/UserInfo";
 import AddressInfo from "@/app/model/AddressModel";
 import {
+  AdminSaveUser,
+  AdminSaveSuccess,
+} from "../../../components/admin-components/AdminUpdateUser";
+import {
   AdminDeleteUser,
   AdminDeleteSuccess,
 } from "../../../components/admin-components/AdminDeleteUser";
@@ -10,42 +14,45 @@ import React, { useEffect, useState } from "react";
 
 interface UserTable {
   user: UserInfo;
+  selectUser: (user: UserInfo) => void;
+}
+
+function AdminUserTable(props: UserTable) {
+  return (
+    <tr>
+      <td>{props.user.User_ID}</td>
+      <td>{props.user.First_Name}</td>
+      <td>{props.user.Last_Name}</td>
+      <td>{props.user.Email}</td>
+      <td>{props.user.Phone}</td>
+      <td>{props.user.Access_Level}</td>
+      <td>
+        <button
+          className="btn bg-yellow-500"
+          onClick={() => {
+            props.selectUser(props.user);
+          }}
+        >
+          แก้ไข
+        </button>
+      </td>
+    </tr>
+  );
 }
 
 export default function userManagement() {
-  function AdminUserTable(props: UserTable) {
-    return (
-      <tr>
-        <td>{props.user.User_ID}</td>
-        <td>{props.user.First_Name}</td>
-        <td>{props.user.Last_Name}</td>
-        <td>{props.user.Email}</td>
-        <td>{props.user.Phone}</td>
-        <td>{props.user.Access_Level}</td>
-        <td>
-          <button
-            className="btn bg-yellow-500"
-            onClick={() => {
-              selectUser(props.user);
-            }}
-          >
-            แก้ไข
-          </button>
-        </td>
-      </tr>
-    );
-  }
-
   function handleChange(e: React.FormEvent<HTMLInputElement>) {
     const { name, value } = e.currentTarget;
     setCurUser({
       ...curUser,
       [name]: value,
     });
+    setBtnSave(true);
   }
 
   function handleAddrChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const value = e.target.value;
+    console.log(value);
     const selected = dataAddr.find((x: AddressInfo) => x.Address_ID == value);
     setCurUserAddress(
       selected || {
@@ -64,6 +71,7 @@ export default function userManagement() {
   }
 
   const [btnDelete, setBtnDelete] = useState(false);
+  const [btnSave, setBtnSave] = useState(false);
 
   useEffect(() => {
     fetchUsersData();
@@ -76,10 +84,27 @@ export default function userManagement() {
         Phone: "",
         Access_Level: "",
       });
+      setCurUserAddress({
+        Address_ID: "",
+        User_ID: "",
+        Address_1: "",
+        Address_2: "",
+        District: "",
+        Province: "",
+        Zip_Code: "",
+        Is_Default: false,
+        Sub_District: "",
+        Phone: "",
+      });
+      setAddrData([]);
     }
   }, [btnDelete]);
 
-  const [curUser, setCurUser] = useState({
+  useEffect(() => {
+    fetchUsersData();
+  }, [btnSave]);
+
+  const [curUser, setCurUser] = useState<UserInfo>({
     User_ID: "",
     First_Name: "",
     Last_Name: "",
@@ -87,10 +112,6 @@ export default function userManagement() {
     Phone: "",
     Access_Level: "",
   });
-
-  useEffect(() => {
-    if (dataAddr) setAddrData([]);
-  }, [curUser]);
 
   const [curUserAddr, setCurUserAddress] = useState<AddressInfo>({
     Address_ID: "",
@@ -116,6 +137,15 @@ export default function userManagement() {
       if (!response.ok) throw new Error("ERROR");
       const data = await response.json();
       setAddrData(data);
+      if (data.length > 0) {
+        const address: AddressInfo = data[0]
+        setCurUserAddress(address);
+        const opt = document?.querySelector(`#addrlist option[value="${address.Address_ID}"]`);
+        if (opt) {
+          opt.selected = true;
+          opt.defaultSelected = true;
+        }
+      }
     } catch (ex) {
       console.error(ex);
     }
@@ -124,23 +154,19 @@ export default function userManagement() {
   function selectUser(user: UserInfo) {
     setBtnDelete(true);
     setCurUser(user);
+    setCurUserAddress({
+      Address_ID: "",
+      User_ID: "",
+      Address_1: "",
+      Address_2: "",
+      District: "",
+      Province: "",
+      Zip_Code: "",
+      Is_Default: false,
+      Sub_District: "",
+      Phone: "",
+    });
     fetchUserAddressData(user.User_ID);
-    if (dataAddr.length == 0) {
-      setCurUserAddress({
-        Address_ID: "",
-        User_ID: "",
-        Address_1: "",
-        Address_2: "",
-        District: "",
-        Province: "",
-        Zip_Code: "",
-        Is_Default: false,
-        Sub_District: "",
-        Phone: "",
-      });
-    } else {
-      setCurUserAddress(dataAddr[0]);
-    }
   }
 
   async function fetchUsersData() {
@@ -171,6 +197,16 @@ export default function userManagement() {
         <h1>จัดการคลังสินค้า</h1>
       </div>
       <div className="grid grid-cols-7 pl-5 pr-5">
+        <dialog id="saveUser" className="modal">
+          <AdminSaveUser
+            UserData={curUser}
+            btnSave={btnSave}
+            setState={setBtnSave}
+          />
+        </dialog>
+        <dialog id="saveSuccess" className="modal">
+          <AdminSaveSuccess />
+        </dialog>
         <dialog id="deleteUser" className="modal">
           <AdminDeleteUser
             User_ID={curUser.User_ID}
@@ -195,9 +231,9 @@ export default function userManagement() {
                     type="text"
                     placeholder="Please choose first"
                     className="input input-bordered w-11/12"
-                    name="Name"
-                    readOnly={true}
+                    name="User_ID"
                     value={curUser.User_ID}
+                    readOnly={true}
                     onChange={handleChange}
                   />
                 </label>
@@ -210,6 +246,7 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
+                      name="First_Name"
                       value={curUser.First_Name}
                       onChange={handleChange}
                     />
@@ -222,6 +259,7 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
+                      name="Last_Name"
                       value={curUser.Last_Name}
                       onChange={handleChange}
                     />
@@ -234,6 +272,7 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
+                      name="Email"
                       value={curUser.Email}
                       onChange={handleChange}
                     />
@@ -248,6 +287,7 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
+                      name="Phone"
                       value={curUser.Phone}
                       onChange={handleChange}
                     />
@@ -260,6 +300,7 @@ export default function userManagement() {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-11/12"
+                      name="Access_Level"
                       value={curUser.Access_Level}
                       onChange={handleChange}
                     />
@@ -267,7 +308,15 @@ export default function userManagement() {
                   <button className="btn self-end">เปลี่ยนรหัสผ่าน</button>
                 </div>
                 <button className="btn bg-green-500">เพิ่ม</button>
-                <button className="btn bg-yellow-500">บันทึก</button>
+                <button
+                  className="btn bg-yellow-500"
+                  disabled={!btnSave}
+                  onClick={() => {
+                    document?.getElementById("saveUser").showModal();
+                  }}
+                >
+                  บันทึก
+                </button>
                 <button
                   className="btn bg-red-500"
                   disabled={!btnDelete}
@@ -398,7 +447,9 @@ export default function userManagement() {
                   </thead>
                   <tbody>
                     {data.map((user: UserInfo) => {
-                      return <AdminUserTable user={user} />;
+                      return (
+                        <AdminUserTable user={user} selectUser={selectUser} />
+                      );
                     })}
                   </tbody>
                 </table>
