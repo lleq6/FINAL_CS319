@@ -234,11 +234,6 @@ export default function userManagement() {
   // let Index = 0;
   return (
     <div className="">
-      <style jsx>
-        {`
-          @import url("https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap");
-        `}
-      </style>
       <div className="pl-5">
         <h1>จัดการคลังสินค้า</h1>
       </div>
@@ -348,7 +343,15 @@ export default function userManagement() {
                   <button className="btn self-end">เปลี่ยนรหัสผ่าน</button>
                 </div>
                 <button className="btn bg-green-500">เพิ่ม</button>
-                <button className="btn bg-yellow-500">บันทึก</button>
+                <button
+                  className="btn bg-yellow-500"
+                  disabled={!btnSave}
+                  onClick={() => {
+                    document?.getElementById("saveUser").showModal();
+                  }}
+                >
+                  บันทึก
+                </button>
               </div>
               <div className="">
                 <label className="form-control w-full max-w-xs mx-1">
