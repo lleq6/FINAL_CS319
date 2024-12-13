@@ -69,11 +69,10 @@ function AdminUserTable(props: UserTable) {
             className="btn bg-red-500 px-3"
             onClick={() => {
               props.setDeleteUser(props.user.User_ID);
-              document
-                .querySelector(`#deleteUser`)
-                .show();
+              document.querySelector(`#deleteUser`).show();
             }}
-          ><FaTrashAlt/>
+          >
+            <FaTrashAlt />
             ลบ
           </button>
         </td>
@@ -182,9 +181,11 @@ export default function userManagement() {
       const data = await response.json();
       setAddrData(data);
       if (data.length > 0) {
-        const address: AddressInfo = data[0]
+        const address: AddressInfo = data[0];
         setCurUserAddress(address);
-        const opt = document?.querySelector(`#addrlist option[value="${address.Address_ID}"]`);
+        const opt = document?.querySelector(
+          `#addrlist option[value="${address.Address_ID}"]`
+        );
         if (opt) {
           opt.selected = true;
           opt.defaultSelected = true;
@@ -242,7 +243,7 @@ export default function userManagement() {
         <h1>จัดการคลังสินค้า</h1>
       </div>
       <div className="grid grid-cols-7 pl-5 pr-5">
-        <AdminDeleteUser User_ID={btnDelete} setDeleteUser={setBtnDelete}/>
+        <AdminDeleteUser User_ID={btnDelete} setDeleteUser={setBtnDelete} />
         <AdminDeleteSuccess />
         <dialog id="saveUser" className="modal">
           <AdminSaveUser

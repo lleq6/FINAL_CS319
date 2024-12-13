@@ -19,15 +19,19 @@ const config = {
 const client = new Pool(config);
 
 module.exports = {
-    fetchUsers: async() => {
-        const data = await client.query(`SELECT "User_ID", "First_Name","Last_Name", "Email", "Phone", "Access_Level" FROM public."User" ORDER BY "User_ID" ASC`)
-        return data.rows;
-    },
-    query: (text, params) => client.query(text, params),
-    test: () => client.query('SELECT * from User'),
-    fetchOneUser: (email) => client.query(`SELECT * FROM public."User" WHERE "Email" = $1`,[email]),
-    fetchOneProduct:async (id) => {
-        const data = await client.query(`
+  fetchUsers: async () => {
+    const data = await client.query(
+      `SELECT "User_ID", "First_Name","Last_Name", "Email", "Phone", "Access_Level" FROM public."User" ORDER BY "User_ID" ASC`
+    );
+    return data.rows;
+  },
+  query: (text, params) => client.query(text, params),
+  test: () => client.query("SELECT * from User"),
+  fetchOneUser: (email) =>
+    client.query(`SELECT * FROM public."User" WHERE "Email" = $1`, [email]),
+  fetchOneProduct: async (id) => {
+    const data = await client.query(
+      `
             SELECT 
                 p.*, 
                 c."Name" as C_NAME,
