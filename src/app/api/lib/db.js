@@ -1,7 +1,7 @@
-const fs = require('fs');
-const pg = require('pg');
-const url = require('url');
-const { Pool } = require('pg');
+const fs = require("fs");
+const pg = require("pg");
+const url = require("url");
+const { Pool } = require("pg");
 require("dotenv").config();
 const config = {
   user: process.env.DB_USER,
@@ -254,27 +254,54 @@ WHERE sc."Sub_Category_ID" = 2
       Address_ID,
     ]),
 
-    getUserAddress : async (User_ID) => {
-        const data = await client.query(`SELECT * FROM public."Address" WHERE "User_ID"=$1 ORDER BY "Address_ID" ASC`,[User_ID])
-        return data.rows;
-    },
-    editUserAddress : async ( address) => {
-        const updates = [];
-        const values = [];
-        let index = 1;
-        for (const key in address) {
-            if (key !== 'Address_ID' && address[key] !== undefined) {
-                updates.push(`"${key}" = $${index}`);
-                values.push(address[key]);
-                index++;
-            }
-        }
-        values.push(address.Address_ID);
-        await client.query(`UPDATE public."Address"
-            SET ${updates.join(', ')}
-            WHERE "Address_ID" = $${index};`,values)
-    },
-    deleteUser : async (User_ID) => {
-        await client.query(`DELETE FROM public."User" WHERE "User_ID" = ${User_ID};`)
+  getUserAddress: async (User_ID) => {
+    const data = await client.query(
+      `SELECT * FROM public."Address" WHERE "User_ID"=$1 ORDER BY "Address_ID" ASC`,
+      [User_ID]
+    );
+    return data.rows;
+  },
+  editUserAddress: async (address) => {
+    const updates = [];
+    const values = [];
+    let index = 1;
+    for (const key in address) {
+      if (key !== "Address_ID" && address[key] !== undefined) {
+        updates.push(`"${key}" = $${index}`);
+        values.push(address[key]);
+        index++;
+      }
     }
+    values.push(address.Address_ID);
+    await client.query(
+      `UPDATE public."Address"
+            SET ${updates.join(", ")}
+            WHERE "Address_ID" = $${index};`,
+      values
+    );
+  },
+  deleteUser: async (User_ID) => {
+    await client.query(
+      `DELETE FROM public."User" WHERE "User_ID" = ${User_ID};`
+    );
+  },
+  updateUser: async (user) => {
+    const columns = [];
+    const values = [];
+    let index = 1;
+    for (const key in user) {
+      if (key !== "User_ID" && user[key] !== undefined) {
+        columns.push(`"${key}" = $${index}`);
+        values.push(user[key]);
+        index++;
+      }
+    }
+    values.push(user.User_ID);
+    await client.query(
+      `UPDATE public."User"
+            SET ${columns.join(", ")}
+            WHERE "User_ID" = $${index};`,
+      values
+    );
+  },
 };
