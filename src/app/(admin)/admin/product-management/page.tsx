@@ -7,7 +7,14 @@ import { ProductInfo } from "@/app/model/Product";
 import { error } from "console";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { MdErrorOutline } from "react-icons/md";
+import { FaInfoCircle } from "react-icons/fa";
 
+interface alertModalProps {
+  header: string;
+  message: string;
+  errorStatus: number;
+}
 // Create an empty data variable
 const emptyProduct: ProductInfo = {
   Product_ID: "",
@@ -29,7 +36,6 @@ const emptyProduct: ProductInfo = {
   s_name: "",
   cc_name: "",
 };
-
 function Paginate({ items, itemsPerPage, setShow }) {
   // console.log(items.slice(index * itemsPerPage, (index + 1) * itemsPerPage))
   return (
@@ -39,7 +45,9 @@ function Paginate({ items, itemsPerPage, setShow }) {
         (_, index) => (
           <button
             key={index}
-            className={`join-item i2 btn ${index == 0 ? "bg-yellow-600 i1" : ""}`}
+            className={`join-item i2 btn ${
+              index == 0 ? "bg-yellow-600 i1" : ""
+            }`}
             onClick={(e: MouseEvent<Element>) => {
               // console.log(index * itemsPerPage, (index + 1) * itemsPerPage);
               setShow(
@@ -86,6 +94,31 @@ function test(p) {
   child.value = p.Child_ID;
 }
 
+function AlertModal({ props }: alertModalProps) {
+  console.log(props, "alertprops");
+
+  return (
+    <dialog id="alertModal" className="modal">
+      <div className="modal-box">
+        <div className="flex">
+          {props.errorStatus ? (
+            <MdErrorOutline className="text-red-800 my-auto mr-3 text-[2rem] -p-2" />
+          ) : (
+            <FaInfoCircle className="text-blue-700 my-auto mr-3 text-[2rem] -p-2" />
+          )}
+          <h3 className="font-bold text-lg">{props.header}</h3>
+        </div>
+        <div className="py-4">{props.message}</div>
+        <div className="modal-action">
+          <form method="dialog">
+            <button className="btn">Close</button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+  );
+}
+
 export default function productManagement() {
   const [curProduct, setCurProduct] = useState<ProductInfo>(emptyProduct);
   const [productFilter, setFilter] = useState<ProductInfo[]>([]);
@@ -98,6 +131,10 @@ export default function productManagement() {
   const [curImage, setCurImage] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [curFileImg, setCurFile] = useState<File>();
+  const [alertProps, setAlertProps] = useState<alertModalProps>({
+    message: <></>,
+    header: "",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -133,8 +170,8 @@ export default function productManagement() {
     setShow(productFilter.slice(0, 4));
     const k = document.querySelectorAll(".i2");
     k.forEach((d) => d.classList.remove("bg-yellow-600"));
-    const k22 : HTMLElement = document.querySelector('.i1')
-    if (k22){
+    const k22: HTMLElement = document.querySelector(".i1");
+    if (k22) {
       k22.classList.add("bg-yellow-600");
     }
   }, [productFilter]);
@@ -196,12 +233,19 @@ export default function productManagement() {
       console.log(key, value);
       k.push(`${key} : ${value}`);
     }
-    alert(k.join("\n"));
+
+    const alertElement = (
+      <>
+        {k.map((e) => (
+          <p key={e}>{e}</p>
+        ))}
+      </>
+    );
+    showAlert({ message: alertElement, header: "โปรดตรวจสอบข้อผิดพลาด" ,errorStatus:1});
   }, [errors]);
 
   useEffect(() => {
     setFilter(Products);
-    
   }, [Products]);
 
   async function addNewItem() {
@@ -219,7 +263,11 @@ export default function productManagement() {
       // console.log(await response.json())
 
       if (!response.ok) {
-        alert("เกิดข้อผิดพลาด");
+        showAlert({
+          header:'เกิดข้อผิดพลาดในการเพิ่มสินค้า',
+          message:'เพิ่มสินค้าไม่สำเร็จ',
+          errorStatus:1,
+        })
         return;
       }
       const data = await response.json();
@@ -232,9 +280,19 @@ export default function productManagement() {
         { ...curProduct, Product_ID: data.Product_ID },
       ]);
       // setCurProduct(emptyProduct);
-      alert("เพิ่มสินค้าเข้าสู่ระบบเรียบร้อย");
+      // alert("เพิ่มสินค้าเข้าสู่ระบบเรียบร้อย");
+      showAlert({
+        header:'แจ้งเตือน',
+        message:'เพิ่มสินค้าสำเร็จ',
+        errorStatus:0
+      })
     } catch (error) {
-      alert("เพิ่มไอเทมไม่สำเร็จ");
+      // alert("เพิ่มไอเทมไม่สำเร็จ");
+      showAlert({
+        header:'เกิดข้อผิดพลาดในการเพิ่มสินค้า',
+        message:'เพิ่มสินค้าไม่สำเร็จ',
+        errorStatus:1
+      })
       return;
     }
   }
@@ -253,16 +311,32 @@ export default function productManagement() {
       });
       setProducts(newObj);
       setFilter(newObj);
-      setCurProduct(emptyProduct)
-      alert("แก้ไขข้อมูลสำเร็จ");
+      setCurProduct(emptyProduct);
+      // alert("แก้ไขข้อมูลสำเร็จ");
+      showAlert({
+        header:'แจ้งเตือน',
+        message:'แก้ไขข้อมูลสินค้า',
+        errorStatus:0
+      })
     } catch (error) {}
-    alert("เกิดข้อผิดพลาดในการแก้ไข");
+    showAlert({
+      header:'เกิดความผิดพลาดในการแก้ไขสินค้า',
+      message:'แก้ไขสินค้าไม่สำเร็จ',
+      errorStatus:1
+    })
     return;
+  }
+
+  function showAlert(alertProps: alertModalProps) {
+    const modal = document.querySelector("#alertModal");
+    setAlertProps(alertProps);
+    modal.showModal();
   }
 
   if (!Product) return <div>loading</div>;
   return (
     <div className="">
+      <AlertModal props={alertProps} />
       <div className="pl-5">
         <h1>จัดการคลังสินค้า</h1>
       </div>
@@ -274,7 +348,7 @@ export default function productManagement() {
             <div className="flex">
               <div className="m-4 text-center">
                 <div className="min-h-[300px] flex content-center">
-                  <label htmlFor="files" className=" m-auto">
+                  <label htmlFor="files" className="m-auto min-h-[300px]">
                     <ImageWithCheck
                       src={curProduct.Image_URL}
                       alt={curProduct.Name}
@@ -590,13 +664,11 @@ export default function productManagement() {
                   }
                 }}
               >
-                {curProduct.Product_ID == 'เพิ่มสินค้าใหม่'? 
-                <>
-                
-                เพิ่ม
-                </>
-                :
-                'บันทึก'}
+                {curProduct.Product_ID == "เพิ่มสินค้าใหม่" ? (
+                  <>เพิ่ม</>
+                ) : (
+                  "บันทึก"
+                )}
               </button>
             </div>
 
