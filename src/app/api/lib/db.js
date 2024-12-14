@@ -9,7 +9,6 @@ const config = {
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   database: process.env.DB_NAME,
-  // database: process.env.DB_NAME,
   ssl: {
     rejectUnauthorized: true,
     ca: process.env.DB_CACERT,
@@ -21,7 +20,7 @@ const client = new Pool(config);
 module.exports = {
   fetchUsers: async () => {
     const data = await client.query(
-      `SELECT "User_ID", "First_Name","Last_Name", "Email", "Phone", "Access_Level" FROM public."User" ORDER BY "User_ID" ASC`
+      `SELECT "User_ID", "Username", "First_Name","Last_Name", "Email", "Phone", "Access_Level" FROM public."User" ORDER BY "User_ID" ASC`
     );
     return data.rows;
   },
@@ -307,5 +306,28 @@ WHERE sc."Sub_Category_ID" = 2
             WHERE "User_ID" = $${index};`,
       values
     );
+  },
+  addUser: async (User) =>
+    await client.query(
+      `
+        INSERT INTO public."User" 
+        ("Username", "Password", "First_Name", "Last_Name", "Email", "Phone", "Access_Level") 
+        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "User_ID";`,
+      [
+        User.Username,
+        "123456",
+        User.First_Name,
+        User.Last_Name,
+        User.Email,
+        User.Phone,
+        User.Access_Level,
+      ]
+    ),
+  checkUsername: async (Username) => {
+    const data = await client.query(
+      `SELECT COUNT(*) FROM public."User" WHERE "Username"=$1`,
+      [Username]
+    );
+    return data.rows[0];
   },
 };

@@ -1,13 +1,7 @@
 "use client";
 import AdminUserSidebar from "@/app/components/admin-components/AdminUserSidebar";
-import { ProductInfo } from "@/app/model/Product";
 import UserInfo from "@/app/model/UserInfo";
-import React, {
-  // ButtonHTMLAttributes,
-  MouseEvent,
-  useEffect,
-  useState,
-} from "react";
+import React, { MouseEvent, useEffect, useState } from "react";
 import AddressInfo from "@/app/model/AddressModel";
 import {
   AdminSaveUser,
@@ -17,67 +11,55 @@ import {
   AdminDeleteUser,
   AdminDeleteSuccess,
 } from "../../../components/admin-components/AdminDeleteUser";
-import { FaTrashAlt } from "react-icons/fa";
-// import React, { useEffect, useState } from "react";
+import { FaTrashAlt, FaUserEdit } from "react-icons/fa";
+import AddressModal from "@/app/components/AddressModal";
+import {
+  AdminAddFail,
+  AdminAddSuccess,
+  AdminAddUserAlready,
+  AdminAddWarning,
+} from "@/app/components/admin-components/AdminAddUser";
 
 interface UserTable {
   user: UserInfo;
-  selectUser: (user: string) => void;
-  setDeleteUser: (user: string) => void;
-}
-const user: UserInfo = {
-  UID: "U00001",
-  Email: "test@gmail.com",
-  Name: "Name",
-  LastName: "Lastname",
-  Phone: "000000001",
-  Role: "",
-};
-function paginate(items, itemsPerPage, pageNumber) {
-  const startIndex = pageNumber * itemsPerPage;
-  let endIndex = startIndex + itemsPerPage;
-  console.log(startIndex, endIndex, pageNumber, "d");
-  if (endIndex > items.length - 1) {
-    console.log("over length");
-    return items.slice(startIndex, items.length - 1);
-  }
-  return items.slice(startIndex, endIndex);
+  onSelectUser: (user: UserInfo) => void;
+  onDeleteUser: (user: string) => void;
 }
 
 function AdminUserTable(props: UserTable) {
   return (
-    <>
-      <tr>
-        <td>{props.user.User_ID}</td>
-        <td>{props.user.First_Name}</td>
-        <td>{props.user.Last_Name}</td>
-        <td>{props.user.Email}</td>
-        <td>{props.user.Phone}</td>
-        <td>{props.user.Access_Level}</td>
-        <td width={100}>
-          <button
-            className="btn bg-yellow-500"
-            onClick={() => {
-              props.selectUser(props.user);
-            }}
-          >
-            แก้ไข
-          </button>
-        </td>
-        <td width={100}>
-          <button
-            className="btn bg-red-500 px-3"
-            onClick={() => {
-              props.setDeleteUser(props.user.User_ID);
-              document.querySelector(`#deleteUser`).show();
-            }}
-          >
-            <FaTrashAlt />
-            ลบ
-          </button>
-        </td>
-      </tr>
-    </>
+    <tr>
+      <td>{props.user.User_ID}</td>
+      <td>{props.user.Username}</td>
+      <td>{props.user.First_Name}</td>
+      <td>{props.user.Last_Name}</td>
+      <td>{props.user.Email}</td>
+      <td>{props.user.Phone}</td>
+      <td>{props.user.Access_Level == "1" ? "ผู้ดูแลระบบ" : "สมาชิกทั่วไป"}</td>
+      <td width={200}>
+        <button
+          className="btn bg-yellow-500"
+          onClick={() => {
+            props.onSelectUser(props.user);
+          }}
+        >
+          <FaUserEdit />
+          แก้ไข
+        </button>
+        <button
+          className="btn bg-red-500"
+          onClick={() => {
+            props.onDeleteUser(props.user.User_ID);
+            (
+              document.querySelector(`#deleteUser`) as HTMLDialogElement
+            ).showModal();
+          }}
+        >
+          <FaTrashAlt />
+          ลบ
+        </button>
+      </td>
+    </tr>
   );
 }
 
@@ -90,65 +72,88 @@ export default function userManagement() {
       ...curUser,
       [name]: value,
     });
-    setBtnSave(true);
-  }
-
-  function handleAddrChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const value = e.target.value;
-    console.log(value);
-    const selected = dataAddr.find((x: AddressInfo) => x.Address_ID == value);
-    setCurUserAddress(
-      selected || {
-        Address_ID: "",
-        User_ID: "",
-        Address_1: "",
-        Address_2: "",
-        District: "",
-        Province: "",
-        Zip_Code: "",
-        Is_Default: false,
-        Sub_District: "",
-        Phone: "",
-      }
-    );
-  }
-
-  const [btnDelete, setBtnDelete] = useState(0);
-  const [btnSave, setBtnSave] = useState(false);
-
-  useEffect(() => {
-    fetchUsersData();
-    if (!btnDelete) {
-      setCurUser({
-        User_ID: "",
-        First_Name: "",
-        Last_Name: "",
-        Email: "",
-        Phone: "",
-        Access_Level: "",
-      });
-      setCurUserAddress({
-        Address_ID: "",
-        User_ID: "",
-        Address_1: "",
-        Address_2: "",
-        District: "",
-        Province: "",
-        Zip_Code: "",
-        Is_Default: false,
-        Sub_District: "",
-        Phone: "",
-      });
-      setAddrData([]);
+    if (curUser.User_ID) {
+      setIsEditing(true);
     }
-  }, [btnDelete]);
+  }
+
+  function handleAccessChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const value = e.target.value;
+    setCurUser({
+      ...curUser,
+      ["Access_Level"]: value,
+    });
+    if (curUser.User_ID) {
+      setIsEditing(true);
+    }
+  }
+
+  function onClickAddUser(e: MouseEvent<HTMLButtonElement>) {
+    async function AddUser() {
+      const response = await fetch("/api/admin/addUser", {
+        method: "POST",
+        body: JSON.stringify(curUser),
+      });
+      switch (response.status) {
+        case 200:
+          onClearData();
+          fetchUsersData();
+          (
+            document?.getElementById("addSuccess") as HTMLDialogElement
+          ).showModal();
+          break;
+        case 201:
+          (
+            document?.getElementById("addUserAlready") as HTMLDialogElement
+          ).showModal();
+          break;
+        default:
+          (
+            document?.getElementById("addFailure") as HTMLDialogElement
+          ).showModal();
+          break;
+      }
+    }
+
+    e.preventDefault();
+    let Check: boolean = false;
+    for (const key in curUser) {
+      if (key === "User_ID" || key === "Access_Level") {
+        continue;
+      }
+      if (curUser[key as keyof UserInfo] === "") {
+        Check = true;
+      }
+    }
+    if (!Check) {
+      curUser.Access_Level = "0";
+      AddUser();
+    } else {
+      (document?.getElementById("addWarning") as HTMLDialogElement).showModal();
+    }
+  }
+
+  const [delUser_ID, onDeleteUser] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [btnState, setButtonState] = useState(false);
+
+  const [addressList, setAddressList] = useState<AddressInfo[]>([]);
+  const [curAddress, setCurAddress] = useState<AddressInfo>();
 
   useEffect(() => {
     fetchUsersData();
-  }, [btnSave]);
+    if (!delUser_ID) {
+      onClearData();
+    }
+  }, [delUser_ID]);
+
+  useEffect(() => {
+    fetchUsersData();
+  }, [isEditing]);
 
   const [curUser, setCurUser] = useState<UserInfo>({
     User_ID: "",
+    Username: "",
     First_Name: "",
     Last_Name: "",
     Email: "",
@@ -156,18 +161,51 @@ export default function userManagement() {
     Access_Level: "",
   });
 
-  const [curUserAddr, setCurUserAddress] = useState<AddressInfo>({
-    Address_ID: "",
-    User_ID: "",
-    Address_1: "",
-    Address_2: "",
-    District: "",
-    Province: "",
-    Zip_Code: "",
-    Is_Default: false,
-    Sub_District: "",
-    Phone: "",
-  });
+  function onClearData() {
+    setIsEditing(false);
+    setButtonState(false);
+    setCurUser({
+      User_ID: "",
+      Username: "",
+      First_Name: "",
+      Last_Name: "",
+      Email: "",
+      Phone: "",
+      Access_Level: "",
+    });
+    const opt = document?.querySelector(
+      `#accessList option[value="0"]`
+    ) as HTMLOptionElement;
+    if (opt) {
+      opt.selected = true;
+      opt.defaultSelected = true;
+    }
+  }
+
+  function onSelectUser(user: UserInfo) {
+    setCurUser(user);
+    setIsEditing(false);
+    setButtonState(true);
+    fetchUserAddressData(user.User_ID);
+    const opt = document?.querySelector(
+      `#accessList option[value="${user.Access_Level}"]`
+    ) as HTMLOptionElement;
+    if (opt) {
+      opt.selected = true;
+      opt.defaultSelected = true;
+    }
+  }
+
+  async function fetchUsersData() {
+    try {
+      const response = await fetch(`/api/user/getUsers`);
+      if (!response.ok) throw new Error("ERROR");
+      const data = await response.json();
+      setData(data);
+    } catch (ex) {
+      console.error(ex);
+    }
+  }
 
   async function fetchUserAddressData(User_ID: string) {
     try {
@@ -179,98 +217,76 @@ export default function userManagement() {
       });
       if (!response.ok) throw new Error("ERROR");
       const data = await response.json();
-      setAddrData(data);
-      if (data.length > 0) {
-        const address: AddressInfo = data[0];
-        setCurUserAddress(address);
-        const opt = document?.querySelector(
-          `#addrlist option[value="${address.Address_ID}"]`
-        );
-        if (opt) {
-          opt.selected = true;
-          opt.defaultSelected = true;
-        }
-      }
-    } catch (ex) {
-      console.error(ex);
-    }
-  }
-
-  function selectUser(user: UserInfo) {
-    setBtnDelete(true);
-    setCurUser(user);
-    setCurUserAddress({
-      Address_ID: "",
-      User_ID: "",
-      Address_1: "",
-      Address_2: "",
-      District: "",
-      Province: "",
-      Zip_Code: "",
-      Is_Default: false,
-      Sub_District: "",
-      Phone: "",
-    });
-    fetchUserAddressData(user.User_ID);
-  }
-
-  async function fetchUsersData() {
-    try {
-      const response = await fetch(`/api/user/GetUsers`);
-      if (!response.ok) throw new Error("ERROR");
-      const data = await response.json();
-      setData(data);
+      setAddressList(data);
     } catch (ex) {
       console.error(ex);
     }
   }
 
   const [data, setData] = useState([]);
-  const [dataAddr, setAddrData] = useState([]);
 
   useEffect(() => {
     fetchUsersData();
   }, []);
-  // let Index = 0;
   return (
     <div className="">
       <div className="pl-5">
-        <h1>จัดการคลังสินค้า</h1>
+        <h1>จัดการบัญชีผู้ใช้งาน</h1>
+        <AddressModal
+          userAddresses={addressList}
+          setAddresses={setAddressList}
+          setCurAddress={setCurAddress}
+        />
       </div>
       <div className="grid grid-cols-7 pl-5 pr-5">
-        <AdminDeleteUser User_ID={btnDelete} setDeleteUser={setBtnDelete} />
+        <AdminAddSuccess />
+        <AdminAddWarning />
+        <AdminAddFail />
+        <AdminAddUserAlready Username={curUser.Username} />
+        <AdminDeleteUser User_ID={delUser_ID} setDeleteUser={onDeleteUser} />
         <AdminDeleteSuccess />
-        <dialog id="saveUser" className="modal">
-          <AdminSaveUser
-            UserData={curUser}
-            btnSave={btnSave}
-            setState={setBtnSave}
-          />
-        </dialog>
-        <dialog id="saveSuccess" className="modal">
-          <AdminSaveSuccess />
-        </dialog>
+        <AdminSaveUser
+          UserData={curUser}
+          isEditing={isEditing}
+          setState={setIsEditing}
+        />
+        <AdminSaveSuccess />
         <AdminUserSidebar />
         <div className="col-span-5 m-2">
           <div>
             <h1>รายละเอียดบัญชีผู้ใช้งาน</h1>
             <div>
-              <div className="">
-                <label className="form-control w-full max-w-xs mx-1">
-                  <div className="label">
-                    <span className="label-text">UID</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Please choose first"
-                    className="input input-bordered w-11/12"
-                    name="User_ID"
-                    value={curUser.User_ID}
-                    readOnly={true}
-                    onChange={handleChange}
-                    disabled
-                  />
-                </label>
+              <div>
+                <div className="flex">
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">UID</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Please select first"
+                      className="input input-bordered w-11/12"
+                      name="User_ID"
+                      value={curUser.User_ID}
+                      readOnly={true}
+                      onChange={handleChange}
+                      disabled
+                    />
+                  </label>
+                  <label className="form-control w-full max-w-xs mx-1">
+                    <div className="label">
+                      <span className="label-text">ชื่อผู้ใช้</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input input-bordered w-11/12"
+                      name="Username"
+                      value={curUser.Username}
+                      onChange={handleChange}
+                    />
+                  </label>
+                </div>
                 <div className="flex">
                   <label className="form-control w-full max-w-xs mx-1">
                     <div className="label">
@@ -283,7 +299,6 @@ export default function userManagement() {
                       name="First_Name"
                       value={curUser.First_Name}
                       onChange={handleChange}
-                      name="First_Name"
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -331,169 +346,104 @@ export default function userManagement() {
                     <div className="label">
                       <span className="label-text">สิทธิการเข้าถึง</span>
                     </div>
-                    <input
-                      type="text"
-                      placeholder="Type here"
-                      className="input input-bordered w-11/12"
-                      name="Access_Level"
-                      value={curUser.Access_Level}
-                      onChange={handleChange}
-                    />
+                    <select
+                      id="accessList"
+                      name="accessList"
+                      className="select select-bordered w-11/12"
+                      onChange={handleAccessChange}
+                    >
+                      <option key="0" value="0">
+                        สมาชิกทั่วไป
+                      </option>
+                      <option key="1" value="1">
+                        ผู้ดูแลระบบ
+                      </option>
+                    </select>
                   </label>
-                  <button className="btn self-end">เปลี่ยนรหัสผ่าน</button>
+                  <button
+                    className="btn self-end bg-yellow-500 mx-1"
+                    disabled={!btnState}
+                  >
+                    เปลี่ยนรหัสผ่าน
+                  </button>
+                  <button
+                    className="btn self-end bg-yellow-500 mx-1"
+                    disabled={!btnState}
+                    onClick={() =>
+                      (
+                        document.getElementById(
+                          "address-modal"
+                        ) as HTMLDialogElement
+                      ).showModal()
+                    }
+                  >
+                    เปิดดูข้อมูลที่อยู่
+                  </button>
                 </div>
-                <button className="btn bg-green-500">เพิ่ม</button>
                 <button
-                  className="btn bg-yellow-500"
-                  disabled={!btnSave}
+                  className="btn bg-green-500 w-30 max-w-xs mx-1 my-2"
+                  onClick={onClickAddUser}
+                >
+                  เพิ่ม
+                </button>
+                <button
+                  className="btn bg-yellow-500 w-30 max-w-xs mx-1 my-2"
+                  disabled={!isEditing}
                   onClick={() => {
-                    document?.getElementById("saveUser").showModal();
+                    (
+                      document.getElementById("saveUser") as HTMLDialogElement
+                    ).showModal();
                   }}
                 >
                   บันทึก
                 </button>
-              </div>
-              <div className="">
-                <label className="form-control w-full max-w-xs mx-1">
-                  <div className="label">
-                    <span className="label-text">ที่อยู่</span>
-                  </div>
-                  <select
-                    name="addrlist"
-                    id="addrlist"
-                    className="select select-bordered"
-                    onChange={handleAddrChange}
-                  >
-                    {dataAddr.map((x: AddressInfo, Index) => {
-                      return (
-                        <option value={x.Address_ID} key={Index}>
-                          ที่อยู่ - {++Index}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </label>
-                <div className="flex">
-                  <label className="form-control w-full max-w-xs mx-1">
-                    <div className="label">
-                      <span className="label-text">ที่อยู่ : 1</span>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Type here"
-                      className="input input-bordered w-11/12"
-                      value={curUserAddr.Address_1}
-                    />
-                  </label>
-                  <label className="form-control w-full max-w-xs mx-1">
-                    <div className="label">
-                      <span className="label-text">ที่อยู่ : 2</span>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Type here"
-                      className="input input-bordered w-11/12"
-                      value={curUserAddr.Address_2}
-                    />
-                  </label>
-                  <label className="form-control w-full max-w-xs mx-1">
-                    <div className="label">
-                      <span className="label-text">ตำบล/แขวง</span>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Type here"
-                      className="input input-bordered w-11/12"
-                      value={curUserAddr.Sub_District}
-                    />
-                  </label>
-                  <label className="form-control w-full max-w-xs mx-1">
-                    <div className="label">
-                      <span className="label-text">อำเภอ/เขต</span>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Type here"
-                      className="input input-bordered w-11/12"
-                      value={curUserAddr.District}
-                    />
-                  </label>
-                </div>
-                <div className="flex">
-                  <label className="form-control w-full max-w-xs mx-1">
-                    <div className="label">
-                      <span className="label-text">จังหวัด</span>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Type here"
-                      className="input input-bordered w-11/12"
-                      value={curUserAddr.Province}
-                    />
-                  </label>
-                  <label className="form-control w-full max-w-xs mx-1">
-                    <div className="label">
-                      <span className="label-text">รหัสไปรษณีย์</span>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Type here"
-                      className="input input-bordered w-11/12"
-                      value={curUserAddr.Zip_Code}
-                    />
-                  </label>
-                  <label className="form-control w-full max-w-xs mx-1">
-                    <div className="label">
-                      <span className="label-text">เบอร์โทรศัพท์</span>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Type here"
-                      className="input input-bordered w-11/12"
-                      value={curUserAddr.Phone}
-                    />
-                  </label>
-                </div>
-                <button className="btn bg-green-500">เพิ่ม</button>
-                <button className="btn bg-yellow-500">บันทึก</button>
-                <button className="btn bg-red-500">ลบ</button>
+                <button
+                  className="btn bg-yellow-500 w-30 max-w-xs mx-1 my-2"
+                  disabled={!btnState}
+                  onClick={onClearData}
+                >
+                  ล้างข้อมูล
+                </button>
               </div>
               <div className="join my-4">
-                  {data.length > 7
-                    ? Array.from(
-                        { length: Math.ceil(data.length / 7) },
-                        (_, index) => (
-                          <button
-                            key={index}
-                            className={`join-item btn ${
-                              index == 0 ? "bg-yellow-600" : ""
-                            }`}
-                            onClick={(e: MouseEvent<Element>) => {
-                              setPage([index * 7, (index + 1) * 7 - 1]);
-                              const k = document.querySelectorAll(".join-item");
-                              k.forEach((d) =>
-                                d.classList.remove("bg-yellow-600")
-                              );
-                              e.target.classList.add("bg-yellow-600");
-                            }}
-                          >
-                            {index + 1}
-                          </button>
-                        )
+                {data.length > 6
+                  ? Array.from(
+                      { length: Math.ceil(data.length / 6) },
+                      (_, index) => (
+                        <button
+                          key={index}
+                          className={`join-item btn ${
+                            index == 0 ? "bg-yellow-600" : ""
+                          }`}
+                          onClick={(e: MouseEvent<Element>) => {
+                            setPage([index * 6, (index + 1) * 6]);
+                            const k = document.querySelectorAll(".join-item");
+                            k.forEach((d) =>
+                              d.classList.remove("bg-yellow-600")
+                            );
+                            (e.target as Element).classList.add(
+                              "bg-yellow-600"
+                            );
+                          }}
+                        >
+                          {index + 1}
+                        </button>
                       )
-                    : ""}
-                </div>
+                    )
+                  : ""}
+              </div>
               <div className="overflow-x-auto">
                 <table className="table table-zebra">
                   <thead>
                     <tr>
-                      <th>UID</th>
-                      <th className="">ชื่อ</th>
+                      <th>User ID</th>
+                      <th>ชื่อผู้ใช้</th>
+                      <th>ชื่อ</th>
                       <th>นามสกุล</th>
                       <th>E-mail</th>
                       <th>เบอร์โทรศัพท์</th>
                       <th>สิทธิการเข้าถึง</th>
-                      <th></th>
+                      <th>จัดการ</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -502,38 +452,13 @@ export default function userManagement() {
                         <AdminUserTable
                           key={e.User_ID}
                           user={e}
-                          selectUser={selectUser}
-                          setDeleteUser={setBtnDelete}
+                          onSelectUser={onSelectUser}
+                          onDeleteUser={onDeleteUser}
                         />
                       );
                     })}
                   </tbody>
                 </table>
-                <div className="join my-4">
-                  {data.length > 7
-                    ? Array.from(
-                        { length: Math.ceil(data.length / 7) },
-                        (_, index) => (
-                          <button
-                            key={index}
-                            className={`join-item btn ${
-                              index == 0 ? "bg-yellow-600" : ""
-                            }`}
-                            onClick={(e: MouseEvent<Element>) => {
-                              setPage([index * 7, (index + 1) * 7 - 1]);
-                              const k = document.querySelectorAll(".join-item");
-                              k.forEach((d) =>
-                                d.classList.remove("bg-yellow-600")
-                              );
-                              e.target.classList.add("bg-yellow-600");
-                            }}
-                          >
-                            {index + 1}
-                          </button>
-                        )
-                      )
-                    : ""}
-                </div>
               </div>
             </div>
           </div>
