@@ -4,6 +4,7 @@ import { fetchAllProduct } from "../../lib/db"
 
 export async function GET(req : NextRequest, res) {
   const product = await fetchAllProduct()
+  console.log(product)
   if (!product){
     return NextResponse.json('PRODUCT NOT FOUND',{status:404})
   }

@@ -13,14 +13,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   /*if (!session && session.status !== 'loading' || session?.data?.user.role !='a' && session.status !== 'loading'){
     return redirect('/products')
   }else if(session.status !== 'loading'){*/
+  // if (!session && session.status !== 'loading' || session?.data?.user.role !='a' && session.status !== 'loading'){
+    // return redirect('/admin')
+  // }else if(session.status !== 'loading'){
     return (
       <div>
         <CounterProvider>
         <h1>admin</h1>
         <Navbar>
         </Navbar>
-        <div className="mx-14">
-          {session.data?.user.role}
+        <div className="mx-14 h-fit">
         {children}
         </div>
         <Footer/>

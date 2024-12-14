@@ -74,7 +74,7 @@ const Navbar = () => {
 
         function CategoryMenu(){
             return(
-                <div key={1}>
+                <div key={1} className="">
                 {Categories.map( (Category : CategoryList) => 
                     <li key={Category.Category_ID}>
                         <details>
@@ -161,7 +161,7 @@ const Navbar = () => {
             </div>
             </div>
             <div className="flex h-fit bg-gray-300">
-            <ul className="menu menu-horizontal flex-row px-1 p-0 w-11/12 mx-auto">
+            <ul className="menu menu-horizontal flex-row px-1 p-0 w-11/12 mx-auto z-20">
                 <li className="">
                     <details id={'category_menu'}>
                     <summary className="rounded-none p-4 px-10 bg-yellow-400 font-semibold">สินค้า</summary>
