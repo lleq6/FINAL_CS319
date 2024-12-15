@@ -4,13 +4,25 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { MdErrorOutline } from "react-icons/md";
+import AlertModal from "../alertModal";
+import { Dispatch, SetStateAction } from "react";
 interface AdminProductProps {
   product: ProductInfo;
   setProduct: (product: ProductInfo) => void;
-  setProducts: (product: ProductInfo[]) => void;
+  setProducts: Dispatch<SetStateAction<ProductInfo[]>>;
   isGray: boolean;
+  showAlert: (alert : alertModal) => void;
 }
-const ImageWithCheck = ({ src, alt, height, width }) => {
+
+interface alertModal {
+  header: string;
+  message: string;
+  errorStatus: boolean;
+  callback?: () => void | undefined;
+}
+
+
+const ImageWithCheck = ({ src , alt, height, width } : {src:string, alt:string, height:number, width:number}) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
@@ -35,10 +47,45 @@ export default function AdminProduct({
   setProduct,
   isGray,
   setProducts,
+  showAlert,
 }: AdminProductProps) {
+  const [alert, setAlert] = useState<alertModal>({
+    header: "แจ้งเตือน!",
+    message: "",
+    errorStatus: false,
+    callback: () => {},
+  });
+  function setAlertt(
+    alert: {
+      header: string;
+      message: string;
+      errorStatus: boolean;
+      callback?: () => void;
+    },
+    e?: Event
+  ) {
+    setAlert(alert);
+  }
+
+  useEffect(() => {
+    if (alert.message != "") {
+      console.log(alert);
+      (
+        document.getElementById("alertModalProduct") as HTMLDialogElement
+      ).showModal();
+    }
+  }, [alert]);
+
   return (
     <div className={`${isGray ? "bg-yellow-100" : ""} w-full`}>
       {/* dialog */}
+      <AlertModal
+        id="alertModalProduct"
+        header={alert.header}
+        message={alert.message}
+        errorStatus={alert.errorStatus}
+        callback={alert.callback}
+      />
       <dialog id={`deleteModal${product.Product_ID}`} className="modal">
         <div className="modal-box">
           <div className="flex">
@@ -63,16 +110,28 @@ export default function AdminProduct({
                       }),
                     });
                     if (!response.ok) {
-                      alert("การลบสินค้าผิดพลาด");
+                      showAlert({
+                        ...alert,
+                        message: `การลบสินค้าผิดพลาดรหัสสินค้า : ${product.Product_ID}`,
+                        errorStatus: true,
+                      });
                       throw new Error("error");
                     }
 
+                    showAlert({
+                      header: "แจ้งลบสินค้า",
+                      message: `ลบสินค้ารหัส : ${product.Product_ID} เรียบร้อยแล้ว `,
+                      errorStatus: false,
+                    });
                     setProducts((products: ProductInfo[]) =>
                       products.filter((e) => e.Product_ID != product.Product_ID)
                     );
-                    alert("ลบสินค้าเรียบร้อย");
                   } catch (error) {
-                    alert("การลบสินค้าผิดพลาด");
+                    showAlert({
+                      ...alert,
+                      message: `การลบสินค้าผิดพลาด รหัสสินค้า : ${product.Product_ID}`,
+                      errorStatus: true,
+                    });
                   }
                 }}
               >
@@ -81,8 +140,8 @@ export default function AdminProduct({
               <button
                 className="btn"
                 onClick={() =>
-                  document
-                    .getElementById(`deleteModal${product.Product_ID}`)
+                  (document
+                    .getElementById(`deleteModal${product.Product_ID}`) as HTMLDialogElement)
                     .close()
                 }
               >
@@ -155,8 +214,8 @@ export default function AdminProduct({
         <button
           className="btn btn-sm text-md p-1 mx-2 px-2 w-20 hover:bg-red-300 hover:text-red-600"
           onClick={async () => {
-            document
-              .getElementById(`deleteModal${product.Product_ID}`)
+            (document
+              .getElementById(`deleteModal${product.Product_ID}`) as HTMLDialogElement)
               .showModal();
           }}
         >

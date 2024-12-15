@@ -6,6 +6,7 @@ interface alertModalProps {
   header: string;
   message: string;
   errorStatus: boolean;
+  callback?: ()=>void
 }
 
 export default function AlertModal(props: alertModalProps) {
@@ -24,7 +25,8 @@ export default function AlertModal(props: alertModalProps) {
         <div className="modal-action">
           <form method="dialog">
             {/* if there is a button in form, it will close the modal */}
-            <button className="btn">ปิด</button>
+            <button className="btn"
+            >ปิด</button>
           </form>
         </div>
       </div>

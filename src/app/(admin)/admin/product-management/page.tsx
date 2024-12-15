@@ -2,20 +2,28 @@
 import AdminProduct from "@/app/components/admin-components/AdminProduct";
 import AdminProductSidebar from "@/app/components/admin-components/AdminProductSidebar";
 import Product from "@/app/components/Product";
-import { CategoryList } from "@/app/model/CategoryModel";
+import {
+  CategoryList,
+  ChildCategory,
+  SubCategory,
+} from "@/app/model/CategoryModel";
 import { ProductInfo } from "@/app/model/Product";
 import { error } from "console";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import {
+  ButtonHTMLAttributes,
+  Dispatch,
+  MouseEventHandler,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import { MdErrorOutline } from "react-icons/md";
 import { FaInfoCircle, FaUpload } from "react-icons/fa";
 import { IoIosAddCircle } from "react-icons/io";
+import ImageWithCheck from "@/app/components/ImageWithCheck";
+import { DialogProps } from "@/app/model/DialogProps";
 
-interface alertModalProps {
-  header: string;
-  message: string;
-  errorStatus: number;
-}
 // Create an empty data variable
 const emptyProduct: ProductInfo = {
   Product_ID: "",
@@ -37,7 +45,15 @@ const emptyProduct: ProductInfo = {
   s_name: "",
   cc_name: "",
 };
-function Paginate({ items, itemsPerPage, setShow }) {
+function Paginate({
+  items,
+  itemsPerPage,
+  setShow,
+}: {
+  items: ProductInfo[];
+  itemsPerPage: number;
+  setShow: Dispatch<SetStateAction<ProductInfo[]>>;
+}) {
   // console.log(items.slice(index * itemsPerPage, (index + 1) * itemsPerPage))
   return (
     <div className="join my-4 w-fit">
@@ -49,14 +65,14 @@ function Paginate({ items, itemsPerPage, setShow }) {
             className={`join-item i2 btn ${
               index == 0 ? "bg-yellow-600 i1" : ""
             }`}
-            onClick={(e: MouseEvent<Element>) => {
+            onClick={(e) => {
               // console.log(index * itemsPerPage, (index + 1) * itemsPerPage);
               setShow(
                 items.slice(index * itemsPerPage, (index + 1) * itemsPerPage)
               );
               const k = document.querySelectorAll(".i2");
               k.forEach((d) => d.classList.remove("bg-yellow-600"));
-              e.target.classList.add("bg-yellow-600");
+              (e.target as HTMLButtonElement).classList.add("bg-yellow-600");
               console.log("clickpage");
               console.log(index);
             }}
@@ -68,34 +84,16 @@ function Paginate({ items, itemsPerPage, setShow }) {
     </div>
   );
 }
-const ImageWithCheck = ({ src, alt, height, width }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  useEffect(() => {
-    const img = new window.Image();
-    img.src = src;
-    img.onload = () => setImageLoaded(true);
-    img.onerror = () => setImageLoaded(false);
-  }, [src]);
-
-  return imageLoaded && src ? (
-    <Image src={src} alt={alt} height={height} width={width} />
-  ) : (
-    <div className={`flex m-auto w-[${width}px] h-[${height}px] bg-gray-300`}>
-      <p className="m-auto text-center">ไม่สามารถแสดงภาพ...</p>
-    </div>
-  );
-};
-function test(p) {
-  const main = document.querySelector("#c1");
-  const sub = document.querySelector("#c2");
-  const child = document.querySelector("#c3");
-  main.value = p.c_id;
-  sub.value = p.s_id;
-  child.value = p.Child_ID;
+function test(p: ProductInfo) {
+  const main = document.querySelector("#c1") as HTMLSelectElement;
+  const sub = document.querySelector("#c2") as HTMLSelectElement;
+  const child = document.querySelector("#c3") as HTMLSelectElement;
+  main.value = p.c_id.toString();
+  sub.value = p.s_id.toString();
+  child.value = p.Child_ID.toString();
 }
 
-function AlertModal({ props }: alertModalProps) {
+function AlertModal({ props }: { props: DialogProps }) {
   console.log(props, "alertprops");
 
   return (
@@ -127,14 +125,15 @@ export default function productManagement() {
   const [Show, setShow] = useState<ProductInfo[]>([]);
   const [category, setCategory] = useState<CategoryList[]>([]);
   const [curCategory, setCurCategory] = useState<CategoryList>();
-  const [CurSubCategory, setCurSubCategory] = useState<CategoryList>();
-  const [curChild, setChild] = useState<CategoryList>();
+  const [CurSubCategory, setCurSubCategory] = useState<SubCategory>();
+  const [curChild, setChild] = useState<ChildCategory[]>();
   const [curImage, setCurImage] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [curFileImg, setCurFile] = useState<File>();
-  const [alertProps, setAlertProps] = useState<alertModalProps>({
-    message: <></>,
+  const [alertProps, setAlertProps] = useState<DialogProps>({
+    message: "",
     header: "",
+    errorStatus: false,
   });
 
   useEffect(() => {
@@ -161,7 +160,7 @@ export default function productManagement() {
     if (curCategory) {
       setCurSubCategory(
         curCategory.Sub_Category.find(
-          (sub) => sub.Sub_Category_ID == curProduct.s_id
+          (sub) => sub.Sub_Category_ID == curProduct.s_id.toString()
         )
       );
     }
@@ -171,7 +170,7 @@ export default function productManagement() {
     setShow(productFilter.slice(0, 4));
     const k = document.querySelectorAll(".i2");
     k.forEach((d) => d.classList.remove("bg-yellow-600"));
-    const k22: HTMLElement = document.querySelector(".i1");
+    const k22: HTMLElement = document.querySelector(".i1") as HTMLButtonElement;
     if (k22) {
       k22.classList.add("bg-yellow-600");
     }
@@ -179,7 +178,7 @@ export default function productManagement() {
 
   useEffect(() => {
     if (CurSubCategory) {
-      setChild(CurSubCategory.ChildCategory);
+      setChild(CurSubCategory.Child_Category);
     }
   }, [CurSubCategory]);
 
@@ -189,21 +188,17 @@ export default function productManagement() {
     test(p);
     setCurImage(p.Image_URL);
     if (!p.Product_ID) return;
-    setCurCategory(category.find((e) => e.Category_ID == p.c_id));
-    // setCurSubCategory(
-    //   curCategory.Sub_Category.find(
-    //     (sub) => sub.Sub_Category_ID == curProduct.s_id
-    //   )
-    // );
+    setCurCategory(category.find((e) => e.Category_ID == p.c_id.toString()));
     setChild(
-      curCategory?.Sub_Category.find((sub) => sub.Sub_Category_ID == p.s_id)
-        .ChildCategory
+      curCategory?.Sub_Category.find(
+        (sub) => sub.Sub_Category_ID == p.s_id.toString()
+      )?.Child_Category
     );
-    // console.log(curChild);
-    // setTimeout(() => (child.value = p.Child_ID), 1000);
   }
 
-  function handleChange(e: React.FormEvent<HTMLInputElement>) {
+  function handleChange(
+    e: React.FormEvent<HTMLInputElement> | React.FormEvent<HTMLTextAreaElement>
+  ) {
     const { name, value } = e.currentTarget;
     setCurProduct({
       ...curProduct,
@@ -242,7 +237,11 @@ export default function productManagement() {
         ))}
       </>
     );
-    showAlert({ message: alertElement, header: "โปรดตรวจสอบข้อผิดพลาด" ,errorStatus:1});
+    showAlert({
+      message: alertElement,
+      header: "โปรดตรวจสอบข้อผิดพลาด",
+      errorStatus: true,
+    });
   }, [errors]);
 
   useEffect(() => {
@@ -265,10 +264,10 @@ export default function productManagement() {
 
       if (!response.ok) {
         showAlert({
-          header:'เกิดข้อผิดพลาดในการเพิ่มสินค้า',
-          message:'เพิ่มสินค้าไม่สำเร็จ',
-          errorStatus:1,
-        })
+          header: "เกิดข้อผิดพลาดในการเพิ่มสินค้า",
+          message: "เพิ่มสินค้าไม่สำเร็จ",
+          errorStatus: false,
+        });
         return;
       }
       const data = await response.json();
@@ -283,17 +282,17 @@ export default function productManagement() {
       // setCurProduct(emptyProduct);
       // alert("เพิ่มสินค้าเข้าสู่ระบบเรียบร้อย");
       showAlert({
-        header:'แจ้งเตือน',
-        message:'เพิ่มสินค้าสำเร็จ',
-        errorStatus:0
-      })
+        header: "แจ้งเตือน",
+        message: "เพิ่มสินค้าสำเร็จ",
+        errorStatus: false,
+      });
     } catch (error) {
       // alert("เพิ่มไอเทมไม่สำเร็จ");
       showAlert({
-        header:'เกิดข้อผิดพลาดในการเพิ่มสินค้า',
-        message:'เพิ่มสินค้าไม่สำเร็จ',
-        errorStatus:1
-      })
+        header: "เกิดข้อผิดพลาดในการเพิ่มสินค้า",
+        message: "เพิ่มสินค้าไม่สำเร็จ",
+        errorStatus: true,
+      });
       return;
     }
   }
@@ -314,21 +313,22 @@ export default function productManagement() {
       setFilter(newObj);
       setCurProduct(emptyProduct);
       showAlert({
-        header:'แจ้งเตือน',
-        message:'แก้ไขข้อมูลสินค้า',
-        errorStatus:0
-      })
-    } catch (error) {}
-    showAlert({
-      header:'เกิดความผิดพลาดในการแก้ไขสินค้า',
-      message:'แก้ไขสินค้าไม่สำเร็จ',
-      errorStatus:1
-    })
+        header: "แจ้งเตือน",
+        message: "แก้ไขข้อมูลสินค้า",
+        errorStatus: false,
+      });
+    } catch (error) {
+      showAlert({
+        header: "เกิดความผิดพลาดในการแก้ไขสินค้าสำเร็จ",
+        message: "แก้ไขสินค้าไม่สำเร็จ",
+        errorStatus: true,
+      });
+    }
     return;
   }
 
-  function showAlert(alertProps: alertModalProps) {
-    const modal = document.querySelector("#alertModal");
+  function showAlert(alertProps: DialogProps) {
+    const modal = document.querySelector("#alertModal") as HTMLDialogElement;
     setAlertProps(alertProps);
     modal.showModal();
   }
@@ -360,9 +360,11 @@ export default function productManagement() {
                 <div className="">
                   <label
                     htmlFor="files"
-                    className="btn border-gray-300 bg-gray-200 hover:bg-yellow-500 hover: hover:border-yellow-500 rounded-none w-[300px]"
-                    disabled={!curProduct.Product_ID ? true : false}
-                  ><FaUpload className="text-xl" />
+                    className={`btn border-gray-300 bg-gray-200 hover:bg-yellow-500 hover:
+                       hover:border-yellow-500 rounded-none w-[300px] 
+                    ${!curProduct.Product_ID ? "disabled-class" : ""}`}
+                  >
+                    <FaUpload className="text-xl" />
                     ..อัพโหลดรูปภาพ
                   </label>
                   <input
@@ -378,7 +380,8 @@ export default function productManagement() {
                     accept=".jpg, .jpeg, .png"
                     // value={curProduct.Image_URL}
 
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      if (!e.target.files) return;
                       const objectUrl = URL.createObjectURL(e.target.files[0]);
                       setCurProduct({ ...curProduct, Image_URL: objectUrl });
                       setCurFile(e.target.files[0]);
@@ -416,7 +419,7 @@ export default function productManagement() {
                     }}
                     disabled={curProduct.Product_ID ? true : false}
                   >
-                    <IoIosAddCircle className="text-xl m-auto"/>
+                    <IoIosAddCircle className="text-xl m-auto" />
                     เพิ่มสินค้า
                   </button>
                 </div>
@@ -476,9 +479,10 @@ export default function productManagement() {
                       defaultValue={0}
                       onChange={(e) => {
                         console.log("main change");
-                        const k = document.querySelectorAll(".ctgy");
+                        const k =
+                          document.querySelectorAll<HTMLSelectElement>(".ctgy");
                         k.forEach((e) => {
-                          e.value = 0;
+                          e.value = "0";
                         });
                         setCurCategory(
                           category.find(
@@ -510,8 +514,10 @@ export default function productManagement() {
                             (sub) => sub.Sub_Category_ID == e.target.value
                           )
                         );
-                        const child = document.querySelector("#c3");
-                        child.value = 0;
+                        const child = document.querySelector(
+                          "#c3"
+                        ) as HTMLSelectElement;
+                        child.value = "0";
                         // setChild(CurSubCategory.ChildCategory)
                       }}
                       disabled={!curProduct.Product_ID ? true : false}
@@ -541,7 +547,7 @@ export default function productManagement() {
                         setCurProduct((old) => {
                           const p = {
                             ...old,
-                            Child_ID: e.target.value,
+                            Child_ID: parseInt(e.target.value),
                           };
                           return p;
                         });
@@ -635,7 +641,7 @@ export default function productManagement() {
               className="mx-2 textarea textarea-bordered w-10/12 h-32"
               value={curProduct.Description}
               name="Description"
-              onChange={handleChange}
+              onChange={(e) => handleChange(e)}
             ></textarea>
             <div className="w-10/12 ml-2 mt-3 text-end space-x-5">
               <button
@@ -654,9 +660,7 @@ export default function productManagement() {
                 onClick={(e) => {
                   console.log(curProduct);
                   if (validate()) {
-                    if (
-                      curProduct.Product_ID === Number(curProduct.Product_ID)
-                    ) {
+                    if (isNaN(Number(curProduct.Product_ID))) {
                       saveEditItem();
                       return;
                     }
@@ -693,6 +697,7 @@ export default function productManagement() {
                     setProduct={setP}
                     isGray={index % 2 == 0}
                     setProducts={setProducts}
+                    showAlert={showAlert}
                   />
                 </div>
               ))}
