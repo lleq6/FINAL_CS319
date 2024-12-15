@@ -6,4 +6,5 @@ export default class UserInfo {
   Email: string = "";
   Phone: string = "";
   Access_Level: string = "";
+  [Key: string]: string | number | boolean;
 }

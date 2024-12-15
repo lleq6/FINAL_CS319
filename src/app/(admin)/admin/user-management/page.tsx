@@ -201,7 +201,8 @@ export default function userManagement() {
       const response = await fetch(`/api/user/GetUsers`);
       if (!response.ok) throw new Error("ERROR");
       const data = await response.json();
-      setData(data);
+      setUsersData(data);
+      setUsersDisplay(data);
     } catch (ex) {
       console.error(ex);
     }
@@ -223,7 +224,20 @@ export default function userManagement() {
     }
   }
 
-  const [data, setData] = useState([]);
+  const [usersData, setUsersData] = useState<UserInfo[]>([]);
+  const [usersDisplay, setUsersDisplay] = useState<UserInfo[]>([]);
+
+  useEffect(() => {
+    setPage([0, 6]);
+    const k = document.querySelectorAll(".join-item");
+    k.forEach((d, index) => {
+      if (index !== 0) {
+        d.classList.remove("bg-yellow-600");
+      } else {
+        d.classList.add("bg-yellow-600");
+      }
+    });
+  }, [usersDisplay]);
 
   useEffect(() => {
     fetchUsersData();
@@ -233,6 +247,7 @@ export default function userManagement() {
       <div className="pl-5">
         <h1>จัดการบัญชีผู้ใช้งาน</h1>
         <AddressModal
+          userID={curUser.User_ID}
           userAddresses={addressList}
           setAddresses={setAddressList}
           setCurAddress={setCurAddress}
@@ -251,7 +266,7 @@ export default function userManagement() {
           setState={setIsEditing}
         />
         <AdminSaveSuccess />
-        <AdminUserSidebar />
+        <AdminUserSidebar Users={usersData} setUsersDisplay={setUsersDisplay} />
         <div className="col-span-5 m-2">
           <div>
             <h1>รายละเอียดบัญชีผู้ใช้งาน</h1>
@@ -269,8 +284,8 @@ export default function userManagement() {
                       name="User_ID"
                       value={curUser.User_ID}
                       readOnly={true}
+                      disabled={true}
                       onChange={handleChange}
-                      disabled
                     />
                   </label>
                   <label className="form-control w-full max-w-xs mx-1">
@@ -406,9 +421,9 @@ export default function userManagement() {
                 </button>
               </div>
               <div className="join my-4">
-                {data.length > 6
+                {usersDisplay.length > 6
                   ? Array.from(
-                      { length: Math.ceil(data.length / 6) },
+                      { length: Math.ceil(usersDisplay.length / 6) },
                       (_, index) => (
                         <button
                           key={index}
@@ -447,7 +462,7 @@ export default function userManagement() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.slice(page[0], page[1]).map((e: UserInfo) => {
+                    {usersDisplay.slice(page[0], page[1]).map((e: UserInfo) => {
                       return (
                         <AdminUserTable
                           key={e.User_ID}
