@@ -34,8 +34,6 @@ const Navbar = () => {
     const session = useSession()
     const [Categories, setCategories] = useState<CategoryList[]>([])
     const [Loading, setLoading] = useState(true)
-    const [cartQuantity, setCartQuantity] = useState(0)
-    const { count, increment, decrement, setCounter } = useCounter();
     useEffect(()=>{
         const fetchData = async ()=>{
             try {
@@ -51,7 +49,7 @@ const Navbar = () => {
             const res = await fetch(`/api/cart/getCartItems?id=${session.data?.user.id}`)
             const d = await res.json()
             console.log(d.length,'dd')
-            setCounter(d.length)
+            // setCounter(d.length)
 
         }
         fetchData()
@@ -138,7 +136,7 @@ const Navbar = () => {
                     :
                     (<div className="flex content-center my-auto mx-auto">
                         <Link href={'/cart'}>
-                            <button className="text-start border rounded-box bg-yellow-400 py-2 px-2 flex m-auto"><FaShoppingCart className="content-center my-auto"/><span className="mx-1">{count}</span></button>
+                            <button className="text-start border rounded-box bg-yellow-400 py-2 px-2 flex m-auto" disabled><FaShoppingCart className="content-center my-auto"/><span className="mx-1"></span></button>
                         </Link>
                         <span className="content-center m-auto flex">Welcome
                         
@@ -175,7 +173,7 @@ const Navbar = () => {
                 <li><Link href={''} className="rounded-none p-4">โปรโมชั่น</Link></li>
                 <li><Link href={''} className="rounded-none p-4">ข่าวสาร</Link></li>
                 <li><Link href={'/contact'} className="rounded-none p-4">แคทตาล็อก</Link></li>
-                {session.data?.user?.role == 'a' ? 
+                {session.data?.user?.role == 1 ? 
                 <li className="bg-yellow-400 ml-auto mr-14">
                     <details id={'admin_menu'} className="h-full">
                     <summary className="rounded-none px-10 m-auto h-full font-semibold content-center">

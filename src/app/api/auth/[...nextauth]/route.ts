@@ -19,9 +19,16 @@ export const authConfig = {
       async authorize(credentials) {
         const fetch = await fetchOneUser(credentials?.email);
         const user = fetch.rows[0]
+        console.log(user)
         if(user){
-          const isPasswordMatch = encryptSomething(user.password) == credentials?.password
-          if(!isPasswordMatch) return null 
+          const isPasswordMatch = encryptSomething(user.Password) === credentials?.password.toString()
+          if(!isPasswordMatch) 
+          // console.log(user.Password, credentials?.password)
+            {
+              console.log('password not match')
+              return null
+
+            } 
         }
         return user ? user : null;
       },
@@ -32,7 +39,7 @@ export const authConfig = {
       if (user) {
         token.id = user.User_ID;
         token.role = user.Access_Level;
-        token.name = user.Full_Name
+        token.name = user.First_Name
       }
       return token;
     },
