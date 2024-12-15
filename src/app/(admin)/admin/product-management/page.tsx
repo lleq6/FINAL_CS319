@@ -8,7 +8,8 @@ import { error } from "console";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { MdErrorOutline } from "react-icons/md";
-import { FaInfoCircle } from "react-icons/fa";
+import { FaInfoCircle, FaUpload } from "react-icons/fa";
+import { IoIosAddCircle } from "react-icons/io";
 
 interface alertModalProps {
   header: string;
@@ -359,9 +360,9 @@ export default function productManagement() {
                 <div className="">
                   <label
                     htmlFor="files"
-                    className="btn border-gray-300 hover:bg-amber-500 hover:text-gray-600 hover:border-amber-500 btn-outline rounded-none w-[300px]"
+                    className="btn border-gray-300 bg-gray-200 hover:bg-yellow-500 hover: hover:border-yellow-500 rounded-none w-[300px]"
                     disabled={!curProduct.Product_ID ? true : false}
-                  >
+                  ><FaUpload className="text-xl" />
                     ..อัพโหลดรูปภาพ
                   </label>
                   <input
@@ -405,7 +406,7 @@ export default function productManagement() {
                     />
                   </label>
                   <button
-                    className="btn mt-auto mx-2"
+                    className="btn mt-auto mx-2 btn-outline border-yellow-500 border-2 hover:bg-green-700"
                     onClick={() => {
                       setCurProduct({
                         ...emptyProduct,
@@ -415,6 +416,7 @@ export default function productManagement() {
                     }}
                     disabled={curProduct.Product_ID ? true : false}
                   >
+                    <IoIosAddCircle className="text-xl m-auto"/>
                     เพิ่มสินค้า
                   </button>
                 </div>
@@ -637,7 +639,7 @@ export default function productManagement() {
             ></textarea>
             <div className="w-10/12 ml-2 mt-3 text-end space-x-5">
               <button
-                className="btn"
+                className="btn bg-gray-300 hover:bg-red-300"
                 disabled={!curProduct.Product_ID ? true : false}
                 onClick={() => {
                   setP(emptyProduct);
@@ -647,7 +649,7 @@ export default function productManagement() {
                 ยกเลิก
               </button>
               <button
-                className="btn ml-auto"
+                className="btn ml-auto bg-gray-300 hover:bg-yellow-300"
                 disabled={!curProduct.Product_ID ? true : false}
                 onClick={(e) => {
                   console.log(curProduct);
