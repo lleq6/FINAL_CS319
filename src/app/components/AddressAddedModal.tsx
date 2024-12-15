@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 interface AddressEditModalProps {
   Address: UserAddress | false;
   setAddress: (address: UserAddress) => void;
-  setAddressList: (address: UserAddress) => void;
+  setAddressList: (address: UserAddress[]) => void;
 }
 
 export default function AddressEditModal({
