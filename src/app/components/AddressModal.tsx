@@ -1,22 +1,22 @@
 import { FaEdit, FaTrash, FaCheckCircle, FaMinusCircle } from "react-icons/fa";
 import AddressEditModal from "./AddressAddedModal";
 import UserAddress from "@/app/model/AddressModel";
-import { SetStateAction, useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { SetStateAction, useState } from "react";
 
 interface AddressModalProps {
+  userID: string;
   userAddresses: UserAddress[];
   setAddresses: React.Dispatch<SetStateAction<UserAddress[]>>;
   setCurAddress: (address: UserAddress) => void;
 }
 
 export default function AddressModal({
+  userID,
   userAddresses,
   setAddresses,
   setCurAddress,
 }: AddressModalProps) {
   const [address, setAddress] = useState<UserAddress | boolean>(false);
-  const { data: session } = useSession();
 
   function AddressBox({
     address,
@@ -142,6 +142,7 @@ export default function AddressModal({
     <div>
       <dialog id="address-modal-edit" className="modal">
         <AddressEditModal
+          UserID={userID}
           Address={address}
           setAddress={setAddress}
           isAddNew={true}

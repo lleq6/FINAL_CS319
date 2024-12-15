@@ -1,12 +1,15 @@
 import { ProductInfo } from "@/app/model/Product";
 import { useState } from "react";
 
-
 interface Props {
   Products: ProductInfo[];
   setProducts: (e: any) => void;
 }
-export default function AdminProductSidebar({ Products, setProducts , isGray}: Props) {
+
+export default function AdminProductSidebar({
+  Products,
+  setProducts,
+}: Props) {
   const [selectSearch, setSelectSearch] = useState(0);
   const [status, setStatus] = useState(0);
   const [keyword, setKeyword] = useState("");
@@ -14,7 +17,9 @@ export default function AdminProductSidebar({ Products, setProducts , isGray}: P
   function search() {
     let result = Products;
     if (selectSearch) {
-      result = result.filter((e) => e[selectSearch].toString().includes(keyword));
+      result = result.filter((e) =>
+        e[selectSearch].toString().includes(keyword)
+      );
     }
     if (status) {
       if (status == 1) {
@@ -26,7 +31,6 @@ export default function AdminProductSidebar({ Products, setProducts , isGray}: P
       }
     }
     setProducts(result);
-    // console.log(result)
   }
   return (
     <div className="bg-gray-300 w-full">
@@ -41,11 +45,9 @@ export default function AdminProductSidebar({ Products, setProducts , isGray}: P
             className="select w-11/12"
           >
             <option value={0} disabled>
-              {" "}
               - เลือก -
             </option>
             <option value={"Product_ID"}>รหัสสินค้า</option>
-            {/* <option value={"Product_ID"}>รหัสสินค้า</option> */}
             <option value={"Name"}>ชื่อ</option>
             <option value={"Brand"}>ยี่ห้อ</option>
             <option value={"c_name"}>ประเภท</option>
@@ -94,8 +96,8 @@ export default function AdminProductSidebar({ Products, setProducts , isGray}: P
             className="btn"
             onClick={() => {
               setSelectSearch(0);
-              setStatus(0)
-              setKeyword('')
+              setStatus(0);
+              setKeyword("");
               setProducts(Products);
             }}
             // disabled={!selectSearch ? true : false}

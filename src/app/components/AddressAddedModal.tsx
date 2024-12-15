@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react";
 import UserAddress from "@/app/model/AddressModel";
 import ProvinceSelector from "./ProvinceSelector";
-import { useSession } from "next-auth/react";
+
 interface AddressEditModalProps {
+  UserID: string;
   Address: UserAddress | false;
   setAddress: (address: UserAddress) => void;
   setAddressList: (address: UserAddress) => void;
 }
 
 export default function AddressEditModal({
+  UserID,
   Address,
   setAddress,
   setAddressList,
 }: AddressEditModalProps) {
-  const session = useSession();
   const [localAddress, setLocalAddress] = useState<UserAddress>(
     Address || {
-      User_ID: "",
+      User_ID: UserID,
       Address_ID: "",
       Address_1: "",
       Address_2: "",
@@ -36,7 +37,7 @@ export default function AddressEditModal({
     }
     if (!Address) {
       setLocalAddress({
-        User_ID: session.data?.user.id,
+        User_ID: UserID,
         Address_ID: "",
         Address_1: "",
         Address_2: "",
@@ -52,8 +53,8 @@ export default function AddressEditModal({
     console.log("local");
   }, [Address]);
 
-  function handleChange(e) {
-    const { name, value } = e.target;
+  function handleChange(e: React.FormEvent<HTMLInputElement>) {
+    const { name, value } = e.currentTarget;
     setLocalAddress({
       ...localAddress,
       [name]: value,
