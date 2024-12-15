@@ -3,6 +3,7 @@ import AddressEditModal from "./AddressAddedModal";
 import UserAddress from "@/app/model/AddressModel";
 import { SetStateAction, useState } from "react";
 
+
 interface AddressModalProps {
   userID: string;
   userAddresses: UserAddress[];
@@ -17,7 +18,19 @@ export default function AddressModal({
   setCurAddress,
 }: AddressModalProps) {
   const [address, setAddress] = useState<UserAddress | boolean>(false);
-
+  // console.log(userID,'loguser')
+  const emptyAddress = {
+    User_ID: userID,
+    Address_ID: "",
+    Address_1: "",
+    Address_2: "",
+    Province: "",
+    District: "",
+    Sub_District: "",
+    Zip_Code: "",
+    Phone: "",
+    Is_Default: false,
+  }
   function AddressBox({
     address,
     setCurAddress,
@@ -168,7 +181,7 @@ export default function AddressModal({
           <div
             className="grid grid-cols-[9fr_1fr] border border-1 rounded-lg p-2 my-2 content-center py-5 hover:border-green-500 hover:text-green-500 text-center"
             onClick={() => {
-              setAddress(false);
+              setAddress(emptyAddress);
               (
                 document.getElementById(
                   "address-modal-edit"

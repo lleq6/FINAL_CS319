@@ -234,7 +234,7 @@ WHERE sc."Sub_Category_ID" = 2
     client.query(`DELETE FROM public."Cart_Detail" WHERE "User_ID"=$1`, [
       User_ID,
     ]),
-  addAddress: async (Address) => {
+  addAddress: async (Address) => 
     await client.query(
       `
         INSERT INTO public."Address" 
@@ -251,8 +251,8 @@ WHERE sc."Sub_Category_ID" = 2
         Address.Sub_District,
         Address.Phone,
       ]
-    );
-  },
+    )
+  ,
   deleteAddress: async (Address_ID) =>
     await client.query(`DELETE FROM public."Address" WHERE "Address_ID"=$1`, [
       Address_ID,

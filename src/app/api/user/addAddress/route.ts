@@ -6,8 +6,8 @@ export async function POST(req: NextRequest, res) {
   try {
     const request: UserAddress = await req.json();
     delete request.Address_ID;
-    await addAddress(request);
-    return NextResponse.json("add user address", { status: 200 });
+    const result = await addAddress(request);
+    return NextResponse.json(result.rows[0],{ status: 200 });
   } catch (error) {
     console.log(error);
     return NextResponse.json("error", { status: 400 });

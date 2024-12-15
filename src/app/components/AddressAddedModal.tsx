@@ -4,7 +4,7 @@ import ProvinceSelector from "./ProvinceSelector";
 
 interface AddressEditModalProps {
   UserID: string;
-  Address: UserAddress | false;
+  Address: UserAddress;
   setAddress: (address: UserAddress) => void;
   setAddressList: (address: UserAddress) => void;
 }
@@ -29,29 +29,17 @@ export default function AddressEditModal({
       Is_Default: true,
     }
   );
+  
 
   useEffect(() => {
     if (Address) {
       setLocalAddress(Address);
-      console.log(Address, "local");
     }
-    if (!Address) {
-      setLocalAddress({
-        User_ID: UserID,
-        Address_ID: "",
-        Address_1: "",
-        Address_2: "",
-        Province: "",
-        District: "",
-        Sub_District: "",
-        Zip_Code: "",
-        Phone: "",
-        Is_Default: false,
-      });
-      console.log("setlocal");
-    }
-    console.log("local");
   }, [Address]);
+
+  useEffect(()=>{
+  },[localAddress])
+
 
   function handleChange(e: React.FormEvent<HTMLInputElement>) {
     const { name, value } = e.currentTarget;
@@ -68,8 +56,7 @@ export default function AddressEditModal({
         method: "POST",
         body: JSON.stringify(localAddress),
       });
-      // console.log('adr-'+generateOrderId())
-      // console.log(addres)
+
       if (response.ok) {
         const { Address_ID } = await response.json();
         setAddressList((old) => [
@@ -82,12 +69,10 @@ export default function AddressEditModal({
       }
       alert("เกิดข้อผิดพลาดในการเพิ่มที่อยู่");
     }
-    if (!Address) {
-      Add();
-    }
-    // console.log(localAddress)
+    Add()
     document.getElementById("address-modal-edit").close();
   }
+  
   function editHandler(e: SubmitEvent) {
     e.preventDefault();
     async function Edit() {
@@ -111,13 +96,12 @@ export default function AddressEditModal({
       alert("เกิดข้อผิดพลาดในการแก้ไขที่อยู่");
     }
     Edit();
-    console.log(localAddress);
     document.getElementById("address-modal-edit").close();
   }
 
   return (
     <div className="modal-box w-11/12 max-w-4xl [&>lebel]:mx-auto">
-      {!Address ? (
+      {(Address.Address_ID == "") ? (
         <h3 className="font-bold text-lg">เพิ่มที่อยู่ใหม่</h3>
       ) : (
         <h3 className="font-bold text-lg">แก้ไขที่อยู่</h3>
@@ -187,7 +171,7 @@ export default function AddressEditModal({
         </label>
       </div>
 
-      {Address ? (
+      {!(Address.Address_ID == "") ? (
         <form onSubmit={editHandler}>
           <div className="modal-action">
             <button className="btn" type="submit">
