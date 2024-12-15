@@ -12,12 +12,12 @@ export default function ProvinceSelector({ address, setAddress } : any) {
 
     useEffect(() => {
         if (address.Province) {
-            setProvince(getAllProvinces.filter((e) => e.PROVINCE_NAME === address.Province)[0].PROVINCE_ID);
+            setProvince(getAllProvinces.filter((e:any) => e.PROVINCE_NAME === address.Province)[0].PROVINCE_ID);
         if (address.District) {
-            setDistrictID(getAllDistricts.filter((e) => e.DISTRICT_NAME === address.District)[0].DISTRICT_ID);
+            setDistrictID(getAllDistricts.filter((e:any) => e.DISTRICT_NAME === address.District)[0].DISTRICT_ID);
         }
         if (address.Sub_District) {
-            setSubDistrictID(getAllSubDistricts.filter((e) => e.SUB_DISTRICT_NAME === address.Sub_District)[0].SUB_DISTRICT_ID);
+            setSubDistrictID(getAllSubDistricts.filter((e:any) => e.SUB_DISTRICT_NAME === address.Sub_District)[0].SUB_DISTRICT_ID);
         }
         } else {
             setProvince(0);
@@ -28,19 +28,19 @@ export default function ProvinceSelector({ address, setAddress } : any) {
 
     useEffect(() => {
         if (!province) return;
-        setCurDistrict(getAllDistricts.filter((e) => e.PROVINCE_ID === province));
-        setAddress({ ...address, Province: getAllProvinces.filter((e) => e.PROVINCE_ID === province)[0].PROVINCE_NAME });
+        setCurDistrict(getAllDistricts.filter((e:any) => e.PROVINCE_ID === province));
+        setAddress({ ...address, Province: getAllProvinces.filter((e:any) => e.PROVINCE_ID === province)[0].PROVINCE_NAME });
     }, [province]);
 
     useEffect(() => {
         if (!districtID) return;
-        setCurSubDistrict(getAllSubDistricts.filter((e) => e.DISTRICT_ID === districtID));
-        setAddress({ ...address, District: getAllDistricts.filter((e) => e.DISTRICT_ID === districtID)[0].DISTRICT_NAME });
+        setCurSubDistrict(getAllSubDistricts.filter((e:any) => e.DISTRICT_ID === districtID));
+        setAddress({ ...address, District: getAllDistricts.filter((e:any) => e.DISTRICT_ID === districtID)[0].DISTRICT_NAME });
     }, [districtID]);
 
     useEffect(() => {
         if (!subDistrictID) return;
-        setAddress({ ...address, Sub_District: getAllSubDistricts.filter((e) => e.SUB_DISTRICT_ID === subDistrictID)[0].SUB_DISTRICT_NAME });
+        setAddress({ ...address, Sub_District: getAllSubDistricts.filter((e:any) => e.SUB_DISTRICT_ID === subDistrictID)[0].SUB_DISTRICT_NAME });
     }, [subDistrictID]);
 
     return (
@@ -54,7 +54,7 @@ export default function ProvinceSelector({ address, setAddress } : any) {
                     onChange={(e) => setProvince(parseInt(e.target.value))}
                 >
                     <option value={0} disabled>จังหวัด</option>
-                    {getAllProvinces.map((e) => (
+                    {getAllProvinces.map((e:any) => (
                         <option key={e.PROVINCE_NAME} value={e.PROVINCE_ID}>{e.PROVINCE_NAME}</option>
                     ))}
                 </select>
@@ -70,7 +70,7 @@ export default function ProvinceSelector({ address, setAddress } : any) {
                     disabled={!province}
                 >
                     <option value={0} disabled>เขต/อำเภอ</option>
-                    {curDistrict.map((e) => (
+                    {curDistrict.map((e:any) => (
                         <option key={e.DISTRICT_NAME} value={e.DISTRICT_ID}>{e.DISTRICT_NAME}</option>
                     ))}
                 </select>
@@ -86,7 +86,7 @@ export default function ProvinceSelector({ address, setAddress } : any) {
                     disabled={!districtID}
                 >
                     <option value={0} disabled>แขวง/ตำบล</option>
-                    {curSubDistrict.map((e) => (
+                    {curSubDistrict.map((e:any) => (
                         <option key={e.SUB_DISTRICT_NAME} value={e.SUB_DISTRICT_ID}>{e.SUB_DISTRICT_NAME}</option>
                     ))}
                 </select>
