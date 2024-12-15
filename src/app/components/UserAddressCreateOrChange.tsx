@@ -8,7 +8,7 @@ import {
 import AddressInfo from "../model/AddressInfo";
 import { useDialog } from "../context/DialogContext";
 import ProvinceSelector from "./ProvinceSelector";
-import { isEmptyAddressData, isValidPhone } from "../api/lib/utils";
+import { isEmptyAddressData, isValidPhone, isValidZipCode } from "../api/lib/utils";
 
 interface AddressCreateOrChangeProps {
   UserID: string;
@@ -97,6 +97,36 @@ const UserAddressCreateOrChange = ({
       }
     }
     e.preventDefault();
+    if (isEmptyAddressData(localAddress)) {
+      showDialog({
+        ID: "addressDataEmpty",
+        Header: "จัดการข้อมูลที่อยู่",
+        Type: "error",
+        Message: `กรุณากรอกข้อมูลให้ครบ!`,
+        onClose: () => {},
+      });
+      return;
+    }
+    if (!isValidZipCode(localAddress.Zip_Code)) {
+      showDialog({
+        ID: "addressZipCodeInvalid",
+        Header: "จัดการข้อมูลที่อยู่",
+        Type: "error",
+        Message: `กรุณากรอกข้อมูลรหัสไปรษณีย์ให้ถูกต้อง!`,
+        onClose: () => {},
+      });
+      return;
+    }
+    if (!isValidPhone(localAddress.Phone)) {
+      showDialog({
+        ID: "addressPhoneInvalid",
+        Header: "จัดการข้อมูลที่อยู่",
+        Type: "error",
+        Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,
+        onClose: () => {},
+      });
+      return;
+    }
     onCreate();
   }
 
@@ -149,9 +179,19 @@ const UserAddressCreateOrChange = ({
       });
       return;
     }
+    if (!isValidZipCode(localAddress.Zip_Code)) {
+      showDialog({
+        ID: "addressZipCodeInvalid",
+        Header: "จัดการข้อมูลที่อยู่",
+        Type: "error",
+        Message: `กรุณากรอกข้อมูลรหัสไปรษณีย์ให้ถูกต้อง!`,
+        onClose: () => {},
+      });
+      return;
+    }
     if (!isValidPhone(localAddress.Phone)) {
       showDialog({
-        ID: "addressInvalidData",
+        ID: "addressPhoneInvalid",
         Header: "จัดการข้อมูลที่อยู่",
         Type: "error",
         Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,

@@ -1,4 +1,4 @@
-import { SetStateAction, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import AddressInfo from "../model/AddressInfo";
 import { FaCheckCircle, FaEdit, FaMinusCircle, FaTrash } from "react-icons/fa";
 import { useDialog } from "../context/DialogContext";
@@ -57,9 +57,11 @@ const UserAddressManagement = ({
   }
 
   function AddressDetail({ index, address, setCurAddress }: UserAddressDetail) {
-    if (address.Is_Default) {
-      setOldAddress(address);
-    }
+    useEffect(() => {
+      if (address.Is_Default) {
+        setOldAddress(address);
+      }
+    }, [address]);
     return (
       <div
         className={`grid grid-cols-[1fr_9fr_1fr] border border-1 rounded-lg p-2 my-2 content-center hover:border-green-500 ${
@@ -197,6 +199,7 @@ const UserAddressManagement = ({
           </form>
           {Addresses.map((address: AddressInfo, index) => (
             <AddressDetail
+              key={address.Address_ID}
               index={index}
               address={address}
               setCurAddress={setCurAddress}

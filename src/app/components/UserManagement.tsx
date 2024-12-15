@@ -5,8 +5,97 @@ import React, { MouseEvent, useEffect, useState } from "react";
 import AddressInfo from "@/app/model/AddressInfo";
 import { FaTrashAlt, FaUserEdit } from "react-icons/fa";
 import { useDialog } from "../context/DialogContext";
-import { isEmptyUserData, isValidUserData } from "../api/lib/utils";
+import { isEmptyUserData, isValidEmail, isValidPhone } from "../api/lib/utils";
 import UserAddressManagement from "./UserAddressManagement";
+
+interface UserDetailProps {
+  User: UserInfo;
+  onSelectUser: (User: UserInfo) => void;
+  onClearData: () => void;
+  fetchUsersData: () => void;
+}
+
+function UserDetail(props: UserDetailProps) {
+  const { showDialog } = useDialog();
+  return (
+    <tr>
+      <td key="User_ID">{props.User.User_ID}</td>
+      <td key="Email">{props.User.Email}</td>
+      <td key="First_Name">{props.User.First_Name}</td>
+      <td key="Last_Name">{props.User.Last_Name}</td>
+      <td key="Phone">{props.User.Phone}</td>
+      <td key="Access_Level">
+        {props.User.Access_Level == "1" ? "ผู้ดูแลระบบ" : "สมาชิกทั่วไป"}
+      </td>
+      <td width={200} key="Action">
+        <button
+          className="btn bg-yellow-500"
+          onClick={() => {
+            props.onSelectUser(props.User);
+          }}
+        >
+          <FaUserEdit />
+          แก้ไข
+        </button>
+        <button
+          className="btn bg-red-500"
+          onClick={() => {
+            showDialog({
+              ID: "deleteUser",
+              Header: "ลบบัญชีผู้ใช้งาน",
+              Type: "info",
+              Message: `คุณต้องการลบบัญชีผู้ใช้ User ID : ${props.User.User_ID} ใช่ไหม?`,
+              onConfirm: async () => {
+                try {
+                  const response = await fetch(`/api/admin/deleteUser`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                      User_ID: props.User.User_ID,
+                    }),
+                  });
+                  if (response.ok) {
+                    const data = await response.status;
+                    if (data == 200) {
+                      showDialog({
+                        ID: "deleteSuccess",
+                        Header: "ลบบัญชีผู้ใช้งาน",
+                        Type: "info",
+                        Message: `ลบบัญชีผู้ใช้ User ID : ${props.User.User_ID} สำเร็จ!`,
+                        onClose: () => {},
+                      });
+                      props.onClearData();
+                      props.fetchUsersData();
+                    }
+                  } else {
+                    showDialog({
+                      ID: "error",
+                      Header: "Respone Error",
+                      Type: "error",
+                      Message: `Respone ล้มเหลว!`,
+                      onClose: () => {},
+                    });
+                  }
+                } catch (ex) {
+                  showDialog({
+                    ID: "deleteError",
+                    Header: "ลบบัญชีผู้ใช้งาน",
+                    Type: "info",
+                    Message: `ลบบัญชีผู้ใช้ User ID : ${props.User.User_ID} ล้มเหลว!\n${ex}`,
+                    onClose: () => {},
+                  });
+                }
+              },
+              onCancel: () => {},
+            });
+          }}
+        >
+          <FaTrashAlt />
+          ลบ
+        </button>
+      </td>
+    </tr>
+  );
+}
 
 const UserManagement = () => {
   const { showDialog } = useDialog();
@@ -76,12 +165,22 @@ const UserManagement = () => {
       });
       return;
     }
-    if (!isValidUserData(curUser)) {
+    if (!(isValidEmail(curUser.Email))) {
       showDialog({
-        ID: "addInvalidData",
+        ID: "addEmailInvalid",
         Header: "เพิ่มข้อมูลบัญชีผู้ใช้",
         Type: "error",
-        Message: `กรุณากรอกข้อมูลให้ถูกต้อง!`,
+        Message: `กรุณากรอกข้อมูลอีเมลให้ถูกต้อง!`,
+        onClose: () => {},
+      });
+      return;
+    }
+    if (!(isValidPhone(curUser.Phone))) {
+      showDialog({
+        ID: "addPhoneInvalid",
+        Header: "เพิ่มข้อมูลบัญชีผู้ใช้",
+        Type: "error",
+        Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,
         onClose: () => {},
       });
       return;
@@ -161,8 +260,8 @@ const UserManagement = () => {
       Header: "บันทึกข้อมูลบัญชีผู้ใช้",
       Type: "info",
       Message: `คุณต้องการบันทึกข้อมูลบัญชี User ID : ${curUser.User_ID} ใช่ไหม?`,
-      onConfirm: async () => {
-        if (await isEmptyUserData(curUser)) {
+      onConfirm: () => {
+        if (isEmptyUserData(curUser)) {
           showDialog({
             ID: "saveDataEmpty",
             Header: "บันทึกข้อมูลบัญชีผู้ใช้",
@@ -172,12 +271,22 @@ const UserManagement = () => {
           });
           return;
         }
-        if (!(await isValidUserData(curUser))) {
+        if (!(isValidEmail(curUser.Email))) {
           showDialog({
-            ID: "saveInvalidData",
+            ID: "saveEmailInvalid",
             Header: "บันทึกข้อมูลบัญชีผู้ใช้",
             Type: "error",
-            Message: `กรุณากรอกข้อมูลให้ถูกต้อง!`,
+            Message: `กรุณากรอกข้อมูลอีเมลให้ถูกต้อง!`,
+            onClose: () => {},
+          });
+          return;
+        }
+        if (!(isValidPhone(curUser.Phone))) {
+          showDialog({
+            ID: "savePhoneInvalid",
+            Header: "บันทึกข้อมูลบัญชีผู้ใช้",
+            Type: "error",
+            Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,
             onClose: () => {},
           });
           return;
@@ -554,91 +663,23 @@ const UserManagement = () => {
                     </tr>
                   </thead>
                   <tbody key="tbody">
-                    {usersDisplay.length > 0 ? usersDisplay.slice(page[0], page[1]).map((e: UserInfo) => {
-                      return (
-                        <tr>
-                          <td key="User_ID">{e.User_ID}</td>
-                          <td key="Email">{e.Email}</td>
-                          <td key="First_Name">{e.First_Name}</td>
-                          <td key="Last_Name">{e.Last_Name}</td>
-                          <td key="Phone">{e.Phone}</td>
-                          <td key="Access_Level">
-                            {e.Access_Level == "1"
-                              ? "ผู้ดูแลระบบ"
-                              : "สมาชิกทั่วไป"}
-                          </td>
-                          <td width={200} key="Action">
-                            <button
-                              className="btn bg-yellow-500"
-                              onClick={() => {
-                                onSelectUser(e);
-                              }}
-                            >
-                              <FaUserEdit />
-                              แก้ไข
-                            </button>
-                            <button
-                              className="btn bg-red-500"
-                              onClick={() => {
-                                showDialog({
-                                  ID: "deleteUser",
-                                  Header: "ลบบัญชีผู้ใช้งาน",
-                                  Type: "info",
-                                  Message: `คุณต้องการลบบัญชีผู้ใช้ User ID : ${e.User_ID} ใช่ไหม?`,
-                                  onConfirm: async () => {
-                                    try {
-                                      const response = await fetch(
-                                        `/api/admin/deleteUser`,
-                                        {
-                                          method: "POST",
-                                          body: JSON.stringify({
-                                            User_ID: e.User_ID,
-                                          }),
-                                        }
-                                      );
-                                      if (response.ok) {
-                                        const data = await response.status;
-                                        if (data == 200) {
-                                          showDialog({
-                                            ID: "deleteSuccess",
-                                            Header: "ลบบัญชีผู้ใช้งาน",
-                                            Type: "info",
-                                            Message: `ลบบัญชีผู้ใช้ User ID : ${e.User_ID} สำเร็จ!`,
-                                            onClose: () => {},
-                                          });
-                                          onClearData();
-                                          fetchUsersData();
-                                        }
-                                      } else {
-                                        showDialog({
-                                          ID: "error",
-                                          Header: "Respone Error",
-                                          Type: "error",
-                                          Message: `Respone ล้มเหลว!`,
-                                          onClose: () => {},
-                                        });
-                                      }
-                                    } catch (ex) {
-                                      showDialog({
-                                        ID: "deleteError",
-                                        Header: "ลบบัญชีผู้ใช้งาน",
-                                        Type: "info",
-                                        Message: `ลบบัญชีผู้ใช้ User ID : ${e.User_ID} ล้มเหลว!\n${ex}`,
-                                        onClose: () => {},
-                                      });
-                                    }
-                                  },
-                                  onCancel: () => {},
-                                });
-                              }}
-                            >
-                              <FaTrashAlt />
-                              ลบ
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    }) : <tr></tr>}
+                    {usersDisplay.length > 0 ? (
+                      usersDisplay
+                        .slice(page[0], page[1])
+                        .map((e: UserInfo) => {
+                          return (
+                            <UserDetail
+                              key={e.User_ID}
+                              User={e}
+                              onSelectUser={onSelectUser}
+                              onClearData={onClearData}
+                              fetchUsersData={fetchUsersData}
+                            />
+                          );
+                        })
+                    ) : (
+                      <tr></tr>
+                    )}
                   </tbody>
                 </table>
               </div>

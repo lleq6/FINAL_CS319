@@ -4,6 +4,7 @@ import { createHmac } from "crypto";
 require("dotenv").config();
 
 const phoneRegex = /^\d{10}$/;
+const zipCodeRegex = /^\d{5}$/;
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const isValidEmail = (email: string): boolean => {
@@ -12,6 +13,10 @@ const isValidEmail = (email: string): boolean => {
 
 const isValidPhone = (phone: string): boolean => {
   return phoneRegex.test(phone.replace(/[^0-9]/g, ""));
+};
+
+const isValidZipCode = (zipCode: string): boolean => {
+  return zipCodeRegex.test(zipCode);
 };
 
 const generateOrderId = () => {
@@ -35,8 +40,9 @@ const isEmptyUserData = (User: UserInfo) => {
 
 const isEmptyAddressData = (Address: AddressInfo) => {
   let isEmpty: boolean = false;
+  console.log(Address);
   for (const key in Address) {
-    if (key === "User_ID") {
+    if (key === "Address_ID") {
       continue;
     }
     if (Address[key as keyof AddressInfo] === "") {
@@ -46,14 +52,10 @@ const isEmptyAddressData = (Address: AddressInfo) => {
   return isEmpty;
 };
 
-const isValidUserData = (User: UserInfo): boolean => {
-  return isValidEmail(User.Email) && isValidPhone(User.Phone);
-};
-
 const hashMD5 = (plaintext: string, salt: string): string => {
   const hash = createHmac('md5', salt);
   hash.update(plaintext);
   return hash.digest('hex');
 };
 
-export { generateOrderId, isEmptyUserData, isEmptyAddressData, isValidUserData, hashMD5, isValidPhone };
+export { generateOrderId, isEmptyUserData, isEmptyAddressData, hashMD5, isValidEmail, isValidPhone, isValidZipCode };
