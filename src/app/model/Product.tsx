@@ -1,6 +1,6 @@
 export interface ProductInfo {
     Product_ID: string;
-    Child_ID: number;
+    Child_ID: string;
     Name: string;
     Brand: string;
     Description: string;

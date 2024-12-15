@@ -27,7 +27,7 @@ import { DialogProps } from "@/app/model/DialogProps";
 // Create an empty data variable
 const emptyProduct: ProductInfo = {
   Product_ID: "",
-  Child_ID: 0,
+  Child_ID: '0',
   Name: "",
   Brand: "",
   Description: "",
@@ -178,7 +178,8 @@ export default function productManagement() {
 
   useEffect(() => {
     if (CurSubCategory) {
-      setChild(CurSubCategory.Child_Category);
+      console.log(CurSubCategory)
+      setChild(CurSubCategory.ChildCategory);
     }
   }, [CurSubCategory]);
 
@@ -192,7 +193,7 @@ export default function productManagement() {
     setChild(
       curCategory?.Sub_Category.find(
         (sub) => sub.Sub_Category_ID == p.s_id.toString()
-      )?.Child_Category
+      )?.ChildCategory
     );
   }
 
@@ -216,7 +217,7 @@ export default function productManagement() {
       newErrors.Quantity = "โปรดกรอกจำนวนที่ถูกต้อง";
     if (curProduct.Sale_Cost < 0) newErrors.Sale_Cost = "โปรดกรอกราคา";
     if (!curProduct.Unit) newErrors.Unit = "โปรดกรอกหน่่วยสินค้า";
-    if (curProduct.Child_ID <= 0)
+    if (curProduct.Child_ID == '0')
       newErrors.Child_ID = "โปรดเลือกหมวดหมู่สินค้า";
     // if (curProduct.Sale_Price < 0) newErrors.Sale_Price = 'Sale Price cannot be negative';
     setErrors(newErrors);
@@ -279,7 +280,7 @@ export default function productManagement() {
         ...Products,
         { ...curProduct, Product_ID: data.Product_ID },
       ]);
-      // setCurProduct(emptyProduct);
+      setCurProduct(emptyProduct);
       // alert("เพิ่มสินค้าเข้าสู่ระบบเรียบร้อย");
       showAlert({
         header: "แจ้งเตือน",
@@ -547,7 +548,7 @@ export default function productManagement() {
                         setCurProduct((old) => {
                           const p = {
                             ...old,
-                            Child_ID: parseInt(e.target.value),
+                            Child_ID: e.target.value,
                           };
                           return p;
                         });
@@ -660,7 +661,7 @@ export default function productManagement() {
                 onClick={(e) => {
                   console.log(curProduct);
                   if (validate()) {
-                    if (isNaN(Number(curProduct.Product_ID))) {
+                    if (!isNaN(Number(curProduct.Product_ID))) {
                       saveEditItem();
                       return;
                     }

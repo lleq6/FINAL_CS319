@@ -12,7 +12,7 @@ const ImageWithCheck = ({ src, alt, height, width } : {src:string, alt:string, h
     }, [src]);
   
     return imageLoaded && src ? (
-      <Image src={src} alt={alt} height={height} width={width} />
+      <Image src={src} alt={alt} height={height} width={width} className="m-auto"/>
     ) : (
       <div className={`flex m-auto w-[${width}px] h-[${height}px] bg-gray-300`}>
         <p className="m-auto text-center">ไม่สามารถแสดงภาพ...</p>
