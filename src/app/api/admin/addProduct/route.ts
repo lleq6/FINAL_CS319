@@ -7,7 +7,7 @@ import { ProductInfo } from "@/app/model/Product";
 export async function POST(req: NextRequest, res: NextApiResponse) {
   // const formData : FormData = req.formData()
   const formData = await req.formData();
-  let Product: ProductInfo = JSON.parse(formData.get("Product"));
+  let Product: ProductInfo = JSON.parse(formData.get("Product") as string);
   const imgFile = formData.get("myfile");
 
   if (imgFile) {
@@ -29,8 +29,8 @@ export async function POST(req: NextRequest, res: NextApiResponse) {
     }
   }
   // const c = await formData.file()
-  const keys = new Array();
-  const values = [];
+  const keys : string[] = new Array();
+  const values : string[] = [];
   Object.keys(Product).forEach((key) => {
     if (
       [

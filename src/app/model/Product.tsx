@@ -17,6 +17,6 @@ export interface ProductInfo {
     s_id: number;
     s_name: string;
     cc_name: string;
-    [key: string]: string | number | boolean;
+    [key: string]: any
 
   }
