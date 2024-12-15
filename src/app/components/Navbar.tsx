@@ -145,7 +145,7 @@ const Navbar = () => {
                         <div className="dropdown dropdown-left">
                         <a className="link link-hover content-center px-2 flex" tabIndex={0} role="button">{session.data?.user?.name}<GoTriangleDown className="my-auto"></GoTriangleDown></a>
                         {/* <div tabIndex={0} role="button" className="btn m-1">Click</div> */}
-                            <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                            <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[99] w-52 p-2 shadow">
                                 {/* <button className="btn" onClick={() => {signOut()}}>sign out</button> */}
                                 <li><a>ประวัติการสั่งซื้อ</a></li>
                                 <li><a onClick={(e) => {

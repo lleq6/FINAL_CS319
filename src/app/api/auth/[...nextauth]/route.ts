@@ -3,6 +3,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 // import { query } from '../../lib/db'
 import { fetchOneUser } from "../../lib/db";
 
+function encryptSomething(text : string){
+//เข้ารหัสข้อมูล
+
+  return text
+}
+
 export const authConfig = {
   providers: [
     CredentialsProvider({
@@ -11,14 +17,12 @@ export const authConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const fetch = await fetchOneUser(credentials?.email); // Replace with your login function
-        // console.log(user,'kk')
+        const fetch = await fetchOneUser(credentials?.email);
         const user = fetch.rows[0]
         if(user){
-          // console.log(credentials)
-          // console.log(user)
+          const isPasswordMatch = encryptSomething(user.password) == credentials?.password
+          if(!isPasswordMatch) return null 
         }
-        
         return user ? user : null;
       },
     }),
@@ -42,7 +46,7 @@ export const authConfig = {
   session: {
     strategy: 'jwt',
   },
-  secret: process.env.NEXTAUTH_SECRET, // Add your secret in .env file
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authConfig);
