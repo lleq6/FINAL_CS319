@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteAddress } from "../../lib/db";
 
-export async function POST(req: NextRequest, res) {
+export async function POST(req: NextRequest, res: NextResponse) {
   const { Address_ID } = await req.json();
   try {
     await deleteAddress(Address_ID);

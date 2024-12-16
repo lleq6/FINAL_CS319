@@ -16,7 +16,7 @@ export default function LoginModal() {
       [name]: value,
     });
   }
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const email = curUser.Email;
     const password = curUser.Password;
@@ -26,11 +26,11 @@ export default function LoginModal() {
       password,
     });
     if (res.error) {
-      document.getElementById("login-fail").showModal();
+      (document.getElementById("login-fail") as HTMLDialogElement).showModal();
       return;
     }
-    document?.getElementById("my_modal_1")?.close();
-    document.getElementById("login-success").showModal();
+    (document?.getElementById("my_modal_1") as HTMLDialogElement)?.close();
+    (document.getElementById("login-success") as HTMLDialogElement).showModal();
   };
   // console.log(curUser.Email)
 
@@ -87,8 +87,8 @@ export default function LoginModal() {
         <a
           className="link"
           onClick={() => {
-            document?.getElementById("my_modal_1").close();
-            document?.getElementById("my_modal_2").showModal();
+            (document?.getElementById("my_modal_1") as HTMLDialogElement).close();
+            (document?.getElementById("my_modal_2") as HTMLDialogElement).showModal();
           }}
         >
           สมัครสมาชิก
@@ -97,3 +97,4 @@ export default function LoginModal() {
     </div>
   );
 }
+

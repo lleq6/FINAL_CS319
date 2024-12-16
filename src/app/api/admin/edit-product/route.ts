@@ -15,7 +15,7 @@ export async function POST(req: NextRequest, res: NextApiResponse) {
       return;
     }
     keys.push(`"${e}"=$${index + 1}`);
-    values.push(product[e]);
+    values.push(String(product[e]));
   });
   const queryString = `
     UPDATE public."Product"
@@ -29,6 +29,4 @@ export async function POST(req: NextRequest, res: NextApiResponse) {
   } catch (error) {
     return NextResponse.json({ error: "edit error" }, { status: 400 });
   }
-  console.log(values);
-  console.log(queryString);
 }

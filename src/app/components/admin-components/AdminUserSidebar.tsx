@@ -53,11 +53,10 @@ export default function AdminUserSidebar({ Users, setUsersDisplay }: Props) {
           onChange={handleFilterChange}
         >
           <option value={"User_ID"}>User ID</option>
-          <option value={"Username"}>ชื่อผู้ใช้</option>
+          <option value={"Email"}>อีเมล</option>
           <option value={"First_Name"}>ชื่อ</option>
           <option value={"Last_Name"}>นามสกุล</option>
           <option value={"Phone"}>เบอร์โทรศัพท์</option>
-          <option value={"Email"}>อีเมล</option>
         </select>
       </label>
 

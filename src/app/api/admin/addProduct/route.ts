@@ -29,8 +29,8 @@ export async function POST(req: NextRequest, res: NextApiResponse) {
     }
   }
   // const c = await formData.file()
-  const keys : string[] = new Array();
-  const values : string[] = [];
+  const keys = new Array();
+  const values = [];
   Object.keys(Product).forEach((key) => {
     if (
       [
