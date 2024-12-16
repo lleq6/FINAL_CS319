@@ -2,13 +2,18 @@ const fs = require("fs");
 const pg = require("pg");
 const url = require("url");
 const { Pool } = require("pg");
+const { hashMD5 } = require("./utils");
 require("dotenv").config();
+
 const config = {
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   database: process.env.DB_NAME,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
   ssl: {
     rejectUnauthorized: true,
     ca: process.env.DB_CACERT,
@@ -20,7 +25,7 @@ const client = new Pool(config);
 module.exports = {
   fetchUsers: async () => {
     const data = await client.query(
-      `SELECT "User_ID", "Username", "First_Name","Last_Name", "Email", "Phone", "Access_Level" FROM public."User" ORDER BY "User_ID" ASC`
+      `SELECT "User_ID", "Email", "First_Name","Last_Name", "Phone", "Access_Level" FROM public."User" ORDER BY "User_ID" ASC`
     );
     return data.rows;
   },
@@ -201,39 +206,6 @@ WHERE sc."Sub_Category_ID" = 2
         `,
       [Child_ID]
     ),
-
-  insertToCart: async (id, product_id, Quantity) =>
-    await client.query(
-      `INSERT INTO public."Cart_Detail" ("User_ID", "Product_ID", "Quantity") VALUES
-    ($1, $2, $3)`,
-      [id, product_id, Quantity]
-    ),
-
-  fetchItemsInCart: async (user_id) =>
-    await client.query(
-      `
-        SELECT 
-            cd."Quantity" as "cd_Quantity",
-            p.*
-        FROM
-            public."Cart_Detail" cd
-        JOIN
-            public."Product" p ON p."Product_ID" IN (SELECT cd."Product_ID" WHERE cd."User_ID" = $1)
-        WHERE
-            cd."User_ID" = $1
-        `,
-      [user_id]
-    ),
-  removeItemFromCart: async (user_id, product_id) =>
-    await client.query(
-      `DELETE FROM public."Cart_Detail" WHERE "User_ID"=$1 AND "Product_ID"=$2`,
-      [user_id, product_id]
-    ),
-
-  clearCart: async (User_ID) =>
-    client.query(`DELETE FROM public."Cart_Detail" WHERE "User_ID"=$1`, [
-      User_ID,
-    ]),
   addAddress: async (Address) =>
     await client.query(
       `
@@ -256,7 +228,6 @@ WHERE sc."Sub_Category_ID" = 2
     await client.query(`DELETE FROM public."Address" WHERE "Address_ID"=$1`, [
       Address_ID,
     ]),
-
   getUserAddress: async (User_ID) => {
     const data = await client.query(
       `SELECT * FROM public."Address" WHERE "User_ID"=$1 ORDER BY "Address_ID" ASC`,
@@ -284,9 +255,9 @@ WHERE sc."Sub_Category_ID" = 2
     );
   },
   deleteUser: async (User_ID) => {
-    await client.query(
-      `DELETE FROM public."User" WHERE "User_ID" = ${User_ID};`
-    );
+    await client.query(`DELETE FROM public."User" WHERE "User_ID" = $1;`, [
+      User_ID,
+    ]);
   },
   updateUser: async (user) => {
     const columns = [];
@@ -307,27 +278,37 @@ WHERE sc."Sub_Category_ID" = 2
       values
     );
   },
-  addUser: async (User) =>
+  addUser: async (User) => {
     await client.query(
       `
-        INSERT INTO public."User" 
-        ("Username", "Password", "First_Name", "Last_Name", "Email", "Phone", "Access_Level") 
-        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "User_ID";`,
+          INSERT INTO public."User" 
+          ("Email", "Password", "First_Name", "Last_Name", "Phone", "Access_Level") 
+          VALUES ($1, $2, $3, $4, $5, $6) RETURNING "User_ID";`,
       [
-        User.Username,
-        "123456",
+        User.Email,
+        hashMD5("123456", process.env.SALT_SECRET),
         User.First_Name,
         User.Last_Name,
-        User.Email,
         User.Phone,
         User.Access_Level,
       ]
-    ),
-  checkUsername: async (Username) => {
+    );
+  },
+  checkEmail: async (Email) => {
     const data = await client.query(
-      `SELECT COUNT(*) FROM public."User" WHERE "Username"=$1`,
-      [Username]
+      `SELECT COUNT(*) FROM public."User" WHERE "Email"=$1`,
+      [Email]
     );
     return data.rows[0];
+  },
+  deleteAddressByUserID: async (UserID) =>
+    await client.query(`DELETE FROM public."Address" WHERE "User_ID"=$1`, [
+      UserID,
+    ]),
+  resetPassword: async (UserID) => {
+    await client.query(
+      `UPDATE public."User" SET "Password" = $1 WHERE "User_ID" = $2;`,
+      [hashMD5("123456", process.env.SALT_SECRET), UserID]
+    );
   },
 };

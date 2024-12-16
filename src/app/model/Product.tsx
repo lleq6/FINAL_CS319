@@ -1,6 +1,6 @@
 export interface ProductInfo {
     Product_ID: string;
-    Child_ID: number;
+    Child_ID: string;
     Name: string;
     Brand: string;
     Description: string;
@@ -17,6 +17,6 @@ export interface ProductInfo {
     s_id: number;
     s_name: string;
     cc_name: string;
-    [key: string]: string | number | boolean;
+    [key: string]: any
 
   }

@@ -3,6 +3,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 // import { query } from '../../lib/db'
 import { fetchOneUser } from "../../lib/db";
 
+function encryptSomething(text : string){
+//เข้ารหัสข้อมูล
+
+  return text
+}
+
 export const authConfig = {
   providers: [
     CredentialsProvider({
@@ -11,14 +17,19 @@ export const authConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const fetch = await fetchOneUser(credentials?.email); // Replace with your login function
-        // console.log(user,'kk')
+        const fetch = await fetchOneUser(credentials?.email);
         const user = fetch.rows[0]
+        console.log(user)
         if(user){
-          // console.log(credentials)
-          // console.log(user)
+          const isPasswordMatch = encryptSomething(user.Password) === credentials?.password.toString()
+          if(!isPasswordMatch) 
+          // console.log(user.Password, credentials?.password)
+            {
+              console.log('password not match')
+              return null
+
+            } 
         }
-        
         return user ? user : null;
       },
     }),
@@ -28,7 +39,7 @@ export const authConfig = {
       if (user) {
         token.id = user.User_ID;
         token.role = user.Access_Level;
-        token.name = user.Full_Name
+        token.name = user.First_Name
       }
       return token;
     },
@@ -42,7 +53,7 @@ export const authConfig = {
   session: {
     strategy: 'jwt',
   },
-  secret: process.env.NEXTAUTH_SECRET, // Add your secret in .env file
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authConfig);

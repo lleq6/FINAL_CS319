@@ -4,13 +4,25 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { MdErrorOutline } from "react-icons/md";
+import AlertModal from "../alertModal";
+import { Dispatch, SetStateAction } from "react";
 interface AdminProductProps {
   product: ProductInfo;
   setProduct: (product: ProductInfo) => void;
-  setProducts: (product: ProductInfo[]) => void;
+  setProducts: Dispatch<SetStateAction<ProductInfo[]>>;
   isGray: boolean;
+  showAlert: (alert : alertModal) => void;
 }
-const ImageWithCheck = ({ src, alt, height, width }) => {
+
+interface alertModal {
+  header: string;
+  message: string;
+  errorStatus: boolean;
+  callback?: () => void | undefined;
+}
+
+
+const ImageWithCheck = ({ src , alt, height, width } : {src:string, alt:string, height:number, width:number}) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {

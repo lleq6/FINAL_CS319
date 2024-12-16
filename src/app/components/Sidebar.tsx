@@ -10,8 +10,7 @@ export default function Sidebar(){
         <div className="bg-slate-600">
             <ul className="contentt">
                 <li className="collapsible" onClick={(e) => {
-                    const item = document.getElementsByClassName('contentt')
-                    console.log(item);
+                    const item = document.getElementsByClassName('contentt')[0] as HTMLUListElement
                     if (item.classList.contains('active')){
                         item.classList.add('hidden')
                         document.getElementsByClassName('content')[1].classList.add('block')

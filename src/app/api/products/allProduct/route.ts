@@ -1,13 +1,11 @@
-import { NextRequest, NextResponse } from "next/server"
-import { fetchAllProduct } from "../../lib/db"
+import { NextRequest, NextResponse } from "next/server";
+import { fetchAllProduct } from "../../lib/db";
 
-
-export async function GET(req : NextRequest, res) {
-  const product = await fetchAllProduct()
-  console.log(product)
-  if (!product){
-    return NextResponse.json('PRODUCT NOT FOUND',{status:404})
+export async function GET(req: NextRequest, res: NextResponse) {
+  const product = await fetchAllProduct();
+  console.log(product);
+  if (!product) {
+    return NextResponse.json("PRODUCT NOT FOUND", { status: 404 });
   }
-  return NextResponse.json(product)
-
+  return NextResponse.json(product);
 }

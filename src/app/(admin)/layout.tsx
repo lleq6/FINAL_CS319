@@ -10,15 +10,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const session = useSession()
 
 
-  /*if (!session && session.status !== 'loading' || session?.data?.user.role !='a' && session.status !== 'loading'){
-    return redirect('/products')
-  }else if(session.status !== 'loading'){*/
-  // if (!session && session.status !== 'loading' || session?.data?.user.role !='a' && session.status !== 'loading'){
-    // return redirect('/admin')
-  // }else if(session.status !== 'loading'){
+  if (!session && session.status !== 'loading' || session?.data?.user.role != 1 && session.status !== 'loading'){
+    return redirect('/')
+
+  }else if(session.status !== 'loading'){
     return (
       <div>
-        <CounterProvider>
         <h1>admin</h1>
         <Navbar>
         </Navbar>
@@ -26,7 +23,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {children}
         </div>
         <Footer/>
-        </CounterProvider>
       </div>
     );
   //}
@@ -34,3 +30,4 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   
   }
+}

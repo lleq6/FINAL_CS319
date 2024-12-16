@@ -20,6 +20,7 @@ interface Child {
     Sub_Category_ID: string;
     Name: string;
     ChildCategory: Child[];
+    
   }
   
   interface CategoryList {
@@ -175,7 +176,7 @@ const Navbar = () => {
                 <li><Link href={''} className="rounded-none p-4">โปรโมชั่น</Link></li>
                 <li><Link href={''} className="rounded-none p-4">ข่าวสาร</Link></li>
                 <li><Link href={'/contact'} className="rounded-none p-4">แคทตาล็อก</Link></li>
-                {session.data?.user?.role == 'a' ? 
+                {session.data?.user?.role == '1' ? 
                 <li className="bg-yellow-400 ml-auto mr-14">
                     <details id={'admin_menu'} className="h-full">
                     <summary className="rounded-none px-10 m-auto h-full font-semibold content-center">

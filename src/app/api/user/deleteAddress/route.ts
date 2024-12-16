@@ -1,13 +1,12 @@
-import { NextRequest, NextResponse } from "next/server"
-import { deleteAddress } from "../../lib/db"
-import { UserAddress } from "@/app/model/AddressModel"
+import { NextRequest, NextResponse } from "next/server";
+import { deleteAddress } from "../../lib/db";
 
-
-export async function POST(req : NextRequest, res) {
-//   const id = req.nextUrl.searchParams.get('id')
-    const { Address_ID } = await req.json()
-    console.log(Address_ID)
-
-    const k = await deleteAddress(Address_ID)
-    return NextResponse.json('product')
+export async function POST(req: NextRequest, res: NextResponse) {
+  const { Address_ID } = await req.json();
+  try {
+    await deleteAddress(Address_ID);
+    return NextResponse.json("delete complete", { status: 200 });
+  } catch (error) {
+    return NextResponse.json("error", { status: 400 });
+  }
 }

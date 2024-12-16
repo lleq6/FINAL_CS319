@@ -1,30 +1,34 @@
-'use client'
+"use client";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import Navbar from "./components/Navbar";
+import LoginModalForce from "./components/login/LoginModalForce";
+import { redirect } from "next/navigation";
 
-{/* <div className="flex"> */}
-export default function Homepage(){
-    const a = useSession()
-  console.log(a.data?.user)
-  const [data, setData]= useState([])
+{
+  /* <div className="flex"> */
+}
+export default function Homepage() {
+  const session = useSession();
+  console.log(session.data?.user);
 
+  
   useEffect(()=>{
-    async function fetchData(){
-      try{
-        const response = await fetch(`/api/products/allProduct`);
-        if(!response.ok)
-          throw new Error('ERROR')
-        // console.log(await response.json())
-        setData(await response.json())
-      }catch (error){
-
-      }
+    if(document.getElementById('loginModalForce')){
+      document.getElementById('loginModalForce').showModal()
     }
-    fetchData()
-  },[])
-    return(
-        <div>
-
-        </div>
-    )
+    if (session.data?.user){
+      if (session.data?.user.role == 1) redirect('/admin')
+    }
+  },)
+    
+    
+  if (session.status === 'loading') return <div>Loading</div>
+  
+  return (
+    <div>
+      {/* <Navbar /> */}
+      <LoginModalForce></LoginModalForce>
+    </div>
+  );
 }
