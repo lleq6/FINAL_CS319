@@ -195,9 +195,9 @@ const Navbar = () => {
               ) : (
                 <div className="flex content-center my-auto mx-auto">
                   <Link href={"/cart"}>
-                    <button className="text-start border rounded-box bg-yellow-400 py-2 px-2 flex m-auto">
+                    <button className="text-start border rounded-box bg-yellow-400 py-2 px-2 flex m-auto" disabled>
                       <FaShoppingCart className="content-center my-auto" />
-                      <span className="mx-1">{count}</span>
+                      <span className="mx-1"></span>
                     </button>
                   </Link>
                   <span className="content-center m-auto flex">
@@ -214,7 +214,7 @@ const Navbar = () => {
                       {/* <div tabIndex={0} role="button" className="btn m-1">Click</div> */}
                       <ul
                         tabIndex={0}
-                        className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+                        className="dropdown-content menu bg-base-100 rounded-box z-[99] w-52 p-2 shadow"
                       >
                         {/* <button className="btn" onClick={() => {signOut()}}>sign out</button> */}
                         <li>
