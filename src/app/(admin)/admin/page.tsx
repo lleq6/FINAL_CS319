@@ -29,10 +29,12 @@ export default function AdmindashBoard() {
             <p>asd</p>
           </div>
           <div className="max-h-[500px] overflow-y-auto w-full pr-3">
-            {products.length == 0 ? 'ไม่พบสินค้า' : ''}
+            {products.length == 0 ? 'ไม่พบสินค้า' : <>
             {products.map((e: ProductInfo, _index) => (
               <DashBoardProduct key={_index} product={e} index={_index} />
             ))}
+            </>
+            }
             {/* <DashBoardProduct></DashBoardProduct> */}
           </div>
         </div>

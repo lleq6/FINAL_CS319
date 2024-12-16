@@ -205,6 +205,7 @@ function AddCategoryModal({
                     },
                   });
                 }
+                setValue('')
               }}
             >
               เพิ่ม
@@ -241,12 +242,12 @@ const ProductManagement = () => {
       setCategory(data);
       console.log(data);
       (document.getElementById("c1") as HTMLSelectElement).value = "0";
-      document.getElementById("c2").value = 0;
-      document.getElementById("c3").value = 0;
+      (document.getElementById("c2") as HTMLSelectElement).value = "0";
+      (document.getElementById("c3")  as HTMLSelectElement).value = "0";
       setCurCategory(undefined);
       setCurSubCategory(undefined);
       setChild(undefined);
-      // setCurProduct({ ...curProduct, Child_ID: "0" });
+      setCurProduct({ ...curProduct, Child_ID: "0" });
     } catch (error) {
       console.log(error);
     }
