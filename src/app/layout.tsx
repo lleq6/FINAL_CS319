@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { SessionProvider } from "next-auth/react";
 import { Providers } from "./provider";
+import { CounterProvider } from "./context/CartCount";
 
 
 const geistSans = localFont({

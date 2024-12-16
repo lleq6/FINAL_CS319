@@ -3,7 +3,7 @@ import { signIn, SignInResponse } from "next-auth/react";
 import { useState } from "react";
 import AlertModal from "../alertModal";
 
-export default function LoginModal() {
+export default function LoginModalForce() {
   const [curUser, setCurUser] = useState({
     Email: "",
     Password: "",
@@ -16,7 +16,7 @@ export default function LoginModal() {
       [name]: value,
     });
   }
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const email = curUser.Email;
     const password = curUser.Password;
@@ -26,15 +26,16 @@ export default function LoginModal() {
       password,
     });
     if (res.error) {
-      (document.getElementById("login-fail") as HTMLDialogElement).showModal();
+      document.getElementById("login-fail").showModal();
       return;
     }
-    (document?.getElementById("my_modal_1") as HTMLDialogElement)?.close();
-    (document.getElementById("login-success") as HTMLDialogElement).showModal();
+    document?.getElementById("my_modal_1")?.close();
+    document.getElementById("login-success").showModal();
   };
   // console.log(curUser.Email)
 
   return (
+    <dialog id="loginModalForce" className="modal">
     <div className="modal-box">
       <AlertModal
         id={"login-success"}
@@ -48,16 +49,8 @@ export default function LoginModal() {
         message={<>การเข้าสู่ระบบไม่สำเร็จ<br/>โปรดตรวจสอบอีเมลล์และรหัสผ่าน<br></br>หรือติดต่อเจ้าหน้าที่</>}
         errorStatus={true}
       />
-      <form method="dialog">
-        {/* if there is a button in form, it will close the modal */}
-        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 border-none">
-          ✕
-        </button>
-      </form>
       <h3 className="font-bold text-lg">เข้าสู่ระบบ</h3>
-      {/* <p className="py-4">Press ESC key or click on ✕ button to close</p> */}
       <form className="flex flex-col " onSubmit={handleSubmit}>
-        {/* <input type="text" /> */}
         <input
           className="input m-2 bg-gray-300"
           placeholder="อีเมลล์"
@@ -73,10 +66,8 @@ export default function LoginModal() {
             name="Password"
             onChange={handleChange}
           />
-          {/* <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" /> */}
           <div className="label">
             <span className="label-text-alt"></span>
-            {/* <span className="label-text-alt">ลืมรหัสผ่าน</span> */}
           </div>
         </label>
         <button className="btn bg-yellow-600 m-4">เข้าสู่ระบบ</button>
@@ -87,14 +78,14 @@ export default function LoginModal() {
         <a
           className="link"
           onClick={() => {
-            (document?.getElementById("my_modal_1") as HTMLDialogElement).close();
-            (document?.getElementById("my_modal_2") as HTMLDialogElement).showModal();
+            document?.getElementById("my_modal_1").close();
+            document?.getElementById("my_modal_2").showModal();
           }}
         >
           สมัครสมาชิก
         </a>
       </p>
     </div>
+    </dialog>
   );
 }
-

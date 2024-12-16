@@ -1,16 +1,28 @@
 "use client";
 import { ProductInfo } from "@/app/model/Product";
 import Image from "next/image";
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { MdErrorOutline } from "react-icons/md";
+import AlertModal from "../alertModal";
+import { Dispatch, SetStateAction } from "react";
 interface AdminProductProps {
   product: ProductInfo;
   setProduct: (product: ProductInfo) => void;
-  setProducts?: React.Dispatch<SetStateAction<ProductInfo[]>>;
+  setProducts: Dispatch<SetStateAction<ProductInfo[]>>;
   isGray: boolean;
+  showAlert: (alert : alertModal) => void;
 }
-const ImageWithCheck = ({ src, alt, height, width }: any) => {
+
+interface alertModal {
+  header: string;
+  message: string;
+  errorStatus: boolean;
+  callback?: () => void | undefined;
+}
+
+
+const ImageWithCheck = ({ src , alt, height, width } : {src:string, alt:string, height:number, width:number}) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
@@ -66,14 +78,10 @@ export default function AdminProduct({
                       alert("การลบสินค้าผิดพลาด");
                       throw new Error("error");
                     }
-                    if (setProducts) {
-                      setProducts((products: ProductInfo[]) =>
-                        products.filter(
-                          (e: ProductInfo) =>
-                            e.Product_ID !== product.Product_ID
-                        )
-                      );
-                    }
+
+                    setProducts((products: ProductInfo[]) =>
+                      products.filter((e) => e.Product_ID != product.Product_ID)
+                    );
                     alert("ลบสินค้าเรียบร้อย");
                   } catch (error) {
                     alert("การลบสินค้าผิดพลาด");
@@ -85,11 +93,9 @@ export default function AdminProduct({
               <button
                 className="btn"
                 onClick={() =>
-                  (
-                    document.getElementById(
-                      `deleteModal${product.Product_ID}`
-                    ) as HTMLDialogElement
-                  ).close()
+                  document
+                    .getElementById(`deleteModal${product.Product_ID}`)
+                    .close()
                 }
               >
                 ยกเลิก
@@ -161,11 +167,9 @@ export default function AdminProduct({
         <button
           className="btn btn-sm text-md p-1 mx-2 px-2 w-20 hover:bg-red-300 hover:text-red-600"
           onClick={async () => {
-            (
-              document.getElementById(
-                `deleteModal${product.Product_ID}`
-              ) as HTMLDialogElement
-            ).showModal();
+            document
+              .getElementById(`deleteModal${product.Product_ID}`)
+              .showModal();
           }}
         >
           {" "}
