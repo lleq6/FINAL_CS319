@@ -79,7 +79,7 @@ function UserDetail(props: UserDetailProps) {
                   showDialog({
                     ID: "deleteError",
                     Header: "ลบบัญชีผู้ใช้งาน",
-                    Type: "info",
+                    Type: "error",
                     Message: `ลบบัญชีผู้ใช้ User ID : ${props.User.User_ID} ล้มเหลว!\n${ex}`,
                     onClose: () => {},
                   });
@@ -159,7 +159,7 @@ const UserManagement = () => {
       showDialog({
         ID: "addDataEmpty",
         Header: "เพิ่มข้อมูลบัญชีผู้ใช้",
-        Type: "error",
+        Type: "warning",
         Message: `กรุณากรอกข้อมูลให้ครบ!`,
         onClose: () => {},
       });
@@ -169,7 +169,7 @@ const UserManagement = () => {
       showDialog({
         ID: "addEmailInvalid",
         Header: "เพิ่มข้อมูลบัญชีผู้ใช้",
-        Type: "error",
+        Type: "warning",
         Message: `กรุณากรอกข้อมูลอีเมลให้ถูกต้อง!`,
         onClose: () => {},
       });
@@ -179,7 +179,7 @@ const UserManagement = () => {
       showDialog({
         ID: "addPhoneInvalid",
         Header: "เพิ่มข้อมูลบัญชีผู้ใช้",
-        Type: "error",
+        Type: "warning",
         Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,
         onClose: () => {},
       });
@@ -265,7 +265,7 @@ const UserManagement = () => {
           showDialog({
             ID: "saveDataEmpty",
             Header: "บันทึกข้อมูลบัญชีผู้ใช้",
-            Type: "error",
+            Type: "warning",
             Message: `กรุณากรอกข้อมูลให้ครบ!`,
             onClose: () => {},
           });
@@ -275,7 +275,7 @@ const UserManagement = () => {
           showDialog({
             ID: "saveEmailInvalid",
             Header: "บันทึกข้อมูลบัญชีผู้ใช้",
-            Type: "error",
+            Type: "warning",
             Message: `กรุณากรอกข้อมูลอีเมลให้ถูกต้อง!`,
             onClose: () => {},
           });
@@ -285,7 +285,7 @@ const UserManagement = () => {
           showDialog({
             ID: "savePhoneInvalid",
             Header: "บันทึกข้อมูลบัญชีผู้ใช้",
-            Type: "error",
+            Type: "warning",
             Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,
             onClose: () => {},
           });
@@ -372,7 +372,7 @@ const UserManagement = () => {
 
   async function fetchUsersData() {
     try {
-      const response = await fetch(`/api/user/getUsers`);
+      const response = await fetch(`/api/admin/getUsers`);
       if (response.ok) {
         const data: UserInfo[] = await response.json();
         setUsersData(data);

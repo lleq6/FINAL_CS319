@@ -52,7 +52,7 @@ const isEmptyAddressData = (Address: AddressInfo) => {
   return isEmpty;
 };
 
-const hashMD5 = (plaintext: string, salt: string): string => {
+const hashMD5 = (plaintext: string, salt: string = process.env.SALT_SECRET!): string => {
   const hash = createHmac('md5', salt);
   hash.update(plaintext);
   return hash.digest('hex');

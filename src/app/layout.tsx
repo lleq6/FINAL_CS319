@@ -1,4 +1,3 @@
-
 // 'use client'
 import type { Metadata } from "next";
 import localFont from "next/font/local";
@@ -8,7 +7,6 @@ import Footer from "./components/Footer";
 import { SessionProvider } from "next-auth/react";
 import { Providers } from "./provider";
 import { CounterProvider } from "./context/CartCount";
-
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,7 +27,7 @@ export const metadata: Metadata = {
 const a = `
   @import url('https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
 
-`
+`;
 
 export default function RootLayout({
   children,
@@ -38,12 +36,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-      </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-        {children}
-        </Providers>
+      <head></head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

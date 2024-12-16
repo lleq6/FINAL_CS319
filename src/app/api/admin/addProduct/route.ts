@@ -5,7 +5,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { ProductInfo } from "@/app/model/Product";
 
 export async function POST(req: NextRequest, res: NextApiResponse) {
-  // const formData : FormData = req.formData()
   const formData = await req.formData();
   let Product: ProductInfo = JSON.parse(formData.get("Product") as string);
   const imgFile = formData.get("myfile");
@@ -28,9 +27,8 @@ export async function POST(req: NextRequest, res: NextApiResponse) {
       );
     }
   }
-  // const c = await formData.file()
   const keys = new Array();
-  const values = [];
+  const values: string[] = [];
   Object.keys(Product).forEach((key) => {
     if (
       [
@@ -56,12 +54,13 @@ export async function POST(req: NextRequest, res: NextApiResponse) {
   console.log(keys, Product);
   try {
     const response = await query(queryString, values);
-    console.log(response,'add response')
-    return NextResponse.json({ message: "true", Product_ID: response.rows[0].Product_ID },{status:200});
+    console.log(response, "add response");
+    return NextResponse.json(
+      { message: "true", Product_ID: response.rows[0].Product_ID },
+      { status: 200 }
+    );
   } catch (error) {
     console.log("query error : ", error);
-    return NextResponse.json({message:'add error'}, {status:400})
+    return NextResponse.json({ message: "add error" }, { status: 400 });
   }
-
-
 }

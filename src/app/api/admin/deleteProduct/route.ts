@@ -1,8 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import { query } from "../../lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest, res: NextApiResponse) {
+export async function POST(req: NextRequest, res: NextResponse) {
   const { Product_ID } = await req.json();
   const queryString = `DELETE FROM public."Product" WHERE "Product_ID"=$1`;
   try {

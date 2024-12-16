@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { addAddress } from "../../lib/db";
 import AddressInfo from "@/app/model/AddressInfo";
 
-export async function POST(req: NextRequest, res) {
+export async function POST(req: NextRequest, res : NextResponse) {
   try {
     const request: AddressInfo = await req.json();
     delete request.Address_ID;

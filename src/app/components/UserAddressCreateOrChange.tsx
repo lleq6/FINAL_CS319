@@ -8,7 +8,11 @@ import {
 import AddressInfo from "../model/AddressInfo";
 import { useDialog } from "../context/DialogContext";
 import ProvinceSelector from "./ProvinceSelector";
-import { isEmptyAddressData, isValidPhone, isValidZipCode } from "../api/lib/utils";
+import {
+  isEmptyAddressData,
+  isValidPhone,
+  isValidZipCode,
+} from "../api/lib/utils";
 
 interface AddressCreateOrChangeProps {
   UserID: string;
@@ -101,7 +105,7 @@ const UserAddressCreateOrChange = ({
       showDialog({
         ID: "addressDataEmpty",
         Header: "จัดการข้อมูลที่อยู่",
-        Type: "error",
+        Type: "warning",
         Message: `กรุณากรอกข้อมูลให้ครบ!`,
         onClose: () => {},
       });
@@ -111,7 +115,7 @@ const UserAddressCreateOrChange = ({
       showDialog({
         ID: "addressZipCodeInvalid",
         Header: "จัดการข้อมูลที่อยู่",
-        Type: "error",
+        Type: "warning",
         Message: `กรุณากรอกข้อมูลรหัสไปรษณีย์ให้ถูกต้อง!`,
         onClose: () => {},
       });
@@ -121,7 +125,7 @@ const UserAddressCreateOrChange = ({
       showDialog({
         ID: "addressPhoneInvalid",
         Header: "จัดการข้อมูลที่อยู่",
-        Type: "error",
+        Type: "warning",
         Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,
         onClose: () => {},
       });
@@ -147,7 +151,7 @@ const UserAddressCreateOrChange = ({
             })
           );
         }
-        await showDialog({
+        showDialog({
           ID: "saveAddressSuccess",
           Header: "จัดการข้อมูลที่อยู่",
           Type: "info",
@@ -159,7 +163,7 @@ const UserAddressCreateOrChange = ({
           },
         });
       } else {
-        await showDialog({
+        showDialog({
           ID: "saveAddressFailure",
           Header: "จัดการข้อมูลที่อยู่",
           Type: "error",
@@ -173,7 +177,7 @@ const UserAddressCreateOrChange = ({
       showDialog({
         ID: "addressDataEmpty",
         Header: "จัดการข้อมูลที่อยู่",
-        Type: "error",
+        Type: "warning",
         Message: `กรุณากรอกข้อมูลให้ครบ!`,
         onClose: () => {},
       });
@@ -183,7 +187,7 @@ const UserAddressCreateOrChange = ({
       showDialog({
         ID: "addressZipCodeInvalid",
         Header: "จัดการข้อมูลที่อยู่",
-        Type: "error",
+        Type: "warning",
         Message: `กรุณากรอกข้อมูลรหัสไปรษณีย์ให้ถูกต้อง!`,
         onClose: () => {},
       });
@@ -193,7 +197,7 @@ const UserAddressCreateOrChange = ({
       showDialog({
         ID: "addressPhoneInvalid",
         Header: "จัดการข้อมูลที่อยู่",
-        Type: "error",
+        Type: "warning",
         Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,
         onClose: () => {},
       });

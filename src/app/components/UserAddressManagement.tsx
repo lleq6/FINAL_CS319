@@ -158,7 +158,7 @@ const UserAddressManagement = ({
                       showDialog({
                         ID: "deleteAddressSuccess",
                         Header: "จัดการข้อมูลที่อยู่",
-                        Type: "info",
+                        Type: "error",
                         Message: `ไม่สามารถลบข้อมูลที่อยู่ได้!`,
                         onClose: () => {},
                       });
