@@ -235,6 +235,9 @@ const ProductManagement = () => {
     try {
       const response = await fetch("/api/getCategory/all");
       const data = await response.json();
+      if (data.length == 0) {
+        return;
+      }
       setCategory(data);
       console.log(data);
       (document.getElementById("c1") as HTMLSelectElement).value = "0";
@@ -243,7 +246,7 @@ const ProductManagement = () => {
       setCurCategory(undefined);
       setCurSubCategory(undefined);
       setChild(undefined);
-      setCurProduct({ ...curProduct, Child_ID: "0" });
+      // setCurProduct({ ...curProduct, Child_ID: "0" });
     } catch (error) {
       console.log(error);
     }
@@ -255,6 +258,7 @@ const ProductManagement = () => {
       try {
         const response = await fetch("/api/products/allProduct");
         const data = await response.json();
+        if (data.length == 0) return "Product not found";
         console.log(data, "first");
         setProducts(data);
         setFilter(data);
@@ -643,7 +647,7 @@ const ProductManagement = () => {
                       disabled={!curProduct.Product_ID ? true : false}
                     >
                       <option value={0}>- เลือก -</option>
-                      {category.map((e) => (
+                      {category?.map((e) => (
                         <option key={e.Category_ID} value={e.Category_ID}>
                           {e.Name}
                         </option>
@@ -651,7 +655,7 @@ const ProductManagement = () => {
                     </select>
                     <div className="text-end space-x-2 my-2">
                       <button
-                        className="btn btn-sm"
+                        className="btn btn-sm btn-outline border-red-700 border-2 hover:bg-red-700 hover:border-white hover:text-white"
                         disabled={!curCategory ? true : false}
                         onClick={() =>
                           showDialog({
@@ -705,7 +709,7 @@ const ProductManagement = () => {
                         ลบ
                       </button>
                       <button
-                        className="btn btn-sm"
+                        className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
                         disabled={!curProduct.Product_ID ? true : false}
                         onClick={() => openAddModal(0, getCategory)}
                       >
@@ -749,7 +753,7 @@ const ProductManagement = () => {
                     </select>
                     <div className="text-end space-x-2 my-2">
                       <button
-                        className="btn btn-sm"
+                        className="btn btn-sm btn-outline border-red-700 border-2 hover:bg-red-700 hover:border-white hover:text-white"
                         disabled={!CurSubCategory ? true : false}
                         onClick={() =>
                           showDialog({
@@ -805,7 +809,7 @@ const ProductManagement = () => {
                         ลบ
                       </button>
                       <button
-                        className="btn btn-sm"
+                        className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
                         disabled={!curCategory ? true : false}
                         onClick={() => openAddModal(1, getCategory)}
                       >
@@ -841,9 +845,9 @@ const ProductManagement = () => {
                         </option>
                       ))}
                     </select>
-                    <div className="text-end">
+                    <div className="text-end my-2 space-x-2">
                       <button
-                        className="btn btn-sm"
+                        className="btn btn-sm btn-outline border-red-700 border-2 hover:bg-red-700 hover:border-white hover:text-white"
                         disabled={curProduct?.Child_ID == "0" ? true : false}
                         onClick={() =>
                           showDialog({
@@ -897,7 +901,7 @@ const ProductManagement = () => {
                         ลบ
                       </button>
                       <button
-                        className="btn btn-sm"
+                        className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
                         disabled={!CurSubCategory ? true : false}
                         onClick={() =>
                           openAddModal(
@@ -1053,18 +1057,23 @@ const ProductManagement = () => {
               <p>จุดสั่งซื้อ</p>
             </div>
             <div className="grid grid-rows-4 w-full">
-              {productFilter.length == 0 ? <p>ไม่พบสินค้า</p> : ""}
-              {Show.map((e, index) => (
-                <div key={e.Product_ID}>
-                  <AdminProduct
-                    key={e.Product_ID + 1}
-                    product={e}
-                    setProduct={setP}
-                    isGray={index % 2 == 0}
-                    setProducts={setProducts}
-                  />
-                </div>
-              ))}
+              {productFilter.length == 0 ? (
+                <p>ไม่พบสินค้า</p>
+              ) : (
+                <>
+                  {Show.map((e, index) => (
+                    <div key={e.Product_ID}>
+                      <AdminProduct
+                        key={e.Product_ID + 1}
+                        product={e}
+                        setProduct={setP}
+                        isGray={index % 2 == 0}
+                        setProducts={setProducts}
+                      />
+                    </div>
+                  ))}
+                </>
+              )}
               <Paginate
                 items={productFilter}
                 itemsPerPage={4}

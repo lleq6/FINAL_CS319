@@ -40,8 +40,11 @@ const Navbar = () => {
       try {
         const response = await fetch("/api/getCategory/all");
         const result = await response.json();
+        if(result.length == 0){
+          console.log(result,'test')
+          throw new Error('data not found')
+        }
         setCategories(result);
-        console.log(Categories, "asdasdasdasd");
       } catch (error) {
         console.log(error);
       }
@@ -133,7 +136,7 @@ const Navbar = () => {
       </div>
     );
   }
-  if (!Categories.length) return <div>loadingD</div>;
+  // if (!Categories.length) return <div>loadingD</div>;
   if (session.status === "loading") {
     return <div>Loading</div>;
   }
