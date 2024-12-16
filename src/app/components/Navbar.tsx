@@ -50,9 +50,13 @@ const Navbar = () => {
       const res = await fetch(
         `/api/cart/getCartItems?id=${session.data?.user.id}`
       );
-      const d = await res.json();
-      console.log(d.length, "dd");
-      setCounter(d.length);
+      try{
+        const d = await res.json();
+        console.log(d.length, "dd");
+        setCounter(d.length);
+      }catch(error){
+        setCounter(0);
+      }
     }
     fetchData();
     if (session.status === "authenticated") {
@@ -303,7 +307,7 @@ const Navbar = () => {
                         จัดการคลังสินค้า
                       </Link>
                     </li>
-                    <li>
+                    {/* <li>
                       <Link
                         href={"/"}
                         className="rounded-none p-4"
@@ -311,7 +315,7 @@ const Navbar = () => {
                       >
                         จัดการคำสั่งซื้อ
                       </Link>
-                    </li>
+                    </li> */}
                   </ul>
                 </details>
               </li>
