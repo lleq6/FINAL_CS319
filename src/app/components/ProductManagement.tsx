@@ -214,39 +214,39 @@ const ProductManagement = () => {
         method: "POST",
         body: formData,
       });
-      if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json();
+        setProducts((e) => [
+          ...e,
+          { ...curProduct, Product_ID: data.Product_ID },
+        ]);
+        setFilter((e) => [
+          ...Products,
+          { ...curProduct, Product_ID: data.Product_ID },
+        ]);
+        setCurProduct(emptyProduct);
         showDialog({
-          ID: "addProductFailure",
-          Header: "เกิดข้อผิดพลาดในการเพิ่มสินค้า",
-          Type: "error",
-          Message: `เพิ่มสินค้าไม่สำเร็จ!`,
+          ID: "addProductSuccess",
+          Header: "แจ้งเตือน",
+          Type: "success",
+          Message: `เพิ่มสินค้าสำเร็จ!`,
           onClose: () => {},
         });
-        return;
+      } else {
+        showDialog({
+          ID: "addProductFailure",
+          Header: "แจ้งเตือน",
+          Type: "error",
+          Message: `เพิ่มสินค้าล้มเหลว!`,
+          onClose: () => {},
+        });
       }
-      const data = await response.json();
-      setProducts((e) => [
-        ...e,
-        { ...curProduct, Product_ID: data.Product_ID },
-      ]);
-      setFilter((e) => [
-        ...Products,
-        { ...curProduct, Product_ID: data.Product_ID },
-      ]);
-      setCurProduct(emptyProduct);
-      showDialog({
-        ID: "addProductSuccess",
-        Header: "แจ้งเตือน",
-        Type: "info",
-        Message: `เพิ่มสินค้าสำเร็จ!`,
-        onClose: () => {},
-      });
     } catch (error) {
       showDialog({
         ID: "addProductFailure",
-        Header: "เกิดข้อผิดพลาดในการเพิ่มสินค้า",
+        Header: "แจ้งเตือน",
         Type: "error",
-        Message: `เพิ่มสินค้าไม่สำเร็จ!`,
+        Message: `เกิดข้อผิดพลาดในการเพิ่มสินค้า!`,
         onClose: () => {},
       });
       return;
@@ -259,28 +259,38 @@ const ProductManagement = () => {
         method: "POST",
         body: JSON.stringify(curProduct),
       });
-      const newObj = Products.map((e) => {
-        if (e.Product_ID == curProduct.Product_ID) {
-          return curProduct;
-        }
-        return e;
-      });
-      setProducts(newObj);
-      setFilter(newObj);
-      setCurProduct(emptyProduct);
-      showDialog({
-        ID: "editProductSuccess",
-        Header: "แจ้งเตือน",
-        Type: "info",
-        Message: `แก้ไขข้อมูลสินค้าสำเร็จ!`,
-        onClose: () => {},
-      });
+      if (response.ok) {
+        const newObj = Products.map((e) => {
+          if (e.Product_ID == curProduct.Product_ID) {
+            return curProduct;
+          }
+          return e;
+        });
+        setProducts(newObj);
+        setFilter(newObj);
+        setCurProduct(emptyProduct);
+        showDialog({
+          ID: "editProductSuccess",
+          Header: "แจ้งเตือน",
+          Type: "success",
+          Message: `แก้ไขข้อมูลสินค้าสำเร็จ!`,
+          onClose: () => {},
+        });
+      } else {
+        showDialog({
+          ID: "editProductFailure",
+          Header: "แจ้งเตือน",
+          Type: "error",
+          Message: `แก้ไขข้อมูลสินค้าล้มเหลว!`,
+          onClose: () => {},
+        });
+      }
     } catch (error) {
       showDialog({
         ID: "editProductError",
-        Header: "เกิดความผิดพลาดในการแก้ไขสินค้าสำเร็จ",
+        Header: "แจ้งเตือน",
         Type: "error",
-        Message: `แก้ไขสินค้าไม่สำเร็จ!`,
+        Message: `เกิดข้อผิดพลาดในการแก้ไขข้อมูลสินค้า`,
         onClose: () => {},
       });
     }

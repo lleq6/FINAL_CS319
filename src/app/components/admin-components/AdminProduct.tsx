@@ -116,8 +116,8 @@ export default function AdminProduct({
           className="btn btn-sm text-md p-1 mx-2 px-2 w-20 hover:bg-red-300 hover:text-red-600"
           onClick={async (e) => {
             showDialog({
-              ID: `deleteProduct${product.Product_ID}`,
-              Header: `แจ้งเตือนสำคัญ!`,
+              ID: `deleteProduct_${product.Product_ID}`,
+              Header: `จัดการคลังสินค้า`,
               Type: "warning",
               Message: `คุณต้องการที่จะลบสินค้ารหัส : ${product.Product_ID} ใช่หรือไม่?`,
               onConfirm: async () => {
@@ -136,16 +136,16 @@ export default function AdminProduct({
                     showDialog({
                       ID: "deleteProductSuccess",
                       Header: "แจ้งเตือน",
-                      Type: "info",
+                      Type: "success",
                       Message: `ลบสินค้าสำเร็จ!`,
                       onClose: () => {},
                     });
                   } else {
                     showDialog({
                       ID: "deleteProductFailure",
-                      Header: "เกิดข้อผิดพลาดในการลบสินค้า",
+                      Header: "แจ้งเตือน",
                       Type: "error",
-                      Message: `ลบสินค้าไม่สำเร็จ!`,
+                      Message: `ลบสินค้าล้มเหลว!`,
                       onClose: () => {},
                     });
                   }
@@ -153,9 +153,9 @@ export default function AdminProduct({
                 } catch (error) {
                   showDialog({
                     ID: "deleteProductError",
-                    Header: "เกิดข้อผิดพลาดในการลบสินค้า",
+                    Header: "แจ้งเตือน",
                     Type: "error",
-                    Message: `ลบสินค้าไม่สำเร็จ!`,
+                    Message: `เกิดข้อผิดพลาดในการลบสินค้า!`,
                     onClose: () => {},
                   });
                 }

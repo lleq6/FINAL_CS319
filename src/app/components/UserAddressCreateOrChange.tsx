@@ -67,7 +67,6 @@ const UserAddressCreateOrChange = ({
         method: "POST",
         body: JSON.stringify(localAddress),
       });
-
       if (response.ok) {
         const { Address_ID } = await response.json();
         if (setAddresses) {
@@ -81,9 +80,9 @@ const UserAddressCreateOrChange = ({
         }
         showDialog({
           ID: "createAddressSuccess",
-          Header: "จัดการข้อมูลที่อยู่",
-          Type: "info",
-          Message: `บันทึกข้อมูลการเพิ่มที่อยู่สำเร็จ!`,
+          Header: "แจ้งเตือน",
+          Type: "success",
+          Message: `บันทึกข้อมูลการเพิ่มที่อยู่ใหม่สำเร็จ!`,
           onClose: () => {
             (
               document.getElementById("address-modal-edit") as HTMLDialogElement
@@ -92,10 +91,10 @@ const UserAddressCreateOrChange = ({
         });
       } else {
         showDialog({
-          ID: "saveAddressFailure",
-          Header: "จัดการข้อมูลที่อยู่",
+          ID: "createAddressFailure",
+          Header: "แจ้งเตือน",
           Type: "error",
-          Message: `เกิดข้อผิดพลาดในการบันทึกข้อมูลการเพิ่มที่อยู่!`,
+          Message: `บันทึกข้อมูลการเพิ่มที่อยู่ใหม่ล้มเหลว!`,
           onClose: () => {},
         });
       }
@@ -103,8 +102,8 @@ const UserAddressCreateOrChange = ({
     e.preventDefault();
     if (isEmptyAddressData(localAddress)) {
       showDialog({
-        ID: "addressDataEmpty",
-        Header: "จัดการข้อมูลที่อยู่",
+        ID: "createAddressDataEmpty",
+        Header: "แจ้งเตือน",
         Type: "warning",
         Message: `กรุณากรอกข้อมูลให้ครบ!`,
         onClose: () => {},
@@ -113,8 +112,8 @@ const UserAddressCreateOrChange = ({
     }
     if (!isValidZipCode(localAddress.Zip_Code)) {
       showDialog({
-        ID: "addressZipCodeInvalid",
-        Header: "จัดการข้อมูลที่อยู่",
+        ID: "createAddressZipCodeInvalid",
+        Header: "แจ้งเตือน",
         Type: "warning",
         Message: `กรุณากรอกข้อมูลรหัสไปรษณีย์ให้ถูกต้อง!`,
         onClose: () => {},
@@ -123,8 +122,8 @@ const UserAddressCreateOrChange = ({
     }
     if (!isValidPhone(localAddress.Phone)) {
       showDialog({
-        ID: "addressPhoneInvalid",
-        Header: "จัดการข้อมูลที่อยู่",
+        ID: "createAddressPhoneInvalid",
+        Header: "แจ้งเตือน",
         Type: "warning",
         Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,
         onClose: () => {},
@@ -153,8 +152,8 @@ const UserAddressCreateOrChange = ({
         }
         showDialog({
           ID: "saveAddressSuccess",
-          Header: "จัดการข้อมูลที่อยู่",
-          Type: "info",
+          Header: "แจ้งเตือน",
+          Type: "success",
           Message: `บันทึกข้อมูลการแก้ไขที่อยู่สำเร็จ!`,
           onClose: () => {
             (
@@ -165,9 +164,9 @@ const UserAddressCreateOrChange = ({
       } else {
         showDialog({
           ID: "saveAddressFailure",
-          Header: "จัดการข้อมูลที่อยู่",
+          Header: "แจ้งเตือน",
           Type: "error",
-          Message: `เกิดข้อผิดพลาดในการบันทึกข้อมูลการแก้ไขที่อยู่!`,
+          Message: `บันทึกข้อมูลการแก้ไขที่อยู่ล้มเหลว!`,
           onClose: () => {},
         });
       }
@@ -175,8 +174,8 @@ const UserAddressCreateOrChange = ({
     e.preventDefault();
     if (isEmptyAddressData(localAddress)) {
       showDialog({
-        ID: "addressDataEmpty",
-        Header: "จัดการข้อมูลที่อยู่",
+        ID: "saveAddressDataEmpty",
+        Header: "แจ้งเตือน",
         Type: "warning",
         Message: `กรุณากรอกข้อมูลให้ครบ!`,
         onClose: () => {},
@@ -185,8 +184,8 @@ const UserAddressCreateOrChange = ({
     }
     if (!isValidZipCode(localAddress.Zip_Code)) {
       showDialog({
-        ID: "addressZipCodeInvalid",
-        Header: "จัดการข้อมูลที่อยู่",
+        ID: "saveAddressZipCodeInvalid",
+        Header: "แจ้งเตือน",
         Type: "warning",
         Message: `กรุณากรอกข้อมูลรหัสไปรษณีย์ให้ถูกต้อง!`,
         onClose: () => {},
@@ -195,8 +194,8 @@ const UserAddressCreateOrChange = ({
     }
     if (!isValidPhone(localAddress.Phone)) {
       showDialog({
-        ID: "addressPhoneInvalid",
-        Header: "จัดการข้อมูลที่อยู่",
+        ID: "saveAddressPhoneInvalid",
+        Header: "แจ้งเตือน",
         Type: "warning",
         Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,
         onClose: () => {},

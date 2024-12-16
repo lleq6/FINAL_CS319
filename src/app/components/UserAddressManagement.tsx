@@ -47,10 +47,10 @@ const UserAddressManagement = ({
     });
     if (!response.ok) {
       showDialog({
-        ID: "error",
-        Header: "SQL Error",
+        ID: "setDefaultAddressFailure",
+        Header: "แจ้งเตือน",
         Type: "error",
-        Message: `อัพเดทข้อมูล Database ล้มเหลว!`,
+        Message: `บันทึกข้อมูลที่อยู่เริ่มต้นล้มเหลว!`,
         onClose: () => {},
       });
     }
@@ -144,8 +144,8 @@ const UserAddressManagement = ({
                     if (response.ok) {
                       showDialog({
                         ID: "deleteAddressSuccess",
-                        Header: "จัดการข้อมูลที่อยู่",
-                        Type: "info",
+                        Header: "แจ้งเตือน",
+                        Type: "success",
                         Message: `ลบข้อมูลที่อยู่สำเร็จ!`,
                         onClose: () => {},
                       });
@@ -156,15 +156,21 @@ const UserAddressManagement = ({
                       }
                     } else {
                       showDialog({
-                        ID: "deleteAddressSuccess",
-                        Header: "จัดการข้อมูลที่อยู่",
+                        ID: "deleteAddressFailure",
+                        Header: "แจ้งเตือน",
                         Type: "error",
-                        Message: `ไม่สามารถลบข้อมูลที่อยู่ได้!`,
+                        Message: `ลบข้อมูลที่อยู่ล้มเหลว!`,
                         onClose: () => {},
                       });
                     }
                   } catch (error) {
-                    console.error(error);
+                    showDialog({
+                      ID: "deleteAddressError",
+                      Header: "แจ้งเตือน",
+                      Type: "error",
+                      Message: `เกิดข้อผิดพลาดไม่สามารถลบข้อมูลที่อยู่ได้!`,
+                      onClose: () => {},
+                    });
                   }
                 },
                 onCancel: () => {},
