@@ -58,8 +58,8 @@ function UserDetail(props: UserDetailProps) {
                     if (data == 200) {
                       showDialog({
                         ID: "deleteSuccess",
-                        Header: "ลบบัญชีผู้ใช้งาน",
-                        Type: "info",
+                        Header: "แจ้งเตือน",
+                        Type: "success",
                         Message: `ลบบัญชีผู้ใช้ User ID : ${props.User.User_ID} สำเร็จ!`,
                         onClose: () => {},
                       });
@@ -68,19 +68,19 @@ function UserDetail(props: UserDetailProps) {
                     }
                   } else {
                     showDialog({
-                      ID: "error",
-                      Header: "Respone Error",
+                      ID: "deleteUserFailure",
+                      Header: "แจ้งเตือน",
                       Type: "error",
-                      Message: `Respone ล้มเหลว!`,
+                      Message: `ลบบัญชีผู้ใช้ User ID : ${props.User.User_ID} ล้มเหลว! \n API ไม่ตอบสนอง`,
                       onClose: () => {},
                     });
                   }
                 } catch (ex) {
                   showDialog({
-                    ID: "deleteError",
-                    Header: "ลบบัญชีผู้ใช้งาน",
+                    ID: "deleteUserError",
+                    Header: "แจ้งเตือน",
                     Type: "error",
-                    Message: `ลบบัญชีผู้ใช้ User ID : ${props.User.User_ID} ล้มเหลว!\n${ex}`,
+                    Message: `เกิดข้อผิดพลาดในการลบบัญชีผู้ใช้ User ID : ${props.User.User_ID}`,
                     onClose: () => {},
                   });
                 }
@@ -126,9 +126,9 @@ const UserManagement = () => {
           onClearData();
           fetchUsersData();
           showDialog({
-            ID: "addSuccess",
-            Header: "เพิ่มข้อมูลบัญชีผู้ใช้",
-            Type: "info",
+            ID: "addUserSuccess",
+            Header: "แจ้งเตือน",
+            Type: "success",
             Message: `เพิ่มบัญชีผู้ใช้งานสำเร็จ!`,
             onClose: () => {},
           });
@@ -136,7 +136,7 @@ const UserManagement = () => {
         case 201:
           showDialog({
             ID: "addUserAlready",
-            Header: "เพิ่มข้อมูลบัญชีผู้ใช้",
+            Header: "แจ้งเตือน",
             Type: "warning",
             Message: `มีบัญชีผู้ใช้งาน '${curUser.Email}' อยู่ในระบบแล้ว!`,
             onClose: () => {},
@@ -144,8 +144,8 @@ const UserManagement = () => {
           break;
         default:
           showDialog({
-            ID: "addFailure",
-            Header: "เพิ่มข้อมูลบัญชีผู้ใช้",
+            ID: "addUserFailure",
+            Header: "แจ้งเตือน",
             Type: "error",
             Message: `เพิ่มบัญชีผู้ใช้งาน '${curUser.Email}' ล้มเหลว!`,
             onClose: () => {},
@@ -158,7 +158,7 @@ const UserManagement = () => {
     if (isEmptyUserData(curUser)) {
       showDialog({
         ID: "addDataEmpty",
-        Header: "เพิ่มข้อมูลบัญชีผู้ใช้",
+        Header: "แจ้งเตือน",
         Type: "warning",
         Message: `กรุณากรอกข้อมูลให้ครบ!`,
         onClose: () => {},
@@ -168,7 +168,7 @@ const UserManagement = () => {
     if (!(isValidEmail(curUser.Email))) {
       showDialog({
         ID: "addEmailInvalid",
-        Header: "เพิ่มข้อมูลบัญชีผู้ใช้",
+        Header: "แจ้งเตือน",
         Type: "warning",
         Message: `กรุณากรอกข้อมูลอีเมลให้ถูกต้อง!`,
         onClose: () => {},
@@ -178,7 +178,7 @@ const UserManagement = () => {
     if (!(isValidPhone(curUser.Phone))) {
       showDialog({
         ID: "addPhoneInvalid",
-        Header: "เพิ่มข้อมูลบัญชีผู้ใช้",
+        Header: "แจ้งเตือน",
         Type: "warning",
         Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,
         onClose: () => {},
@@ -209,17 +209,17 @@ const UserManagement = () => {
               onClearData();
               fetchUsersData();
               showDialog({
-                ID: "saveSuccess",
-                Header: "บันทึกข้อมูลบัญชีผู้ใช้",
-                Type: "info",
+                ID: "saveUserSuccess",
+                Header: "แจ้งเตือน",
+                Type: "success",
                 Message: `บันทึกข้อมูลบัญชี User ID : ${curUser.User_ID} สำเร็จ!`,
                 onClose: () => {},
               });
               break;
             case 201:
               showDialog({
-                ID: "saveEmailAlready",
-                Header: "บันทึกข้อมูลบัญชีผู้ใช้",
+                ID: "saveUserEmailAlready",
+                Header: "แจ้งเตือน",
                 Type: "warning",
                 Message: `ไม่สามารถเปลี่ยนอีเมล '${curEmail}' เป็น '${curUser.Email}' ได้ เนื่องจากมีอีเมลนี้อยู่ในระบบแล้ว!`,
                 onClose: () => {},
@@ -227,8 +227,8 @@ const UserManagement = () => {
               break;
             default:
               showDialog({
-                ID: "saveFailure",
-                Header: "บันทึกข้อมูลบัญชีผู้ใช้",
+                ID: "saveUserFailure",
+                Header: "แจ้งเตือน",
                 Type: "error",
                 Message: `บันทึกข้อมูลบัญชี User ID : ${curUser.User_ID} ล้มเหลว!`,
                 onClose: () => {},
@@ -237,19 +237,19 @@ const UserManagement = () => {
           }
         } else {
           showDialog({
-            ID: "error",
-            Header: "Respone Error",
+            ID: "saveUserAPIFailure",
+            Header: "แจ้งเตือน",
             Type: "error",
-            Message: `Respone ล้มเหลว!`,
+            Message: `บันทึกข้อมูลบัญชี User ID : ${curUser.User_ID} ล้มเหลว! \n API ไม่ตอบสนอง`,
             onClose: () => {},
           });
         }
       } catch (ex) {
         showDialog({
-          ID: "error",
-          Header: "SQL Error",
+          ID: "saveUserError",
+          Header: "แจ้งเตือน",
           Type: "error",
-          Message: `อัพเดทข้อมูล Database ล้มเหลว!\n${ex}`,
+          Message: `เกิดข้อผิดพลาดในการบันทึกข้อมูลบัญชี User ID : ${curUser.User_ID}!`,
           onClose: () => {},
         });
       }
@@ -263,8 +263,8 @@ const UserManagement = () => {
       onConfirm: () => {
         if (isEmptyUserData(curUser)) {
           showDialog({
-            ID: "saveDataEmpty",
-            Header: "บันทึกข้อมูลบัญชีผู้ใช้",
+            ID: "saveUserDataEmpty",
+            Header: "แจ้งเตือน",
             Type: "warning",
             Message: `กรุณากรอกข้อมูลให้ครบ!`,
             onClose: () => {},
@@ -273,8 +273,8 @@ const UserManagement = () => {
         }
         if (!(isValidEmail(curUser.Email))) {
           showDialog({
-            ID: "saveEmailInvalid",
-            Header: "บันทึกข้อมูลบัญชีผู้ใช้",
+            ID: "saveUserEmailInvalid",
+            Header: "แจ้งเตือน",
             Type: "warning",
             Message: `กรุณากรอกข้อมูลอีเมลให้ถูกต้อง!`,
             onClose: () => {},
@@ -283,8 +283,8 @@ const UserManagement = () => {
         }
         if (!(isValidPhone(curUser.Phone))) {
           showDialog({
-            ID: "savePhoneInvalid",
-            Header: "บันทึกข้อมูลบัญชีผู้ใช้",
+            ID: "saveUserPhoneInvalid",
+            Header: "แจ้งเตือน",
             Type: "warning",
             Message: `กรุณากรอกข้อมูลเบอร์โทรศัพท์ให้ถูกต้อง!`,
             onClose: () => {},
@@ -379,19 +379,19 @@ const UserManagement = () => {
         setUsersDisplay(data);
       } else {
         showDialog({
-          ID: "error",
-          Header: "Respone Error",
+          ID: "loadAllUsersFailure",
+          Header: "แจ้งเตือน",
           Type: "error",
-          Message: `Respone ล้มเหลว!`,
+          Message: `โหลดข้อมูลบัญชีผู้ใช้ไม่สำเร็จ! \n API ไม่ตอบสนอง`,
           onClose: () => {},
         });
       }
     } catch (ex) {
       showDialog({
-        ID: "error",
-        Header: "SQL Error",
+        ID: "loadAllUsersError",
+        Header: "แจ้งเตือน",
         Type: "error",
-        Message: `ดึงข้อมูลจาก Database ล้มเหลว!\n${ex}`,
+        Message: `เกิดข้อผิดพลาดในการโหลดข้อมูลบัญชีผู้ใช้`,
         onClose: () => {},
       });
     }
@@ -410,19 +410,19 @@ const UserManagement = () => {
         setAddressList(data);
       } else {
         showDialog({
-          ID: "error",
-          Header: "Respone Error",
+          ID: "loadAddressByUserFailure",
+          Header: "แจ้งเตือน",
           Type: "error",
-          Message: `Respone ล้มเหลว!`,
+          Message: `โหลดข้อมูลที่อยู่ของบัญชีผู้ใช้ไม่สำเร็จ! \n API ไม่ตอบสนอง`,
           onClose: () => {},
         });
       }
     } catch (ex) {
       showDialog({
-        ID: "error",
-        Header: "SQL Error",
+        ID: "loadAddressByUserError",
+        Header: "แจ้งเตือน",
         Type: "error",
-        Message: `ดึงข้อมูลจาก Database ล้มเหลว!\n${ex}`,
+        Message: `เกิดข้อผิดพลาดในการโหลดข้อมูลที่อยู่ของบัญชีผู้ใช้`,
         onClose: () => {},
       });
     }
@@ -560,17 +560,17 @@ const UserManagement = () => {
                                 onClearData();
                                 fetchUsersData();
                                 showDialog({
-                                  ID: "resetSuccess",
-                                  Header: "รีเซ็ตรหัสผ่านของบัญชีผู้ใช้",
-                                  Type: "info",
+                                  ID: "userResetPasswordSuccess",
+                                  Header: "แจ้งเตือน",
+                                  Type: "success",
                                   Message: `รีเซ็ตรหัสผ่านของบัญชีผู้ใช้ User ID : ${curUser.User_ID} สำเร็จ! \n รหัสผ่านคือ : 123456`,
                                   onClose: () => {},
                                 });
                                 break;
                               default:
                                 showDialog({
-                                  ID: "addFailure",
-                                  Header: "รีเซ็ตรหัสผ่านของบัญชีผู้ใช้",
+                                  ID: "userResetPasswordFailure",
+                                  Header: "แจ้งเตือน",
                                   Type: "error",
                                   Message: `รีเซ็ตรหัสผ่านล้มเหลว!`,
                                   onClose: () => {},
@@ -578,7 +578,6 @@ const UserManagement = () => {
                                 break;
                             }
                           }
-
                           onResetPassword();
                         },
                         onCancel: () => {},

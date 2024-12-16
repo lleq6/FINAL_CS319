@@ -9,7 +9,7 @@ import React, {
 type DialogData = {
   ID: string;
   Header: string;
-  Type: "error" | "info" | "warning";
+  Type: "error" | "info" | "warning" | "success";
   Message: string;
   onConfirm?: () => void;
   onCancel?: () => void;

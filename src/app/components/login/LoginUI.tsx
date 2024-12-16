@@ -28,7 +28,7 @@ const LoginUI = () => {
     if (res.error) {
       showDialog({
         ID: "loginFailure",
-        Header: "เข้าสู่ระบบ",
+        Header: "แจ้งเตือน",
         Type: "error",
         Message: `การเข้าสู่ระบบไม่สำเร็จ! \n โปรดตรวจสอบอีเมลล์และรหัสผ่าน \n หรือติดต่อเจ้าหน้าที่`,
         onClose: () => {},
@@ -38,8 +38,8 @@ const LoginUI = () => {
     (document?.getElementById("my_modal_1") as HTMLDialogElement)?.close();
     showDialog({
       ID: "loginSuccess",
-      Header: "เข้าสู่ระบบ",
-      Type: "info",
+      Header: "แจ้งเตือน",
+      Type: "success",
       Message: `เข้าสู่ระบบสำเร็จ!`,
       onClose: () => {},
     });

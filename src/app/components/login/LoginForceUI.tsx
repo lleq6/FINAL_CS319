@@ -1,6 +1,6 @@
 import { useDialog } from "@/app/context/DialogContext";
 import { signIn, SignInResponse } from "next-auth/react";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 const LoginForceUI = () => {
   const { showDialog } = useDialog();
@@ -16,7 +16,7 @@ const LoginForceUI = () => {
       [name]: value,
     });
   }
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const email = curUser.Email;
     const password = curUser.Password;
@@ -28,18 +28,17 @@ const LoginForceUI = () => {
     if (res.error) {
       showDialog({
         ID: "loginFailure",
-        Header: "เข้าสู่ระบบ",
+        Header: "แจ้งเตือน",
         Type: "error",
         Message: `การเข้าสู่ระบบไม่สำเร็จ! \n โปรดตรวจสอบอีเมลและรหัสผ่าน \n หรือติดต่อเจ้าหน้าที่`,
         onClose: () => {},
       });
       return;
     }
-    //(document?.getElementById("my_modal_1") as HTMLDialogElement)?.close();
     showDialog({
       ID: "loginSuccess",
-      Header: "เข้าสู่ระบบ",
-      Type: "info",
+      Header: "แจ้งเตือน",
+      Type: "success",
       Message: `เข้าสู่ระบบสำเร็จ!`,
       onClose: () => {},
     });
@@ -74,6 +73,6 @@ const LoginForceUI = () => {
       </div>
     </dialog>
   );
-}
+};
 
-export default LoginForceUI
+export default LoginForceUI;
