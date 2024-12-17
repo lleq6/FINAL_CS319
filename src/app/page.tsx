@@ -1,26 +1,23 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
-import Navbar from "./components/Navbar";
+import { useEffect } from "react";
 import LoginForceUI from "./components/login/LoginForceUI";
 import { redirect } from "next/navigation";
 import { DialogProvider } from "./context/DialogContext";
 import DialogMessage from "./components/DialogMessage";
+import SessionInfo from "./model/SessionInfo";
 
-{
-  /* <div className="flex"> */
-}
 export default function Homepage() {
   const session = useSession();
-  console.log(session.data?.user);
-
+  const user = session.data?.user as SessionInfo;
   useEffect(() => {
     const e = document.getElementById("loginForceUI") as HTMLDialogElement;
     if (e) {
       e.showModal();
     }
-    if (session.data?.user) {
-      if (session.data?.user.role == "1") redirect("/admin");
+
+    if (user) {
+      if (user.role == "1") redirect("/admin");
     }
   });
 
@@ -30,7 +27,7 @@ export default function Homepage() {
     <div>
       {/* <Navbar /> */}
       <DialogProvider>
-        <LoginForceUI/>
+        <LoginForceUI />
         <DialogMessage />
       </DialogProvider>
     </div>
