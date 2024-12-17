@@ -3,7 +3,6 @@ import { useSession } from "next-auth/react";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { redirect } from "next/navigation";
-import { CounterProvider } from "../context/CartCount";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const session = useSession();
@@ -16,11 +15,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   } else if (session.status !== "loading") {
     return (
       <div>
-        <CounterProvider>
-          <Navbar></Navbar>
-          <div className="mx-14 h-fit">{children}</div>
-          <Footer />
-        </CounterProvider>
+        <Navbar></Navbar>
+        <div className="mx-14 h-fit">{children}</div>
+        <Footer />
       </div>
     );
     //}

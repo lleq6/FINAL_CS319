@@ -7,10 +7,9 @@ import RegisterUI from "./login/RegisterUI";
 import { signOut, useSession } from "next-auth/react";
 import { FaShoppingCart } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import { fetchData } from "next-auth/client/_utils";
 import Link from "next/link";
-import { useCounter } from "../context/CartCount";
 import { DialogProvider } from "../context/DialogContext";
+import SessionInfo from "../model/SessionInfo";
 
 interface Child {
   Child_ID: string;
@@ -32,38 +31,22 @@ interface CategoryList {
 const Navbar = () => {
   const session = useSession();
   const [Categories, setCategories] = useState<CategoryList[]>([]);
-  const [Loading, setLoading] = useState(true);
-  const [cartQuantity, setCartQuantity] = useState(0);
-  const { count, increment, decrement, setCounter } = useCounter();
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch("/api/getCategory/all");
         const result = await response.json();
-        if(result.length == 0){
-          console.log(result,'test')
-          throw new Error('data not found')
+        if (result.length == 0) {
+          console.log(result, "test");
+          throw new Error("data not found");
         }
         setCategories(result);
       } catch (error) {
         console.log(error);
       }
     };
-    async function fetchCart() {
-      const res = await fetch(
-        `/api/cart/getCartItems?id=${session.data?.user.id}`
-      );
-      try{
-        const d = await res.json();
-        console.log(d.length, "dd");
-        setCounter(d.length);
-      }catch(error){
-        setCounter(0);
-      }
-    }
     fetchData();
     if (session.status === "authenticated") {
-      fetchCart();
     }
   }, [session.status]);
 
@@ -85,6 +68,8 @@ const Navbar = () => {
       dropdown.open = false;
     }
   }
+
+  const user = session.data?.user as SessionInfo;
 
   function CategoryMenu() {
     return (
@@ -202,7 +187,10 @@ const Navbar = () => {
               ) : (
                 <div className="flex content-center my-auto mx-auto">
                   <Link href={"/cart"}>
-                    <button className="text-start border rounded-box bg-yellow-400 py-2 px-2 flex m-auto" disabled>
+                    <button
+                      className="text-start border rounded-box bg-yellow-400 py-2 px-2 flex m-auto"
+                      disabled
+                    >
                       <FaShoppingCart className="content-center my-auto" />
                       <span className="mx-1"></span>
                     </button>
@@ -215,7 +203,7 @@ const Navbar = () => {
                         tabIndex={0}
                         role="button"
                       >
-                        {session.data?.user?.name}
+                        {user?.name}
                         <GoTriangleDown className="my-auto"></GoTriangleDown>
                       </a>
                       {/* <div tabIndex={0} role="button" className="btn m-1">Click</div> */}
@@ -282,7 +270,7 @@ const Navbar = () => {
                 แคทตาล็อก
               </Link>
             </li>
-            {session.data?.user?.role == "1" ? (
+            {user.role == "1" ? (
               <li className="bg-yellow-400 ml-auto mr-14">
                 <details id={"admin_menu"} className="h-full">
                   <summary className="rounded-none px-10 m-auto h-full font-semibold content-center">

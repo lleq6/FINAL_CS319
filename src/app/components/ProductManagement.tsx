@@ -96,7 +96,7 @@ interface addCategoryModalProps {
   type: number;
   curCategory: CategoryList | undefined;
   subCategory: SubCategory | undefined;
-  callback?: () => void | undefined;
+  callback?: () => void;
 }
 function AddCategoryModal({
   type,
@@ -122,7 +122,7 @@ function AddCategoryModal({
             ✕
           </button>
         </form>
-        <h3 className="font-bold text-lg">เพิ่ม {select[type]}</h3>
+        <h3 className="font-bold text-lg">เพิ่ม {select[type as keyof typeof select]}</h3>
         <div>
           <input
             className="input w-full bg-gray-200 my-3"
@@ -134,7 +134,6 @@ function AddCategoryModal({
         </div>
         <form method="dialog">
           <div className="text-end space-x-2">
-            <button className="btn">ยกเลิก</button>
             <button
               className="btn"
               onClick={async () => {
@@ -171,32 +170,47 @@ function AddCategoryModal({
                     method: "PUT",
                     body: JSON.stringify(body),
                   });
-                  if (!response.ok) throw new Error("error");
-                  showDialog({
-                    ID: "addProductCategory",
-                    Header: "เพิ่มหมวดหมู่สำเร็จ",
-                    Type: "info",
-                    Message: "เพิ่มสำเร็จ",
-                    onClose: () => {
-                      console.log("close");
-                      console.log(callback);
-                      if (callback) {
-                        callback();
-                      }
-                      (
-                        document.getElementById(
-                          "addCategory"
-                        ) as HTMLDialogElement
-                      ).close();
-                      // console.log(callback)
-                    },
-                  });
+                  if (response.ok) {
+                    showDialog({
+                      ID: "addProductCategorySuccess",
+                      Header: "แจ้งเตือน",
+                      Type: "info",
+                      Message: `เพิ่มหมวดหมู่ '${value}' สำเร็จ!`,
+                      onClose: () => {
+                        console.log("close");
+                        console.log(callback);
+                        if (callback) {
+                          callback();
+                        }
+                        (
+                          document.getElementById(
+                            "addCategory"
+                          ) as HTMLDialogElement
+                        ).close();
+                        // console.log(callback)
+                      },
+                    });
+                  } else {
+                    showDialog({
+                      ID: "addProductCategoryFailure",
+                      Header: "แจ้งเตือน",
+                      Type: "error",
+                      Message: `เพิ่มหมวดหมู่ '${value}' ล้มเหลว!`,
+                      onClose: () => {
+                        (
+                          document.getElementById(
+                            "addCategory"
+                          ) as HTMLDialogElement
+                        ).close();
+                      },
+                    });
+                  }
                 } catch (error) {
                   showDialog({
-                    ID: "addProductCategory",
-                    Header: "โปรดตรวจสอบข้อผิดพลาด",
+                    ID: "addProductCategoryError",
+                    Header: "แจ้งเตือน",
                     Type: "error",
-                    Message: "การเพิ่มข้อมูลล้มเหลว",
+                    Message: "เกิดข้อผิดพลาดในการเพิ่มหมวดหมู่",
                     onClose: () => {
                       (
                         document.getElementById(
@@ -206,11 +220,12 @@ function AddCategoryModal({
                     },
                   });
                 }
-                setValue('')
+                setValue("");
               }}
             >
               เพิ่ม
             </button>
+            <button className="btn">ยกเลิก</button>
           </div>
         </form>
       </div>
@@ -244,7 +259,7 @@ const ProductManagement = () => {
       console.log(data);
       (document.getElementById("c1") as HTMLSelectElement).value = "0";
       (document.getElementById("c2") as HTMLSelectElement).value = "0";
-      (document.getElementById("c3")  as HTMLSelectElement).value = "0";
+      (document.getElementById("c3") as HTMLSelectElement).value = "0";
       setCurCategory(undefined);
       setCurSubCategory(undefined);
       setChild(undefined);
@@ -420,26 +435,6 @@ const ProductManagement = () => {
       return;
     }
   }
-  function addCallback(value: string) {
-    const child = [...curChild, value];
-    const sub = {
-      ...CurSubCategory,
-      ChildCategory: child,
-    };
-    setCategory(() => {
-      category.map((e) => {
-        if (e.Category_ID == curCategory?.Category_ID) {
-          return {
-            ...e,
-            Sub_Category: sub,
-          };
-        }
-        return e;
-      });
-    });
-
-    [...curChild];
-  }
 
   async function saveEditItem() {
     try {
@@ -610,7 +605,7 @@ const ProductManagement = () => {
                     </div>
                     <input
                       type="text"
-                      placeholder="e.g (ชิ้น,แท่ง,แผ่น)"
+                      placeholder="e.g (ชิ้น, แท่ง, แผ่น)"
                       className="input input-bordered w-full max-w-xs"
                       value={curProduct?.Unit || ""}
                       onChange={handleChange}
@@ -667,15 +662,21 @@ const ProductManagement = () => {
                     </select>
                     <div className="text-end space-x-2 my-2">
                       <button
+                        className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
+                        disabled={!curProduct.Product_ID ? true : false}
+                        onClick={() => openAddModal(0, getCategory)}
+                      >
+                        เพิ่ม
+                      </button>
+                      <button
                         className="btn btn-sm btn-outline border-red-700 border-2 hover:bg-red-700 hover:border-white hover:text-white"
                         disabled={!curCategory ? true : false}
                         onClick={() =>
                           showDialog({
                             Header: "โปรดตรวจสอบ",
                             ID: "c",
-                            Message: `คุณต้องการลบหมวดหมู่สินค้า ${curCategory?.Name}`,
+                            Message: `คุณต้องการลบหมวดหมู่สินค้า '${curCategory?.Name}' ใช่ไหม่?`,
                             Type: "warning",
-                            onClose: () => {},
                             onConfirm: async () => {
                               const body = {
                                 keyword: "Category",
@@ -715,17 +716,11 @@ const ProductManagement = () => {
                                 });
                               }
                             },
+                            onCancel: () => {},
                           })
                         }
                       >
                         ลบ
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
-                        disabled={!curProduct.Product_ID ? true : false}
-                        onClick={() => openAddModal(0, getCategory)}
-                      >
-                        เพิ่ม
                       </button>
                     </div>
                   </label>
@@ -765,15 +760,21 @@ const ProductManagement = () => {
                     </select>
                     <div className="text-end space-x-2 my-2">
                       <button
+                        className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
+                        disabled={!curCategory ? true : false}
+                        onClick={() => openAddModal(1, getCategory)}
+                      >
+                        เพิ่ม
+                      </button>
+                      <button
                         className="btn btn-sm btn-outline border-red-700 border-2 hover:bg-red-700 hover:border-white hover:text-white"
                         disabled={!CurSubCategory ? true : false}
                         onClick={() =>
                           showDialog({
                             Header: "โปรดตรวจสอบ",
                             ID: "cd",
-                            Message: `คุณต้องการลบหมวดหมู่สินค้า ${CurSubCategory?.Name}`,
+                            Message: `คุณต้องการลบหมวดหมู่สินค้า '${CurSubCategory?.Name}' ใช่ไหม?`,
                             Type: "warning",
-                            onClose: () => {},
                             onConfirm: async () => {
                               const body = {
                                 keyword: "Sub_Category",
@@ -815,17 +816,11 @@ const ProductManagement = () => {
                                 });
                               }
                             },
+                            onCancel: () => {},
                           })
                         }
                       >
                         ลบ
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
-                        disabled={!curCategory ? true : false}
-                        onClick={() => openAddModal(1, getCategory)}
-                      >
-                        เพิ่ม
                       </button>
                     </div>
                   </label>
@@ -859,15 +854,44 @@ const ProductManagement = () => {
                     </select>
                     <div className="text-end my-2 space-x-2">
                       <button
+                        className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
+                        disabled={!CurSubCategory ? true : false}
+                        onClick={() =>
+                          openAddModal(
+                            2,
+                            getCategory
+                            // const child = [...curChild, value];
+                            // const sub = {
+                            //   ...CurSubCategory,
+                            //   ChildCategory: child,
+                            // };
+                            // setCategory(() => {
+                            //   category.map((e) => {
+                            //     if (e.Category_ID == curCategory?.Category_ID) {
+                            //       return {
+                            //         ...e,
+                            //         Sub_Category: sub,
+                            //       };
+                            //     }
+                            //     return e;
+                            //   });
+                            // });
+
+                            // ([...curChild, ])
+                          )
+                        }
+                      >
+                        เพิ่ม
+                      </button>
+                      <button
                         className="btn btn-sm btn-outline border-red-700 border-2 hover:bg-red-700 hover:border-white hover:text-white"
                         disabled={curProduct?.Child_ID == "0" ? true : false}
                         onClick={() =>
                           showDialog({
                             Header: "โปรดตรวจสอบ",
                             ID: "sc",
-                            Message: `คุณต้องการลบหมวดหมู่สินค้า ${curProduct?.cc_name}`,
+                            Message: `คุณต้องการลบหมวดหมู่สินค้า '${curProduct?.cc_name}' ใช่ไหม่?`,
                             Type: "warning",
-                            onClose: () => {},
                             onConfirm: async () => {
                               const body = {
                                 keyword: "Child_Sub_Category",
@@ -907,40 +931,11 @@ const ProductManagement = () => {
                                 });
                               }
                             },
+                            onCancel: () => {},
                           })
                         }
                       >
                         ลบ
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
-                        disabled={!CurSubCategory ? true : false}
-                        onClick={() =>
-                          openAddModal(
-                            2,
-                            getCategory
-                            // const child = [...curChild, value];
-                            // const sub = {
-                            //   ...CurSubCategory,
-                            //   ChildCategory: child,
-                            // };
-                            // setCategory(() => {
-                            //   category.map((e) => {
-                            //     if (e.Category_ID == curCategory?.Category_ID) {
-                            //       return {
-                            //         ...e,
-                            //         Sub_Category: sub,
-                            //       };
-                            //     }
-                            //     return e;
-                            //   });
-                            // });
-
-                            // ([...curChild, ])
-                          )
-                        }
-                      >
-                        เพิ่ม
                       </button>
                     </div>
                   </label>
@@ -1026,16 +1021,6 @@ const ProductManagement = () => {
             ></textarea>
             <div className="w-10/12 ml-2 mt-3 text-end space-x-5">
               <button
-                className="btn bg-gray-300 hover:bg-red-300"
-                disabled={!curProduct.Product_ID ? true : false}
-                onClick={() => {
-                  setP(emptyProduct);
-                  // setCurProduct(emptyProduct);
-                }}
-              >
-                ยกเลิก
-              </button>
-              <button
                 className="btn ml-auto bg-gray-300 hover:bg-yellow-300"
                 disabled={!curProduct.Product_ID ? true : false}
                 onClick={(e) => {
@@ -1055,6 +1040,16 @@ const ProductManagement = () => {
                 ) : (
                   "บันทึก"
                 )}
+              </button>
+              <button
+                className="btn bg-gray-300 hover:bg-red-300"
+                disabled={!curProduct.Product_ID ? true : false}
+                onClick={() => {
+                  setP(emptyProduct);
+                  // setCurProduct(emptyProduct);
+                }}
+              >
+                ยกเลิก
               </button>
             </div>
 
