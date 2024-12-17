@@ -43,7 +43,7 @@ export default function AdminUserSidebar({ Users, setUsersDisplay }: Props) {
     <div>
       <label className="form-control w-full max-w-xs mx-1">
         <div className="label">
-          <span className="label-text">สถานะ</span>
+          <span className="label-text">ค้นหาโดย</span>
         </div>
         <select
           className="select select-bordered w-11/12"
