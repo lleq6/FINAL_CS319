@@ -16,7 +16,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   } else if (session.status !== "loading") {
     return (
       <div>
-        <h1>admin</h1>
         <CounterProvider>
           <Navbar></Navbar>
           <div className="mx-14 h-fit">{children}</div>

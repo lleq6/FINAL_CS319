@@ -40,8 +40,11 @@ const Navbar = () => {
       try {
         const response = await fetch("/api/getCategory/all");
         const result = await response.json();
+        if(result.length == 0){
+          console.log(result,'test')
+          throw new Error('data not found')
+        }
         setCategories(result);
-        console.log(Categories, "asdasdasdasd");
       } catch (error) {
         console.log(error);
       }
@@ -50,9 +53,13 @@ const Navbar = () => {
       const res = await fetch(
         `/api/cart/getCartItems?id=${session.data?.user.id}`
       );
-      const d = await res.json();
-      console.log(d.length, "dd");
-      setCounter(d.length);
+      try{
+        const d = await res.json();
+        console.log(d.length, "dd");
+        setCounter(d.length);
+      }catch(error){
+        setCounter(0);
+      }
     }
     fetchData();
     if (session.status === "authenticated") {
@@ -129,7 +136,7 @@ const Navbar = () => {
       </div>
     );
   }
-  if (!Categories.length) return <div>loadingD</div>;
+  // if (!Categories.length) return <div>loadingD</div>;
   if (session.status === "loading") {
     return <div>Loading</div>;
   }
@@ -303,7 +310,7 @@ const Navbar = () => {
                         จัดการคลังสินค้า
                       </Link>
                     </li>
-                    <li>
+                    {/* <li>
                       <Link
                         href={"/"}
                         className="rounded-none p-4"
@@ -311,7 +318,7 @@ const Navbar = () => {
                       >
                         จัดการคำสั่งซื้อ
                       </Link>
-                    </li>
+                    </li> */}
                   </ul>
                 </details>
               </li>
