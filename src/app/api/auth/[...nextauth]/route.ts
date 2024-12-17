@@ -1,9 +1,9 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { hashMD5 } from "../../lib/utils";
 import { fetchOneUser } from "../../lib/db";
 
-export const authConfig = {
+export const authConfig: AuthOptions = {
   providers: [
     CredentialsProvider({
       credentials: {
@@ -13,7 +13,6 @@ export const authConfig = {
       async authorize(credentials) {
         const fetch = await fetchOneUser(credentials?.email);
         const user = fetch.rows[0];
-        console.log(user);
         if (user) {
           const isPasswordMatch =
             user.Password === hashMD5(credentials?.password as string);
@@ -26,7 +25,7 @@ export const authConfig = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
         token.id = user.User_ID;
         token.role = user.Access_Level;
@@ -34,7 +33,7 @@ export const authConfig = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       session.user.id = token.id;
       session.user.role = token.role;
       session.user.name = token.name;

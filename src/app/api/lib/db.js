@@ -58,9 +58,8 @@ module.exports = {
     );
     return data.rows[0];
   },
-
   fetchAllProduct: async () => {
-    const data = await client.query(`            SELECT 
+    const data = await client.query(`SELECT 
                 p.*, 
                 c."Name" as C_NAME,
                 c."Category_ID" as C_ID,
@@ -76,30 +75,28 @@ module.exports = {
             JOIN 
                 public."Category" c ON s."Category_ID" = c."Category_ID"
                  ORDER BY "Product_ID" ASC`);
-    const dat = await client.query(`SELECT * FROM public."Child_Sub_Category"`);
     return data.rows;
   },
-  fetchProductCategory: async (id) => {
-    const result = {
-      Category: "",
-      SubCategory: "",
-      ChildCategory: "",
-    };
-    const data = await client.query(
-      `SELECT * FROM public."Child_Sub_Category" WHERE "Child_ID" = $1`,
-      [id]
-    );
-    // console.log(data.name);
-    return data;
-  },
-  fechProductCategoryID: async () => {
-    const data = await client.query(
-      `SELECT * FROM public."Child_Sub_Category"`
-    );
-    return data;
+  fetchAllProduct: async () => {
+    const data = await client.query(`SELECT 
+                p.*, 
+                c."Name" as C_NAME,
+                c."Category_ID" as C_ID,
+                s."Name" as S_NAME,
+                s."Sub_Category_ID" as S_ID,
+                cc."Name" as CC_Name
+            FROM 
+                public."Product" p
+            JOIN 
+                public."Child_Sub_Category" cc ON p."Child_ID" NOT IN (cc."Child_ID")
+            JOIN 
+                public."Sub_Category" s ON cc."Sub_Category_ID" NOT IN (s."Sub_Category_ID")
+            JOIN 
+                public."Category" c ON s."Category_ID" NOT IN (c."Category_ID")
+                 ORDER BY "Product_ID" ASC`);
+    return data.rows;
   },
   fetchAllCategory: async () => {
-    // console.log(categoryL.rows)
     const categoryL = await client.query(`SELECT * FROM public."Category"`);
     const subList = await client.query(`SELECT * FROM public."Sub_Category"`);
     const childList = await client.query(
@@ -123,18 +120,6 @@ module.exports = {
       };
     });
     return result;
-  },
-  fetchAllCategoryList: async () => {
-    const categoryL = await client.query(`SELECT * FROM public."Category"`);
-    const subList = await client.query(`SELECT * FROM public."Sub_Category"`);
-    const childList = await client.query(
-      `SELECT * FROM public."Child_Sub_Category"`
-    );
-    // const result = categoryL.rows.map(e => {
-    // return{...e,Sub_Category: subList.rows.filter((sub)=> sub.Category_ID = )}}
-    // )
-
-    return [categoryL.rows];
   },
   fetchProductsByCategory: async (category_id) =>
     await client.query(

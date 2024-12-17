@@ -14,21 +14,16 @@ export const uploadImage = async (file : any) => {
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const filename = Date.now() + file.name.replaceAll(" ", "_");
-  console.log(filename);
   try {
     await writeFile(
-      path.join(process.cwd(), "public/products/" + filename),
+      path.join(process.cwd(), `public/products/${filename}`),
       buffer
     );
-    const k = path.join(process.cwd(), "public/products/" + filename)
-    console.log(k)
     // return NextResponse.json({ Message: "Success", status: 201 });
     return {path : `/products/${filename}`}
   } catch (error) {
     console.log("Error occured ", error);
     // return NextResponse.json({ Message: "Failed", status: 500 });
     return false
-
-
   }
 };
