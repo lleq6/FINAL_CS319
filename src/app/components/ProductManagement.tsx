@@ -86,9 +86,10 @@ function test(p: ProductInfo) {
   const main = document.querySelector("#c1") as HTMLSelectElement;
   const sub = document.querySelector("#c2") as HTMLSelectElement;
   const child = document.querySelector("#c3") as HTMLSelectElement;
-  main.value = p.c_id.toString();
-  sub.value = p.s_id.toString();
-  child.value = p.Child_ID.toString();
+
+  main.value = p.c_id? p.c_id.toString() : '0';
+  sub.value = p.sid ? p.s_id.toString() : '0';
+  child.value = p.Child_ID ? p.Child_ID.toString() : '0';
 }
 
 interface addCategoryModalProps {
@@ -291,7 +292,7 @@ const ProductManagement = () => {
     if (curCategory) {
       setCurSubCategory(
         curCategory.Sub_Category.find(
-          (sub) => sub.Sub_Category_ID == curProduct.s_id.toString()
+          (sub) => sub.Sub_Category_ID == curProduct.s_id ? curProduct.s_id.toString(): '0'
         )
       );
       return;
@@ -331,10 +332,10 @@ const ProductManagement = () => {
       // setCurSubCategory(undefined)
       return;
     }
-    setCurCategory(category.find((e) => e.Category_ID == p.c_id.toString()));
+    setCurCategory(category.find((e) => e.Category_ID == p.c_id ? p.c_id.toString(): '0'));
     setChild(
       curCategory?.Sub_Category.find(
-        (sub) => sub.Sub_Category_ID == p.s_id.toString()
+        (sub) => sub.Sub_Category_ID == p.s_id? p.s_id.toString() : '0'
       )?.ChildCategory
     );
   }

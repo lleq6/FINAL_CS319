@@ -60,22 +60,38 @@ module.exports = {
   },
 
   fetchAllProduct: async () => {
-    const data = await client.query(`            SELECT 
-                p.*, 
-                c."Name" as C_NAME,
-                c."Category_ID" as C_ID,
-                s."Name" as S_NAME,
-                s."Sub_Category_ID" as S_ID,
-                cc."Name" as CC_Name
-            FROM 
-                public."Product" p
-            JOIN 
-                public."Child_Sub_Category" cc ON p."Child_ID" = cc."Child_ID"
-            JOIN 
-                public."Sub_Category" s ON cc."Sub_Category_ID" = s."Sub_Category_ID"
-            JOIN 
-                public."Category" c ON s."Category_ID" = c."Category_ID"
-                 ORDER BY "Product_ID" ASC`);
+    const data = await client.query(`
+      SELECT 
+        p."Product_ID",
+        COALESCE(p."Child_ID", 0) as "Child_ID",
+        p."Name",
+        p."Brand",
+        p."Description",
+        p."Unit",
+        p."Quantity",
+        p."Sale_Cost",
+        p."Sale_Price",
+        p."Reorder_Point",
+        p."Visibility",
+        p."Review_Rating",
+        p."Image_URL",
+        c."Name" as "C_NAME",
+        COALESCE(c."Category_ID", 0) as "C_ID",
+        s."Name" as "S_NAME",
+        COALESCE(s."Sub_Category_ID", 0) as "S_ID",
+        cc."Name" as "CC_Name"
+      FROM 
+        public."Product" p
+      LEFT JOIN 
+        public."Child_Sub_Category" cc ON p."Child_ID" = cc."Child_ID" 
+      LEFT JOIN 
+        public."Sub_Category" s ON cc."Sub_Category_ID" = s."Sub_Category_ID"
+      LEFT JOIN 
+        public."Category" c ON s."Category_ID" = c."Category_ID"
+      ORDER BY 
+        p."Product_ID" ASC;
+    `);
+    
     const dat = await client.query(`SELECT * FROM public."Child_Sub_Category"`);
     return data.rows;
   },
