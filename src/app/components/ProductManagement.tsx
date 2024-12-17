@@ -122,7 +122,9 @@ function AddCategoryModal({
             ✕
           </button>
         </form>
-        <h3 className="font-bold text-lg">เพิ่ม {select[type as keyof typeof select]}</h3>
+        <h3 className="font-bold text-lg">
+          เพิ่ม {select[type as keyof typeof select]}
+        </h3>
         <div>
           <input
             className="input w-full bg-gray-200 my-3"
@@ -236,8 +238,10 @@ const ProductManagement = () => {
   const { showDialog } = useDialog();
   const [curProduct, setCurProduct] = useState<ProductInfo>(emptyProduct);
   const [productFilter, setFilter] = useState<ProductInfo[]>([]);
+  const [productWithoutCategory, setProductsWithoutCategory] = useState<ProductInfo[]>([]);
   const [Products, setProducts] = useState<ProductInfo[]>([]);
-  const [Show, setShow] = useState<ProductInfo[]>([]);
+  const [ShowProductNormal, setShowProductNormal] = useState<ProductInfo[]>([]);
+  const [ShowProductWithoutCategory, setShowProductWithoutCategory] = useState<ProductInfo[]>([]);
   const [category, setCategory] = useState<CategoryList[]>([]);
   const [curCategory, setCurCategory] = useState<CategoryList>();
   const [CurSubCategory, setCurSubCategory] = useState<SubCategory>();
@@ -246,7 +250,11 @@ const ProductManagement = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [curFileImg, setCurFile] = useState<File>();
   const [addCategoryType, setAddCategory] = useState(0);
-  const [callback, setCallback] = useState<() => void>(() => {});
+  const [activeTab, setActiveTab] = useState<string>("tab1");
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+  };
 
   async function getCategory() {
     try {
@@ -256,7 +264,6 @@ const ProductManagement = () => {
         return;
       }
       setCategory(data);
-      console.log(data);
       (document.getElementById("c1") as HTMLSelectElement).value = "0";
       (document.getElementById("c2") as HTMLSelectElement).value = "0";
       (document.getElementById("c3") as HTMLSelectElement).value = "0";
@@ -276,14 +283,12 @@ const ProductManagement = () => {
         const response = await fetch("/api/products/allProduct");
         const data = await response.json();
         if (data.length == 0) return "Product not found";
-        console.log(data, "first");
         setProducts(data);
         setFilter(data);
-        setShow(data.slice(0, 3));
+        setShowProductNormal(data.slice(0, 3));
       } catch (error) {
         console.log(error);
       }
-      console.log(category);
     };
     fetchData();
   }, []);
@@ -301,7 +306,7 @@ const ProductManagement = () => {
   }, [curCategory]);
 
   useEffect(() => {
-    setShow(productFilter.slice(0, 4));
+    setShowProductNormal(productFilter.slice(0, 4));
     const k = document.querySelectorAll(".i2");
     k.forEach((d) => d.classList.remove("bg-yellow-600"));
     const k22: HTMLElement = document.querySelector(".i1") as HTMLButtonElement;
@@ -322,8 +327,6 @@ const ProductManagement = () => {
 
   function setP(p: ProductInfo) {
     setCurProduct(p);
-    console.log(p);
-    console.log(Show);
     test(p);
     setCurImage(p.Image_URL);
     if (!p.Product_ID) {
@@ -353,15 +356,15 @@ const ProductManagement = () => {
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     // if (!curProduct.Product_ID) newErrors.Product_ID = 'Product ID is required';
-    if (!curProduct.Name) newErrors.Name = "โปรดกรอกชื่อสินค้า";
-    if (!curProduct.Brand) newErrors.Brand = "โปรดกรอกยี่ห้อ";
-    if (!curProduct.Description) newErrors.Description = "โปรดกรอกคำอธิบาย";
+    if (!curProduct.Name) newErrors.Name = "กรุณากรอกชื่อสินค้า";
+    if (!curProduct.Brand) newErrors.Brand = "กรุณากรอกยี่ห้อ";
+    if (!curProduct.Description) newErrors.Description = "กรุณากรอกคำอธิบาย";
     if (curProduct.Quantity <= 0)
-      newErrors.Quantity = "โปรดกรอกจำนวนที่ถูกต้อง";
-    if (curProduct.Sale_Price <= 0) newErrors.Sale_Price = "โปรดกรอกราคา";
-    if (!curProduct.Unit) newErrors.Unit = "โปรดกรอกหน่วยสินค้า";
+      newErrors.Quantity = "กรุณากรอกจำนวนให้ถูกต้อง";
+    if (curProduct.Sale_Price <= 0) newErrors.Sale_Price = "กรุณากรอกราคา";
+    if (!curProduct.Unit) newErrors.Unit = "กรุณากรอกหน่วยสินค้า";
     if (curProduct.Child_ID == "0")
-      newErrors.Child_ID = "โปรดเลือกหมวดหมู่สินค้า";
+      newErrors.Child_ID = "กรุณาเลือกหมวดหมู่สินค้า";
     // if (curProduct.Sale_Price < 0) newErrors.Sale_Price = 'Sale Price cannot be negative';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -370,11 +373,11 @@ const ProductManagement = () => {
     if (Object.keys(errors).length === 0) return;
     let message: string = "";
     for (const [key, value] of Object.entries(errors)) {
-      message += `${key} : ${value}\n`;
+      message += `${value}\n`;
     }
     showDialog({
       ID: "checkValidate",
-      Header: "โปรดตรวจสอบข้อผิดพลาด",
+      Header: "แจ้งเตือน",
       Type: "warning",
       Message: message,
       onClose: () => {},
@@ -1004,6 +1007,7 @@ const ProductManagement = () => {
                       type="text"
                       placeholder="Type here"
                       className="input input-bordered w-full max-w-32"
+                      name="Reorder_Point"
                       value={curProduct.Reorder_Point}
                       onChange={handleChange}
                       disabled={!curProduct.Product_ID ? true : false}
@@ -1052,40 +1056,101 @@ const ProductManagement = () => {
                 ยกเลิก
               </button>
             </div>
-
-            <div>ค้นหา</div>
-            <div className="mx-2 my-3 grid grid-cols-[2fr_1fr_4fr_2fr_2fr_1fr_1fr] divide-x-2 text-center">
-              <p>รูปภาพ</p>
-              <p>รหัสสินค้า</p>
-              <p>ชื่อสินค้า</p>
-              <p>หมวดหมู่ย่อย</p>
-              <p>ราคา</p>
-              <p>จำนวนคงเหลือ</p>
-              <p>จุดสั่งซื้อ</p>
-            </div>
-            <div className="grid grid-rows-4 w-full">
-              {productFilter.length == 0 ? (
-                <p>ไม่พบสินค้า</p>
-              ) : (
-                <>
-                  {Show.map((e, index) => (
-                    <div key={e.Product_ID}>
-                      <AdminProduct
-                        key={e.Product_ID + 1}
-                        product={e}
-                        setProduct={setP}
-                        isGray={index % 2 == 0}
-                        setProducts={setProducts}
-                      />
+            <div className="container mx-auto p-4">
+              <div className="flex border-b">
+                <button
+                  onClick={() => handleTabChange("tab1")}
+                  className={`p-2 ${
+                    activeTab === "tab1" ? "border-b-2 border-blue-500" : ""
+                  }`}
+                >
+                  สินค้าทั้งหมด
+                </button>
+                <button
+                  onClick={() => handleTabChange("tab2")}
+                  className={`p-2 ${
+                    activeTab === "tab2" ? "border-b-2 border-blue-500" : ""
+                  }`}
+                >
+                  สินค้าที่ไม่มีหมวดหมู่
+                </button>
+              </div>
+              <div className="mt-4">
+                {activeTab === "tab1" && (
+                  <>
+                    <div className="mx-2 my-3 grid grid-cols-[2fr_1fr_4fr_2fr_2fr_1fr_1fr] divide-x-2 text-center">
+                      <p>รูปภาพ</p>
+                      <p>รหัสสินค้า</p>
+                      <p>ชื่อสินค้า</p>
+                      <p>หมวดหมู่ย่อย</p>
+                      <p>ราคา</p>
+                      <p>จำนวนคงเหลือ</p>
+                      <p>จุดสั่งซื้อ</p>
                     </div>
-                  ))}
-                </>
-              )}
-              <Paginate
-                items={productFilter}
-                itemsPerPage={4}
-                setShow={setShow}
-              ></Paginate>
+                    <div className="grid grid-rows-4 w-full">
+                      {productFilter.length == 0 ? (
+                        <p>ไม่พบสินค้า</p>
+                      ) : (
+                        <>
+                          {ShowProductNormal.map((e, index) => (
+                            <div key={e.Product_ID}>
+                              <AdminProduct
+                                key={e.Product_ID + 1}
+                                product={e}
+                                setProduct={setP}
+                                isGray={index % 2 == 0}
+                                setProducts={setProducts}
+                              />
+                            </div>
+                          ))}
+                        </>
+                      )}
+                      <Paginate
+                        items={productFilter}
+                        itemsPerPage={4}
+                        setShow={setShowProductNormal}
+                      ></Paginate>
+                    </div>
+                  </>
+                )}
+                {activeTab === "tab2" && (
+                  <>
+                    <div className="mx-2 my-3 grid grid-cols-[2fr_1fr_4fr_2fr_2fr_1fr_1fr] divide-x-2 text-center">
+                      <p>รูปภาพ</p>
+                      <p>รหัสสินค้า</p>
+                      <p>ชื่อสินค้า</p>
+                      <p>หมวดหมู่ย่อย</p>
+                      <p>ราคา</p>
+                      <p>จำนวนคงเหลือ</p>
+                      <p>จุดสั่งซื้อ</p>
+                    </div>
+                    <div className="grid grid-rows-4 w-full">
+                      {productWithoutCategory.length == 0 ? (
+                        <p>ไม่พบสินค้า</p>
+                      ) : (
+                        <>
+                          {ShowProductWithoutCategory.map((e, index) => (
+                            <div key={e.Product_ID}>
+                              <AdminProduct
+                                key={e.Product_ID + 1}
+                                product={e}
+                                setProduct={setP}
+                                isGray={index % 2 == 0}
+                                setProducts={setProducts}
+                              />
+                            </div>
+                          ))}
+                        </>
+                      )}
+                      <Paginate
+                        items={productWithoutCategory}
+                        itemsPerPage={4}
+                        setShow={setShowProductWithoutCategory}
+                      ></Paginate>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
