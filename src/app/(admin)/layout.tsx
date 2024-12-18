@@ -10,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const user = session.data?.user as SessionInfo;
   if (
     session.status !== "loading" &&
-    (!session || (session?.data?.user as SessionInfo).role != "1")
+    (!session || (session?.data?.user as SessionInfo)?.role != "1")
   ) {
     return redirect("/");
   } else if (session.status !== "loading") {
