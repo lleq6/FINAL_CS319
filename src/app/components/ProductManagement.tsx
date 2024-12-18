@@ -896,7 +896,7 @@ const ProductManagement = () => {
                         onClick={() =>
                           showDialog({
                             Header: "โปรดตรวจสอบ",
-                            ID: "sc",
+                            ID: "deleteChildSubCategory",
                             Message: `คุณต้องการลบหมวดหมู่สินค้า '${curProduct?.CC_Name}' ใช่ไหม่?`,
                             Type: "warning",
                             onConfirm: async () => {
