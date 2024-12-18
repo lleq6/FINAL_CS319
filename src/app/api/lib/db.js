@@ -32,31 +32,6 @@ module.exports = {
     return data.rows;
   },
   fetchOneUser: async (email) => await client.query(`SELECT * FROM public."User" WHERE "Email" = $1`, [email]),
-  fetchOneProduct: async (id) => {
-    const data = await client.query(
-      `
-            SELECT 
-                p.*, 
-                c."Name" as C_NAME,
-                c."Category_ID" as C_ID,
-                s."Name" as S_NAME,
-                s."Sub_Category_ID" as S_ID,
-                cc."Name" as CC_Name
-            FROM 
-                public."Product" p
-            JOIN 
-                public."Child_Sub_Category" cc ON p."Child_ID" = cc."Child_ID"
-            JOIN 
-                public."Sub_Category" s ON cc."Sub_Category_ID" = s."Sub_Category_ID"
-            JOIN 
-                public."Category" c ON s."Category_ID" = c."Category_ID"
-            WHERE 
-                p."Product_ID"=$1;
-            `,
-      [id]
-    );
-    return data.rows[0];
-  },
   fetchAllProduct: async () => {
     const data = await client.query(`
       SELECT 
@@ -113,76 +88,6 @@ module.exports = {
     });
     return result;
   },
-  fetchProductsByCategory: async (category_id) =>
-    await client.query(
-      `SELECT * FROM public."Product" WHERE "Child_ID" 
-    IN (SELECT "Child_ID" FROM public."Child_Sub_Category" WHERE "Category_ID"=$1)`,
-      [category_id]
-    ),
-
-  fetchProductsBySubCategory: async (category_id) =>
-    await client.query(
-      `SELECT * FROM public."Product" WHERE "Child_ID" 
-    IN (SELECT "Child_ID" FROM public."Child_Sub_Category" WHERE "Sub_Category_ID"=$1)`,
-      [category_id]
-    ),
-
-  fetchProductsByChildCategory: async (category_id) =>
-    await client.query(
-      `SELECT * FROM public."Product" WHERE "Child_ID" 
-    IN (SELECT "Child_ID" FROM public."Child_Sub_Category" WHERE "Child_ID"=$1)`,
-      [category_id]
-    ),
-
-  k: `SELECT 
-    sc."Category_ID", 
-    sc."Sub_Category_ID", 
-    sc."Name" as "S_Name",
-    cat."Name" as "C_Name"
-FROM 
-    public."Sub_Category" sc
-JOIN 
-    public."Category" cat ON sc."Category_ID" = cat."Category_ID"
-WHERE sc."Sub_Category_ID" = 2
-`,
-  fetchCategoryName: "",
-
-  fetchSubCategoryDetail: async (Sub_ID) =>
-    await client.query(
-      `
-        SELECT 
-            s.*,
-			s."Name" as S_Name,
-            p."Name" as C_Name
-		FROM
-			public."Sub_Category" s
-        JOIN
-            public."Category" p ON p."Category_ID" = s."Category_ID"
-        WHERE
-            s."Sub_Category_ID"=$1
-        `,
-      [Sub_ID]
-    ),
-
-  fetchChildCategoryDetail: async (Child_ID) =>
-    await client.query(
-      `
-        SELECT 
-            cc.*,
-            cc."Name" as CC_Name,
-			s."Name" as S_Name,
-            c."Name" as C_Name
-		FROM
-			public."Child_Sub_Category" cc
-        JOIN
-            public."Sub_Category" s ON s."Sub_Category_ID" = cc."Sub_Category_ID"
-        JOIN
-            public."Category" c ON c."Category_ID" = cc."Category_ID"
-        WHERE
-            cc."Child_ID"=$1
-        `,
-      [Child_ID]
-    ),
   addAddress: async (Address) =>
     await client.query(
       `
