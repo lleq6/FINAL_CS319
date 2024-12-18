@@ -1,16 +1,16 @@
 export interface ChildCategory {
-  Child_ID: string;
+  Child_ID: number;
   Name: string;
 }
 
 export interface SubCategory {
-  Sub_Category_ID: string;
+  Sub_Category_ID: number;
   Name: string;
   ChildCategory: ChildCategory[];
 }
 
 export interface CategoryList {
-  Category_ID: string;
+  Category_ID: number;
   Name: string;
   Sub_Category: SubCategory[];
 }

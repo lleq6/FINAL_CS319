@@ -5,8 +5,7 @@ import { query } from "../../lib/db";
 
 export async function POST(req: NextRequest, res: NextApiResponse) {
   const product: ProductInfo = await req.json();
-  console.log(product);
-  const filter = ["Product_ID", "c_name", "c_id", "s_name", "s_id", "cc_name"];
+  const filter = ["Product_ID", "C_Name", "C_ID", "S_Name", "S_ID", "CC_Name"];
   const keys: string[] = [];
   const values: string[] = [];
   values.push(product.Product_ID);

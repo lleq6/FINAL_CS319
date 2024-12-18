@@ -23,16 +23,15 @@ const config = {
 const client = new Pool(config);
 
 module.exports = {
+  query: async (text) => await client.query(text),
+  query: async (text, params) => await client.query(text, params),
   fetchUsers: async () => {
     const data = await client.query(
       `SELECT "User_ID", "Email", "First_Name","Last_Name", "Phone", "Access_Level" FROM public."User" ORDER BY "User_ID" ASC`
     );
     return data.rows;
   },
-  query: (text, params) => client.query(text, params),
-  test: () => client.query("SELECT * from User"),
-  fetchOneUser: (email) =>
-    client.query(`SELECT * FROM public."User" WHERE "Email" = $1`, [email]),
+  fetchOneUser: async (email) => await client.query(`SELECT * FROM public."User" WHERE "Email" = $1`, [email]),
   fetchOneProduct: async (id) => {
     const data = await client.query(
       `
@@ -74,9 +73,9 @@ module.exports = {
         p."Visibility",
         p."Review_Rating",
         p."Image_URL",
-        c."Name" as "C_NAME",
+        c."Name" as "C_Name",
         COALESCE(c."Category_ID", 0) as "C_ID",
-        s."Name" as "S_NAME",
+        s."Name" as "S_Name",
         COALESCE(s."Sub_Category_ID", 0) as "S_ID",
         cc."Name" as "CC_Name"
       FROM 
@@ -90,36 +89,12 @@ module.exports = {
       ORDER BY 
         p."Product_ID" ASC;
     `);
-    
-    const dat = await client.query(`SELECT * FROM public."Child_Sub_Category"`);
-    return data.rows;
-  },
-  fetchAllProduct: async () => {
-    const data = await client.query(`SELECT 
-                p.*, 
-                c."Name" as C_NAME,
-                c."Category_ID" as C_ID,
-                s."Name" as S_NAME,
-                s."Sub_Category_ID" as S_ID,
-                cc."Name" as CC_Name
-            FROM 
-                public."Product" p
-            JOIN 
-                public."Child_Sub_Category" cc ON p."Child_ID" NOT IN (cc."Child_ID")
-            JOIN 
-                public."Sub_Category" s ON cc."Sub_Category_ID" NOT IN (s."Sub_Category_ID")
-            JOIN 
-                public."Category" c ON s."Category_ID" NOT IN (c."Category_ID")
-                 ORDER BY "Product_ID" ASC`);
     return data.rows;
   },
   fetchAllCategory: async () => {
     const categoryL = await client.query(`SELECT * FROM public."Category"`);
     const subList = await client.query(`SELECT * FROM public."Sub_Category"`);
-    const childList = await client.query(
-      `SELECT * FROM public."Child_Sub_Category"`
-    );
-
+    const childList = await client.query(`SELECT * FROM public."Child_Sub_Category"`);
     const result = categoryL.rows.map((e) => {
       return {
         ...e,
@@ -177,8 +152,8 @@ WHERE sc."Sub_Category_ID" = 2
       `
         SELECT 
             s.*,
-			s."Name" as s_name,
-            p."Name" as c_name
+			s."Name" as S_Name,
+            p."Name" as C_Name
 		FROM
 			public."Sub_Category" s
         JOIN
@@ -194,9 +169,9 @@ WHERE sc."Sub_Category_ID" = 2
       `
         SELECT 
             cc.*,
-            cc."Name" as cc_name,
-			s."Name" as s_name,
-            c."Name" as c_name
+            cc."Name" as CC_Name,
+			s."Name" as S_Name,
+            c."Name" as C_Name
 		FROM
 			public."Child_Sub_Category" cc
         JOIN

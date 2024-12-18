@@ -17,7 +17,9 @@ export default function Homepage() {
     }
 
     if (user) {
-      if (user.role == "1") redirect("/admin");
+      if (user.role == "1") {
+        redirect("/admin");
+      }
     }
   });
 

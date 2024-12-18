@@ -10,24 +10,19 @@ import {
 import { ProductInfo } from "@/app/model/Product";
 import {
   ChangeEvent,
-  ChangeEventHandler,
   Dispatch,
   SetStateAction,
   useEffect,
   useState,
 } from "react";
-import { MdErrorOutline } from "react-icons/md";
-import { FaInfoCircle, FaUpload } from "react-icons/fa";
+import { FaUpload } from "react-icons/fa";
 import { IoIosAddCircle } from "react-icons/io";
 import ImageWithCheck from "@/app/components/ImageWithCheck";
 import { useDialog } from "../context/DialogContext";
-import { redirect } from "next/navigation";
-import { useRouter } from "next/router";
 
-// Create an empty data variable
 const emptyProduct: ProductInfo = {
   Product_ID: "",
-  Child_ID: "0",
+  Child_ID: 0,
   Name: "",
   Brand: "",
   Description: "",
@@ -39,11 +34,11 @@ const emptyProduct: ProductInfo = {
   Visibility: true,
   Review_Rating: 0,
   Image_URL: "",
-  c_id: 0,
-  c_name: "",
-  s_id: 0,
-  s_name: "",
-  cc_name: "",
+  C_ID: 0,
+  C_Name: "",
+  S_ID: 0,
+  S_Name: "",
+  CC_Name: "",
 };
 function Paginate({
   items,
@@ -54,7 +49,6 @@ function Paginate({
   itemsPerPage: number;
   setShow: Dispatch<SetStateAction<ProductInfo[]>>;
 }) {
-  // console.log(items.slice(index * itemsPerPage, (index + 1) * itemsPerPage))
   return (
     <div className="join my-4 w-fit">
       {Array.from(
@@ -66,7 +60,6 @@ function Paginate({
               index == 0 ? "bg-yellow-600 i1" : ""
             }`}
             onClick={(e) => {
-              // console.log(index * itemsPerPage, (index + 1) * itemsPerPage);
               setShow(
                 items.slice(index * itemsPerPage, (index + 1) * itemsPerPage)
               );
@@ -82,14 +75,14 @@ function Paginate({
     </div>
   );
 }
-function test(p: ProductInfo) {
+function setSelectElement(p: ProductInfo) {
   const main = document.querySelector("#c1") as HTMLSelectElement;
   const sub = document.querySelector("#c2") as HTMLSelectElement;
   const child = document.querySelector("#c3") as HTMLSelectElement;
 
-  main.value = p.c_id? p.c_id.toString() : '0';
-  sub.value = p.sid ? p.s_id.toString() : '0';
-  child.value = p.Child_ID ? p.Child_ID.toString() : '0';
+  main.value = p.C_ID ? p.C_ID.toString() : "0";
+  sub.value = p.S_ID ? p.S_ID.toString() : "0";
+  child.value = p.Child_ID ? p.Child_ID.toString() : "0";
 }
 
 interface addCategoryModalProps {
@@ -173,24 +166,20 @@ function AddCategoryModal({
                     body: JSON.stringify(body),
                   });
                   if (response.ok) {
+                    if (callback) {
+                      callback();
+                    }
+                    (
+                      document.getElementById(
+                        "addCategory"
+                      ) as HTMLDialogElement
+                    ).close();
                     showDialog({
                       ID: "addProductCategorySuccess",
                       Header: "แจ้งเตือน",
                       Type: "info",
                       Message: `เพิ่มหมวดหมู่ '${value}' สำเร็จ!`,
-                      onClose: () => {
-                        console.log("close");
-                        console.log(callback);
-                        if (callback) {
-                          callback();
-                        }
-                        (
-                          document.getElementById(
-                            "addCategory"
-                          ) as HTMLDialogElement
-                        ).close();
-                        // console.log(callback)
-                      },
+                      onClose: () => {},
                     });
                   } else {
                     showDialog({
@@ -237,11 +226,16 @@ function AddCategoryModal({
 const ProductManagement = () => {
   const { showDialog } = useDialog();
   const [curProduct, setCurProduct] = useState<ProductInfo>(emptyProduct);
-  const [productFilter, setFilter] = useState<ProductInfo[]>([]);
-  const [productWithoutCategory, setProductsWithoutCategory] = useState<ProductInfo[]>([]);
+  const [productsNormal, setProductsNormal] = useState<ProductInfo[]>([]);
+  const [productsWithoutCategory, setProductsWithoutCategory] = useState<
+    ProductInfo[]
+  >([]);
   const [Products, setProducts] = useState<ProductInfo[]>([]);
-  const [ShowProductNormal, setShowProductNormal] = useState<ProductInfo[]>([]);
-  const [ShowProductWithoutCategory, setShowProductWithoutCategory] = useState<ProductInfo[]>([]);
+  const [ShowProductsNormal, setShowProductsNormal] = useState<ProductInfo[]>(
+    []
+  );
+  const [ShowProductsWithoutCategory, setShowProductsWithoutCategory] =
+    useState<ProductInfo[]>([]);
   const [category, setCategory] = useState<CategoryList[]>([]);
   const [curCategory, setCurCategory] = useState<CategoryList>();
   const [CurSubCategory, setCurSubCategory] = useState<SubCategory>();
@@ -254,6 +248,27 @@ const ProductManagement = () => {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch("/api/products/allProduct");
+      const data: ProductInfo[] = await response.json();
+      if (data.length == 0) return "Product not found";
+      const productsNormal: ProductInfo[] = data.filter(
+        (x) => x.C_ID != 0 || x.S_ID != 0
+      );
+      const productsWithoutCategory: ProductInfo[] = data.filter(
+        (x) => x.C_ID == 0 || x.S_ID == 0
+      );
+      setProducts(data);
+      setProductsNormal(productsNormal);
+      setProductsWithoutCategory(productsWithoutCategory);
+      setShowProductsNormal(productsNormal.slice(0, 3));
+      setShowProductsWithoutCategory(productsWithoutCategory.slice(0, 3));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   async function getCategory() {
@@ -270,7 +285,7 @@ const ProductManagement = () => {
       setCurCategory(undefined);
       setCurSubCategory(undefined);
       setChild(undefined);
-      setCurProduct({ ...curProduct, Child_ID: "0" });
+      setCurProduct({ ...curProduct, Child_ID: 0 });
     } catch (error) {
       console.log(error);
     }
@@ -278,26 +293,34 @@ const ProductManagement = () => {
 
   useEffect(() => {
     getCategory();
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/api/products/allProduct");
-        const data = await response.json();
-        if (data.length == 0) return "Product not found";
-        setProducts(data);
-        setFilter(data);
-        setShowProductNormal(data.slice(0, 3));
-      } catch (error) {
-        console.log(error);
-      }
-    };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setShowProductsNormal(productsNormal.slice(0, 4));
+    const k = document.querySelectorAll(".i2");
+    k.forEach((d) => d.classList.remove("bg-yellow-600"));
+    const k22: HTMLElement = document.querySelector(".i1") as HTMLButtonElement;
+    if (k22) {
+      k22.classList.add("bg-yellow-600");
+    }
+  }, [productsNormal]);
+
+  useEffect(() => {
+    setShowProductsWithoutCategory(productsWithoutCategory.slice(0, 4));
+    const k = document.querySelectorAll(".i2");
+    k.forEach((d) => d.classList.remove("bg-yellow-600"));
+    const k22: HTMLElement = document.querySelector(".i1") as HTMLButtonElement;
+    if (k22) {
+      k22.classList.add("bg-yellow-600");
+    }
+  }, [productsWithoutCategory]);
 
   useEffect(() => {
     if (curCategory) {
       setCurSubCategory(
         curCategory.Sub_Category.find(
-          (sub) => sub.Sub_Category_ID == curProduct.s_id ? curProduct.s_id.toString(): '0'
+          (sub) => sub.Sub_Category_ID == curProduct.S_ID
         )
       );
       return;
@@ -306,41 +329,38 @@ const ProductManagement = () => {
   }, [curCategory]);
 
   useEffect(() => {
-    setShowProductNormal(productFilter.slice(0, 4));
-    const k = document.querySelectorAll(".i2");
-    k.forEach((d) => d.classList.remove("bg-yellow-600"));
-    const k22: HTMLElement = document.querySelector(".i1") as HTMLButtonElement;
-    if (k22) {
-      k22.classList.add("bg-yellow-600");
-    }
-  }, [productFilter]);
-
-  useEffect(() => {
     if (CurSubCategory) {
-      console.log(CurSubCategory);
       setChild(CurSubCategory.ChildCategory);
-      setCurProduct({ ...curProduct, Child_ID: "0" });
       return;
     }
     setChild(undefined);
   }, [CurSubCategory]);
 
-  function setP(p: ProductInfo) {
+  useEffect(() => {
+    let m_ChildID = 0;
+    const mDefault = curChild?.find((x) => x.Child_ID == curProduct?.Child_ID);
+    if (mDefault) {
+      m_ChildID = curProduct?.Child_ID;
+    }
+    const opt = document?.querySelector(
+      `#c3 option[value="${m_ChildID}"]`
+    ) as HTMLOptionElement;
+    if (opt) {
+      opt.selected = true;
+      opt.defaultSelected = true;
+    }
+  }, [curChild]);
+
+  function setSelectedProduct(p: ProductInfo) {
     setCurProduct(p);
-    test(p);
+    setSelectElement(p);
     setCurImage(p.Image_URL);
     if (!p.Product_ID) {
       setCurCategory(undefined);
       setCurSubCategory(undefined);
-      // setCurSubCategory(undefined)
       return;
     }
-    setCurCategory(category.find((e) => e.Category_ID == p.c_id ? p.c_id.toString(): '0'));
-    setChild(
-      curCategory?.Sub_Category.find(
-        (sub) => sub.Sub_Category_ID == p.s_id? p.s_id.toString() : '0'
-      )?.ChildCategory
-    );
+    setCurCategory(category.find((e) => e.Category_ID == p.C_ID));
   }
 
   function handleChange(
@@ -355,7 +375,6 @@ const ProductManagement = () => {
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    // if (!curProduct.Product_ID) newErrors.Product_ID = 'Product ID is required';
     if (!curProduct.Name) newErrors.Name = "กรุณากรอกชื่อสินค้า";
     if (!curProduct.Brand) newErrors.Brand = "กรุณากรอกยี่ห้อ";
     if (!curProduct.Description) newErrors.Description = "กรุณากรอกคำอธิบาย";
@@ -363,9 +382,8 @@ const ProductManagement = () => {
       newErrors.Quantity = "กรุณากรอกจำนวนให้ถูกต้อง";
     if (curProduct.Sale_Price <= 0) newErrors.Sale_Price = "กรุณากรอกราคา";
     if (!curProduct.Unit) newErrors.Unit = "กรุณากรอกหน่วยสินค้า";
-    if (curProduct.Child_ID == "0")
+    if (curProduct.Child_ID == 0)
       newErrors.Child_ID = "กรุณาเลือกหมวดหมู่สินค้า";
-    // if (curProduct.Sale_Price < 0) newErrors.Sale_Price = 'Sale Price cannot be negative';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -385,7 +403,10 @@ const ProductManagement = () => {
   }, [errors]);
 
   useEffect(() => {
-    setFilter(Products);
+    setProductsNormal(Products.filter((x) => x.C_ID != 0 || x.S_ID != 0));
+    setProductsWithoutCategory(
+      Products.filter((x) => x.C_ID == 0 || x.S_ID == 0)
+    );
   }, [Products]);
 
   async function addNewItem() {
@@ -406,11 +427,12 @@ const ProductManagement = () => {
           ...e,
           { ...curProduct, Product_ID: data.Product_ID },
         ]);
-        setFilter((e) => [
+        setProductsNormal((e) => [
           ...Products,
           { ...curProduct, Product_ID: data.Product_ID },
         ]);
         setCurProduct(emptyProduct);
+        fetchData();
         showDialog({
           ID: "addProductSuccess",
           Header: "แจ้งเตือน",
@@ -446,15 +468,8 @@ const ProductManagement = () => {
         body: JSON.stringify(curProduct),
       });
       if (response.ok) {
-        const newObj = Products.map((e) => {
-          if (e.Product_ID == curProduct.Product_ID) {
-            return curProduct;
-          }
-          return e;
-        });
-        setProducts(newObj);
-        setFilter(newObj);
-        setCurProduct(emptyProduct);
+        setSelectedProduct(emptyProduct);
+        fetchData();
         showDialog({
           ID: "editProductSuccess",
           Header: "แจ้งเตือน",
@@ -483,12 +498,8 @@ const ProductManagement = () => {
     return;
   }
 
-  function openAddModal(type: number, callbacks?: () => void) {
+  function openAddModal(type: number) {
     setAddCategory(type);
-    // setCallback(callbacks);
-    // console.log(callback)
-    // if (callback) {
-    // }
     (document.getElementById("addCategory") as HTMLDialogElement).showModal();
   }
   if (!Product) return <div>loading</div>;
@@ -498,12 +509,18 @@ const ProductManagement = () => {
         <h1>จัดการคลังสินค้า</h1>
       </div>
       <div className="grid grid-cols-7 pl-5 pr-5">
-        <AdminProductSidebar setProducts={setFilter} Products={Products} />
+        <AdminProductSidebar
+          setProducts={setProductsNormal}
+          Products={Products}
+        />
         <AddCategoryModal
           curCategory={curCategory}
           subCategory={CurSubCategory}
           type={addCategoryType}
-          callback={getCategory}
+          callback={() => {
+            getCategory();
+            fetchData();
+          }}
         />
         <div className="col-span-5 m-2">
           <div>
@@ -548,8 +565,6 @@ const ProductManagement = () => {
                       const objectUrl = URL.createObjectURL(e.target.files[0]);
                       setCurProduct({ ...curProduct, Image_URL: objectUrl });
                       setCurFile(e.target.files[0]);
-                      console.log(`${e.target.files[0]}`);
-                      console.log(curProduct.Image_URL);
                       return () => URL.revokeObjectURL(objectUrl);
                     }}
                   ></input>
@@ -578,7 +593,7 @@ const ProductManagement = () => {
                         ...emptyProduct,
                         Product_ID: "เพิ่มสินค้าใหม่",
                       });
-                      test(emptyProduct);
+                      setSelectElement(emptyProduct);
                     }}
                     disabled={curProduct.Product_ID ? true : false}
                   >
@@ -638,19 +653,20 @@ const ProductManagement = () => {
                     </div>
                     <select
                       id="c1"
+                      name="c1"
                       className="select select-bordered w-full max-w-48"
                       defaultValue={0}
                       onChange={(e) => {
-                        console.log("main change");
-                        console.log(CurSubCategory);
                         const k =
                           document.querySelectorAll<HTMLSelectElement>(".ctgy");
                         k.forEach((e) => {
                           e.value = "0";
                         });
+                        setCurProduct({ ...curProduct, Child_ID: 0 });
                         setCurCategory(
                           category.find(
-                            (cat) => cat.Category_ID == e.target.value
+                            (cat) =>
+                              cat.Category_ID == Number.parseInt(e.target.value)
                           )
                         );
                       }}
@@ -667,7 +683,7 @@ const ProductManagement = () => {
                       <button
                         className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
                         disabled={!curProduct.Product_ID ? true : false}
-                        onClick={() => openAddModal(0, getCategory)}
+                        onClick={() => openAddModal(0)}
                       >
                         เพิ่ม
                       </button>
@@ -677,9 +693,9 @@ const ProductManagement = () => {
                         onClick={() =>
                           showDialog({
                             Header: "โปรดตรวจสอบ",
-                            ID: "c",
-                            Message: `คุณต้องการลบหมวดหมู่สินค้า '${curCategory?.Name}' ใช่ไหม่?`,
-                            Type: "warning",
+                            ID: "deleteCategory",
+                            Message: `คุณต้องการลบประเภทสินค้า '${curCategory?.Name}' ใช่ไหม่?`,
+                            Type: "info",
                             onConfirm: async () => {
                               const body = {
                                 keyword: "Category",
@@ -693,27 +709,30 @@ const ProductManagement = () => {
                                     body: JSON.stringify(body),
                                   }
                                 );
-                                if (!response.ok) {
+                                if (response.ok) {
+                                  getCategory();
+                                  fetchData();
                                   showDialog({
-                                    ID: "DeleteCategory",
-                                    Header: "ลบหมวดหมู่สินค้า",
-                                    Message: "การลบหมวดหมู่สินค้าผิดพลาด",
+                                    ID: "deleteCategorySuccess",
+                                    Header: "แจ้งเตือน",
+                                    Message: `ลบประเภทสินค้า '${curCategory?.Name}' สำเร็จ!`,
+                                    Type: "info",
+                                    onClose: () => {},
+                                  });
+                                } else {
+                                  showDialog({
+                                    ID: "deleteCategoryFailure",
+                                    Header: "แจ้งเตือน",
+                                    Message: `ลบประเภทสินค้า '${curCategory?.Name}' ล้มเหลว!`,
                                     Type: "error",
                                     onClose: () => {},
                                   });
                                 }
-                                showDialog({
-                                  ID: "DeleteCategory",
-                                  Header: "ลบหมวดหมู่สินค้า",
-                                  Message: "ลบหมวดหมู่สินค้าสำเร็จ",
-                                  Type: "info",
-                                  onClose: getCategory,
-                                });
                               } catch (error) {
                                 showDialog({
-                                  ID: "DeleteCategory",
-                                  Header: "ลบหมวดหมู่สินค้า",
-                                  Message: "การลบหมวดหมู่สินค้าผิดพลาด",
+                                  ID: "deleteCategoryError",
+                                  Header: "แจ้งเตือน",
+                                  Message: "เกิดข้อผิดพลาดในการลบประเภทสินค้า",
                                   Type: "error",
                                   onClose: () => {},
                                 });
@@ -732,13 +751,17 @@ const ProductManagement = () => {
                       <span className="label-text">หมวดหมู่</span>
                     </div>
                     <select
-                      id={"c2"}
+                      id="c2"
+                      name="c2"
                       className="ctgy select select-bordered w-full max-w-48"
                       defaultValue={0}
                       onChange={(e) => {
+                        setCurProduct({ ...curProduct, Child_ID: 0 });
                         setCurSubCategory(
                           curCategory?.Sub_Category.find(
-                            (sub) => sub.Sub_Category_ID == e.target.value
+                            (sub) =>
+                              sub.Sub_Category_ID ==
+                              Number.parseInt(e.target.value)
                           )
                         );
                         const child = document.querySelector(
@@ -765,7 +788,7 @@ const ProductManagement = () => {
                       <button
                         className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
                         disabled={!curCategory ? true : false}
-                        onClick={() => openAddModal(1, getCategory)}
+                        onClick={() => openAddModal(1)}
                       >
                         เพิ่ม
                       </button>
@@ -775,7 +798,7 @@ const ProductManagement = () => {
                         onClick={() =>
                           showDialog({
                             Header: "โปรดตรวจสอบ",
-                            ID: "cd",
+                            ID: "deleteSubCategory",
                             Message: `คุณต้องการลบหมวดหมู่สินค้า '${CurSubCategory?.Name}' ใช่ไหม?`,
                             Type: "warning",
                             onConfirm: async () => {
@@ -783,7 +806,6 @@ const ProductManagement = () => {
                                 keyword: "Sub_Category",
                                 Sub_Category_ID:
                                   CurSubCategory?.Sub_Category_ID,
-                                // Category_ID : curCategory?.Category_ID
                               };
                               try {
                                 const response = await fetch(
@@ -793,27 +815,31 @@ const ProductManagement = () => {
                                     body: JSON.stringify(body),
                                   }
                                 );
-                                if (!response.ok) {
+                                if (response.ok) {
+                                  getCategory();
+                                  fetchData();
                                   showDialog({
-                                    ID: "DeleteCategory",
-                                    Header: "ลบหมวดหมู่สินค้า",
-                                    Message: "การลบหมวดหมู่สินค้าผิดพลาด",
+                                    ID: "deleteSubCategorySuccess",
+                                    Header: "แจ้งเตือน",
+                                    Message: `ลบหมวดหมู่สินค้า '${CurSubCategory?.Name}' สำเร็จ!`,
+                                    Type: "info",
+                                    onClose: () => {},
+                                  });
+                                } else {
+                                  showDialog({
+                                    ID: "deleteSubCategoryFailure",
+                                    Header: "แจ้งเตือน",
+                                    Message: `ลบหมวดหมู่สินค้า '${CurSubCategory?.Name}' ล้มเหลว!`,
                                     Type: "error",
                                     onClose: () => {},
                                   });
                                 }
-                                showDialog({
-                                  ID: "DeleteCategory",
-                                  Header: "ลบหมวดหมู่สินค้า",
-                                  Message: "ลบหมวดหมู่สินค้าสำเร็จ",
-                                  Type: "info",
-                                  onClose: getCategory,
-                                });
                               } catch (error) {
                                 showDialog({
-                                  ID: "DeleteCategory",
-                                  Header: "ลบหมวดหมู่สินค้า",
-                                  Message: "การลบหมวดหมู่สินค้าผิดพลาด",
+                                  ID: "deleteSubCategoryError",
+                                  Header: "แจ้งเตือน",
+                                  Message:
+                                    "เกิดข้อผิดพลาดในการลบหมวดหมู่สินค้า",
                                   Type: "error",
                                   onClose: () => {},
                                 });
@@ -833,13 +859,14 @@ const ProductManagement = () => {
                     </div>
                     <select
                       id="c3"
+                      name="c3"
                       className="ctgy select select-bordered w-full max-w-48"
                       defaultValue={0}
                       onChange={(e) => {
                         setCurProduct((old) => {
                           const p = {
                             ...old,
-                            Child_ID: e.target.value,
+                            Child_ID: Number.parseInt(e.target.value),
                           };
                           return p;
                         });
@@ -859,41 +886,18 @@ const ProductManagement = () => {
                       <button
                         className="btn btn-sm btn-outline border-green-700 border-2 hover:bg-green-700 hover:border-white hover:text-white"
                         disabled={!CurSubCategory ? true : false}
-                        onClick={() =>
-                          openAddModal(
-                            2,
-                            getCategory
-                            // const child = [...curChild, value];
-                            // const sub = {
-                            //   ...CurSubCategory,
-                            //   ChildCategory: child,
-                            // };
-                            // setCategory(() => {
-                            //   category.map((e) => {
-                            //     if (e.Category_ID == curCategory?.Category_ID) {
-                            //       return {
-                            //         ...e,
-                            //         Sub_Category: sub,
-                            //       };
-                            //     }
-                            //     return e;
-                            //   });
-                            // });
-
-                            // ([...curChild, ])
-                          )
-                        }
+                        onClick={() => openAddModal(2)}
                       >
                         เพิ่ม
                       </button>
                       <button
                         className="btn btn-sm btn-outline border-red-700 border-2 hover:bg-red-700 hover:border-white hover:text-white"
-                        disabled={curProduct?.Child_ID == "0" ? true : false}
+                        disabled={curProduct?.Child_ID == 0 ? true : false}
                         onClick={() =>
                           showDialog({
                             Header: "โปรดตรวจสอบ",
                             ID: "sc",
-                            Message: `คุณต้องการลบหมวดหมู่สินค้า '${curProduct?.cc_name}' ใช่ไหม่?`,
+                            Message: `คุณต้องการลบหมวดหมู่สินค้า '${curProduct?.CC_Name}' ใช่ไหม่?`,
                             Type: "warning",
                             onConfirm: async () => {
                               const body = {
@@ -908,27 +912,31 @@ const ProductManagement = () => {
                                     body: JSON.stringify(body),
                                   }
                                 );
-                                if (!response.ok) {
+                                if (response.ok) {
+                                  getCategory();
+                                  fetchData();
                                   showDialog({
-                                    ID: "DeleteCategory",
-                                    Header: "ลบหมวดหมู่ย่อยสินค้า",
-                                    Message: "การลบหมวดหมู่ย่อยสินค้าผิดพลาด",
+                                    ID: "deleteChildSubCategorySuccess",
+                                    Header: "แจ้งเตือน",
+                                    Message: `ลบหมวดหมู่ย่อยของสินค้า '${curProduct?.CC_Name}' สำเร็จ!`,
+                                    Type: "error",
+                                    onClose: () => {},
+                                  });
+                                } else {
+                                  showDialog({
+                                    ID: "deleteChildSubCategoryFailure",
+                                    Header: "แจ้งเตือน",
+                                    Message: `ลบหมวดหมู่ย่อยของสินค้า '${curProduct?.CC_Name}' ล้มเหลว!`,
                                     Type: "error",
                                     onClose: () => {},
                                   });
                                 }
-                                showDialog({
-                                  ID: "DeleteCategory",
-                                  Header: "ลบหมวดหมู่สินค้า",
-                                  Message: "ลบหมวดหมู่สินค้าสำเร็จ",
-                                  Type: "info",
-                                  onClose: getCategory,
-                                });
                               } catch (error) {
                                 showDialog({
-                                  ID: "DeleteCategory",
-                                  Header: "ลบหมวดหมู่สินค้า",
-                                  Message: "การลบหมวดหมู่สินค้าผิดพลาด",
+                                  ID: "deleteChildSubCategoryError",
+                                  Header: "แจ้งเตือน",
+                                  Message:
+                                    "เกิดข้อผิดพลาดในการลบหมวดหมู่ย่อยของสินค้า",
                                   Type: "error",
                                   onClose: () => {},
                                 });
@@ -1028,13 +1036,11 @@ const ProductManagement = () => {
                 className="btn ml-auto bg-gray-300 hover:bg-yellow-300"
                 disabled={!curProduct.Product_ID ? true : false}
                 onClick={(e) => {
-                  console.log(curProduct);
                   if (validate()) {
                     if (!isNaN(Number(curProduct.Product_ID))) {
                       saveEditItem();
                       return;
                     }
-                    console.log("addnew");
                     addNewItem();
                   }
                 }}
@@ -1049,7 +1055,7 @@ const ProductManagement = () => {
                 className="btn bg-gray-300 hover:bg-red-300"
                 disabled={!curProduct.Product_ID ? true : false}
                 onClick={() => {
-                  setP(emptyProduct);
+                  setSelectedProduct(emptyProduct);
                   // setCurProduct(emptyProduct);
                 }}
               >
@@ -1088,16 +1094,16 @@ const ProductManagement = () => {
                       <p>จุดสั่งซื้อ</p>
                     </div>
                     <div className="grid grid-rows-4 w-full">
-                      {productFilter.length == 0 ? (
+                      {productsNormal.length == 0 ? (
                         <p>ไม่พบสินค้า</p>
                       ) : (
                         <>
-                          {ShowProductNormal.map((e, index) => (
+                          {ShowProductsNormal.map((e, index) => (
                             <div key={e.Product_ID}>
                               <AdminProduct
                                 key={e.Product_ID + 1}
                                 product={e}
-                                setProduct={setP}
+                                setSelectedProduct={setSelectedProduct}
                                 isGray={index % 2 == 0}
                                 setProducts={setProducts}
                               />
@@ -1106,9 +1112,9 @@ const ProductManagement = () => {
                         </>
                       )}
                       <Paginate
-                        items={productFilter}
+                        items={productsNormal}
                         itemsPerPage={4}
-                        setShow={setShowProductNormal}
+                        setShow={setShowProductsNormal}
                       ></Paginate>
                     </div>
                   </>
@@ -1125,16 +1131,16 @@ const ProductManagement = () => {
                       <p>จุดสั่งซื้อ</p>
                     </div>
                     <div className="grid grid-rows-4 w-full">
-                      {productWithoutCategory.length == 0 ? (
+                      {productsWithoutCategory.length == 0 ? (
                         <p>ไม่พบสินค้า</p>
                       ) : (
                         <>
-                          {ShowProductWithoutCategory.map((e, index) => (
+                          {ShowProductsWithoutCategory.map((e, index) => (
                             <div key={e.Product_ID}>
                               <AdminProduct
                                 key={e.Product_ID + 1}
                                 product={e}
-                                setProduct={setP}
+                                setSelectedProduct={setSelectedProduct}
                                 isGray={index % 2 == 0}
                                 setProducts={setProducts}
                               />
@@ -1143,9 +1149,9 @@ const ProductManagement = () => {
                         </>
                       )}
                       <Paginate
-                        items={productWithoutCategory}
+                        items={productsWithoutCategory}
                         itemsPerPage={4}
-                        setShow={setShowProductWithoutCategory}
+                        setShow={setShowProductsWithoutCategory}
                       ></Paginate>
                     </div>
                   </>
