@@ -40,7 +40,6 @@ const isEmptyUserData = (User: UserInfo) => {
 
 const isEmptyAddressData = (Address: AddressInfo) => {
   let isEmpty: boolean = false;
-  console.log(Address);
   for (const key in Address) {
     if (key === "Address_ID") {
       continue;

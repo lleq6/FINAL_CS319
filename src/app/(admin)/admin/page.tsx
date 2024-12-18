@@ -9,7 +9,11 @@ export default function AdmindashBoard() {
     const request = async () => {
       const response = await fetch("/api/admin/dashboard");
       const data: ProductInfo[] = await response.json();
-      setProducts(data);
+      if (response.ok) {
+        setProducts(data);
+      } else {
+        setProducts([])
+      }
     };
     request();
   }, []);
@@ -26,10 +30,9 @@ export default function AdmindashBoard() {
             <p>ชื่อสินค้า</p>
             <p>จำนวนคงเหลือ</p>
             <p>จุดสั่งซื้อ</p>
-            <p>asd</p>
           </div>
           <div className="max-h-[500px] overflow-y-auto w-full pr-3">
-            {products.length == 0 ? 'ไม่พบสินค้า' : <>
+            {products.length == 0 ? (<p>ไม่พบสินค้า</p>) : <>
             {products.map((e: ProductInfo, _index) => (
               <DashBoardProduct key={_index} product={e} index={_index} />
             ))}
@@ -56,8 +59,6 @@ function DashBoardProduct({ product, index }: { product: ProductInfo , index: nu
       <p className="text-center m-auto">{product.Name}</p>
       <p className="text-center m-auto">{product.Quantity}</p>
       <p className="text-center m-auto">{product.Reorder_Point}</p>
-      <div className="m-auto">
-      </div>
     </div>
 
   );

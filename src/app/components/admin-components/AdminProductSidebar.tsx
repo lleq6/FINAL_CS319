@@ -50,9 +50,9 @@ export default function AdminProductSidebar({
             <option value={"Product_ID"}>รหัสสินค้า</option>
             <option value={"Name"}>ชื่อ</option>
             <option value={"Brand"}>ยี่ห้อ</option>
-            <option value={"c_name"}>ประเภท</option>
-            <option value={"s_name"}>หมวดหมู่</option>
-            <option value={"cc_name"}>หมวดหมู่ย่อย</option>
+            <option value={"C_Name"}>ประเภท</option>
+            <option value={"S_Name"}>หมวดหมู่</option>
+            <option value={"CC_Name"}>หมวดหมู่ย่อย</option>
           </select>
         </label>
         <label className="form-control w-full max-w-xs mx-1">

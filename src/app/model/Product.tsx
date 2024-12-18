@@ -1,6 +1,6 @@
 export interface ProductInfo {
   Product_ID: string;
-  Child_ID: string;
+  Child_ID: number;
   Name: string;
   Brand: string;
   Description: string;
@@ -12,10 +12,10 @@ export interface ProductInfo {
   Visibility: boolean;
   Review_Rating: number;
   Image_URL: string;
-  c_id: number;
-  c_name: string;
-  s_id: number;
-  s_name: string;
-  cc_name: string;
+  C_ID: number;
+  C_Name: string;
+  S_ID: number;
+  S_Name: string;
+  CC_Name: string;
   [key: string]: any;
 }

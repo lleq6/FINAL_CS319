@@ -8,7 +8,7 @@ import { Dispatch, SetStateAction } from "react";
 import { useDialog } from "@/app/context/DialogContext";
 interface AdminProductProps {
   product: ProductInfo;
-  setProduct: (product: ProductInfo) => void;
+  setSelectedProduct: (product: ProductInfo) => void;
   setProducts: Dispatch<SetStateAction<ProductInfo[]>>;
   isGray: boolean;
 }
@@ -42,11 +42,9 @@ const ImageWithCheck = ({
   );
 };
 
-function checkProduct(product: ProductInfo) {}
-
 export default function AdminProduct({
   product,
-  setProduct,
+  setSelectedProduct,
   isGray,
   setProducts,
 }: AdminProductProps) {
@@ -74,7 +72,7 @@ export default function AdminProduct({
           <p className="m-auto text-center">{product.Name}</p>
         </div>
         <div className="m-auto h-full w-full  flex text-center">
-          <p className="m-auto text-center">{product.cc_name}</p>
+          <p className="m-auto text-center">{product.CC_Name}</p>
         </div>
         <div className="m-auto h-full w-full  flex text-center">
           <p className="m-auto text-center">
@@ -106,7 +104,7 @@ export default function AdminProduct({
         </p>
         <button
           className="btn btn-sm text-md mx-2 p-1 px-2 w-20 hover:bg-amber-300"
-          onClick={() => setProduct(product)}
+          onClick={() => setSelectedProduct(product)}
         >
           {" "}
           <FaEdit />

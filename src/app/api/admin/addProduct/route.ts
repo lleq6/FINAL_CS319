@@ -10,7 +10,6 @@ export async function POST(req: NextRequest, res: NextApiResponse) {
   const imgFile = formData.get("myfile");
 
   if (imgFile) {
-    console.log(imgFile);
     try {
       const response = await uploadImage(imgFile);
       if (!response) throw new Error("upload error");
@@ -18,7 +17,6 @@ export async function POST(req: NextRequest, res: NextApiResponse) {
         ...Product,
         Image_URL: response.path,
       };
-      console.log("upload complete");
     } catch (error) {
       console.log("upload error message : ", error);
       return NextResponse.json(
@@ -33,11 +31,11 @@ export async function POST(req: NextRequest, res: NextApiResponse) {
     if (
       [
         "Product_ID",
-        "c_id",
-        "c_name",
-        "s_id",
-        "s_name",
-        "cc_name",
+        "C_ID",
+        "C_Name",
+        "S_ID",
+        "S_Name",
+        "CC_Name",
         "",
       ].includes(key)
     )
@@ -50,11 +48,8 @@ export async function POST(req: NextRequest, res: NextApiResponse) {
     .map((e, index) => `$${index + 1}`)
     .join(",")}) RETURNING "Product_ID"
 `;
-
-  console.log(keys, Product);
   try {
     const response = await query(queryString, values);
-    console.log(response, "add response");
     return NextResponse.json(
       { message: "true", Product_ID: response.rows[0].Product_ID },
       { status: 200 }
