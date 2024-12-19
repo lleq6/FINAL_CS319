@@ -4,10 +4,10 @@ export default class AddressInfo {
   Address_1: string = "";
   Address_2: string = "";
   District: string = "";
+  Sub_District: string = "";
   Province: string = "";
   Zip_Code: string = "";
-  Is_Default: boolean = false;
-  Sub_District: string = "";
   Phone: string = "";
+  Is_Default: boolean = false;
   [Key: string]: string | number | boolean;
 }

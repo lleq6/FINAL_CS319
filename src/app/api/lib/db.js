@@ -92,18 +92,18 @@ module.exports = {
     await client.query(
       `
         INSERT INTO public."Address" 
-        ("User_ID", "Address_1", "Address_2", "District", "Province", "Zip_Code", "Is_Default", "Sub_District", "Phone") 
+        ("User_ID", "Address_1", "Address_2", "District", "Sub_District", "Province", "Zip_Code", "Phone", "Is_Default") 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "Address_ID";`,
       [
         Address.User_ID,
         Address.Address_1,
         Address.Address_2,
         Address.District,
+        Address.Sub_District,
         Address.Province,
         Address.Zip_Code,
-        Address.Is_Default,
-        Address.Sub_District,
         Address.Phone,
+        Address.Is_Default,
       ]
     ),
   deleteAddress: async (Address_ID) =>
