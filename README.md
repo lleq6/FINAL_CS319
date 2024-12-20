@@ -89,7 +89,7 @@ Suggest :
 npm i
 ```
 
-#### Finaly to run project
+#### Finally to run project
 
 ```bash
 npm run dev
