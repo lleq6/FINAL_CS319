@@ -14,10 +14,6 @@ const config = {
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-  ssl: {
-    rejectUnauthorized: true,
-    ca: process.env.DB_CACERT,
-  },
 };
 
 const client = new Pool(config);
