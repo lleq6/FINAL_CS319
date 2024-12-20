@@ -177,7 +177,7 @@ function AddCategoryModal({
                     showDialog({
                       ID: "addProductCategorySuccess",
                       Header: "แจ้งเตือน",
-                      Type: "info",
+                      Type: "success",
                       Message: `เพิ่มหมวดหมู่ '${value}' สำเร็จ!`,
                       onClose: () => {},
                     });
@@ -716,7 +716,7 @@ const ProductManagement = () => {
                                     ID: "deleteCategorySuccess",
                                     Header: "แจ้งเตือน",
                                     Message: `ลบประเภทสินค้า '${curCategory?.Name}' สำเร็จ!`,
-                                    Type: "info",
+                                    Type: "success",
                                     onClose: () => {},
                                   });
                                 } else {
@@ -822,7 +822,7 @@ const ProductManagement = () => {
                                     ID: "deleteSubCategorySuccess",
                                     Header: "แจ้งเตือน",
                                     Message: `ลบหมวดหมู่สินค้า '${CurSubCategory?.Name}' สำเร็จ!`,
-                                    Type: "info",
+                                    Type: "success",
                                     onClose: () => {},
                                   });
                                 } else {
@@ -919,7 +919,7 @@ const ProductManagement = () => {
                                     ID: "deleteChildSubCategorySuccess",
                                     Header: "แจ้งเตือน",
                                     Message: `ลบหมวดหมู่ย่อยของสินค้า '${curProduct?.CC_Name}' สำเร็จ!`,
-                                    Type: "error",
+                                    Type: "success",
                                     onClose: () => {},
                                   });
                                 } else {
