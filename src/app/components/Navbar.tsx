@@ -125,34 +125,7 @@ const Navbar = () => {
         <LoginUI />
         <RegisterUI />
         <div className="div w-11/12 mx-auto">
-          <div className="flex">
-            <p className="content-center mx-auto">
-              เรื่องบ้านต้อง คชาโฮม ถูก ครบ จบที่เดียว
-            </p>
-            <div className="flex mx-auto">
-              <span className="flex pl-5 pr-5 text-center">
-                <FaLine className="text-4xl text-green-600" />{" "}
-                <p className="content-center">kacha982</p>
-              </span>
-              <span className="flex pl-5 pr-5 text-center">
-                <FaFacebookSquare className="text-4xl text-blue-700" />{" "}
-                <p className="content-center">บริษัท คชาโฮม จำกัด</p>
-              </span>
-            </div>
-            <span className="mx-auto content-center">
-              <Link href={"/contact"}>ติดต่อเรา</Link>
-            </span>
-          </div>
           <div className="flex content-center">
-            <Link href={"/"} className="content-center m-auto">
-              <Image
-                src={"/kacha-icon.png"}
-                alt="test"
-                width={80}
-                height={80}
-                className="m-auto"
-              ></Image>
-            </Link>
             <div className="flex bg-gray-300 rounded-full px-5 mx-[4%] content-center text-center my-5 w-8/12">
               <FaSearch className="text-2xl my-auto mr-2" />
               <input
@@ -245,22 +218,22 @@ const Navbar = () => {
               </Link>
             </li>
             <li>
-              <Link href={"/products"} className="rounded-none p-4">
+              <Link href={"/"} className="rounded-none p-4">
                 สินค้าลดราคา
               </Link>
             </li>
             <li>
-              <Link href={""} className="rounded-none p-4">
+              <Link href={"/"} className="rounded-none p-4">
                 โปรโมชั่น
               </Link>
             </li>
             <li>
-              <Link href={""} className="rounded-none p-4">
+              <Link href={"/"} className="rounded-none p-4">
                 ข่าวสาร
               </Link>
             </li>
             <li>
-              <Link href={"/contact"} className="rounded-none p-4">
+              <Link href={"/"} className="rounded-none p-4">
                 แคทตาล็อก
               </Link>
             </li>
@@ -292,15 +265,6 @@ const Navbar = () => {
                         จัดการคลังสินค้า
                       </Link>
                     </li>
-                    {/* <li>
-                      <Link
-                        href={"/"}
-                        className="rounded-none p-4"
-                        onClick={dropHandlerAdmin}
-                      >
-                        จัดการคำสั่งซื้อ
-                      </Link>
-                    </li> */}
                   </ul>
                 </details>
               </li>
