@@ -3,7 +3,7 @@
 ```bash
 1640706451 - Natchanon Srirat
 1640706501 - Preemanon Boonkum
-1640706501 - Tanaphon Hanlerdrit
+1640706543 - Tanaphon Hanlerdrit
 1640706675 - Seksan Suwandee
 1640706741 - Settawut Tangiam
 ```
